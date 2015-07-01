@@ -1,10 +1,16 @@
 data:extend({
 	{
+		type = "resource-category",
+		name = "sand"
+	},
+
+	{
 	    type = "resource",
 	    name = "sand-source",
 	    icon = "__homeworld__/graphics/icons/sand.png",
 	    flags = {"placeable-neutral"},
 	    order="a-b-a",
+	    category = "sand",
 	    --infinite = true,
 	    --minimum = 75,
     	--normal = 76,
@@ -21,8 +27,8 @@ data:extend({
 	    {
 	      control = "sand",
 	      sharpness = 0.5,
-	      richness_multiplier = 1450,
-	      richness_base = 500,
+	      richness_multiplier = 300,
+	      richness_base = 10,
 	      size_control_multiplier = 0.06,
 	      tile_restriction = {"sand", "sand-dark"},
 	      peaks = {

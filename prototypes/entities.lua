@@ -254,3 +254,21 @@ data:extend({
     }
   },
 })
+
+-- Copy basic mining drill for the sand collector.
+local miningDrill = data.raw["mining-drill"]["basic-mining-drill"]
+local sandCollector = {
+    name = "sand-collector",
+    icon = "__homeworld__/graphics/icons/sand-collector.png",
+    minable = {mining_time = 1, result = "sand-collector"},
+    resource_categories = {"sand"},
+    mining_speed = 3,
+    resource_searching_radius = 5,
+    energy_usage = "190kW"
+}
+for key, value in pairs(miningDrill) do
+    if not sandCollector[key] then
+        sandCollector[key] = value
+    end
+end
+data:extend{sandCollector}

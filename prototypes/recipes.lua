@@ -60,6 +60,18 @@ data:extend({
     result = "distillery"
   },
 
+  {
+    type = "recipe",
+    name = "sand-collector",
+    enabled = "true",
+    ingredients = {
+      {"iron-plate", 15},
+      {"iron-gear-wheel", 5},
+      {"electronic-circuit", 2}
+    },
+    result = "sand-collector"
+  },
+
   -- SMELTING RECIPES
 
 	{
@@ -76,7 +88,7 @@ data:extend({
     type = "recipe",
     name = "glass",
     category = "smelting",
-    enabled = "false",
+    enabled = "true",
     energy_required = 2.5,
     ingredients = {{"sand", 5}},
     result = "glass"
@@ -121,8 +133,17 @@ data:extend({
     type = "recipe",
     name = "building-materials",
     enabled = "false",
-    ingredients = {{"concrete", 3}, {"stone-brick", 3}, {"steel-plate", 1}, {"wood", 4}},
+    ingredients = {{"concrete", 3}, {"stone-brick", 3}, {"steel-plate", 1}, {"wood", 3}},
     result = "building-materials"
+  },
+
+  {
+    type = "recipe",
+    name = "synthetic-wood",
+    enabled = "false",
+    ingredients = {{"wood", 5}, {"plastic-bar", 5}},
+    result = "wood",
+    result_count = 20
   },
 
   -- ALCOHOL RECIPES

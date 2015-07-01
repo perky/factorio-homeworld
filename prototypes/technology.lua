@@ -1,9 +1,11 @@
 local fluidTech = data.raw.technology["fluid-handling"]
 local alienTech = data.raw.technology["alien-technology"]
 local battery = data.raw.technology["battery"]
+local plastics = data.raw.technology["plastics"]
 table.insert(fluidTech.effects, {type = "unlock-recipe", recipe = "fill-water-barrel"})
 table.insert(alienTech.effects, {type = "unlock-recipe", recipe = "homeworld-portal"})
 table.insert(battery.effects, {type = "unlock-recipe", recipe = "portable-electronics"})
+table.insert(plastics.effects, {type = "unlock-recipe", recipe = "synthetic-wood"})
 
 data:extend({
 	{
@@ -30,7 +32,7 @@ data:extend({
 		type = "technology",
 		name = "alcohol-technology",
 		icon = "__homeworld__/graphics/icons/beer.png",
-		prerequisites = {"agriculture"},
+		prerequisites = {"agriculture", "fluid-handling"},
 		unit = {
 			count = 30,
 			ingredients = {{"science-pack-1", 2}, {"science-pack-2", 1}},

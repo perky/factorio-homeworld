@@ -63,6 +63,16 @@ data:extend({
 	},
 
 	{
+		type = "item",
+		name = "sand-collector",
+		icon = "__homeworld__/graphics/icons/sand-collector.png",
+		flags = { "goes-to-quickbar" },
+		subgroup = "extraction-machine",
+		place_result = "sand-collector",
+		stack_size = 50
+	},
+
+	{
 	    type = "item",
 	    name = "sand",
 	    icon = "__homeworld__/graphics/icons/sand.png",
