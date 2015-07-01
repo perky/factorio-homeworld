@@ -63,14 +63,14 @@ local function OnPlayerCreated( playerindex )
 	if playerindex ~= 1 then return end
 
 	local player = game.getplayer(playerindex)
-	
+	--[[
 	player.insert{name = "homeworld_portal", count = 1}
 	player.insert{name = "wood", count = 300}
 	player.insert{name = "raw-fish", count = 300}
 	player.insert{name = "fishery", count = 10}
 	player.insert{name = "sawmill", count = 10}
 	player.insert{name = "farm", count = 10}
-	
+	]]--
 	homeworld = AddActor( Homeworld.CreateActor() )
 
 	-- Spawn Portal.
