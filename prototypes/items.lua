@@ -75,7 +75,7 @@ data:extend({
   	{
 	    type = "item",
 	    name = "glass",
-	    icon = "__homeworld__/graphics/icons/sand.png",
+	    icon = "__homeworld__/graphics/icons/glass.png",
 	    flags = {"goes-to-main-inventory"},
 	    subgroup = "intermediate-product",
 	    stack_size = 1024
