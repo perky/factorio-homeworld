@@ -28,6 +28,7 @@ data:extend({
         minable = {mining_time = 0.3, result = "fishery"},
         max_health = 50,
         corpse = "big-remnants",
+        collision_mask = {"ground-tile"},
         collision_box = {{-1.2, -1.2}, {1.2, 1.2}},
         selection_box = {{-1.5, -1.5}, {1.5, 1.5}},
         picture = {
@@ -36,7 +37,7 @@ data:extend({
             height = 96,
             shift = {0, 0}
         },
-        inventory_size = 12,
+        inventory_size = 1,
         open_sound = { filename = "__base__/sound/metallic-chest-open.ogg", volume=0.65 },
         close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 }
     },
