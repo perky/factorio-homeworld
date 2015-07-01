@@ -1,0 +1,8 @@
+require("prototypes.items")
+require("prototypes.entities")
+require("prototypes.fluids")
+require("prototypes.recipes")
+require("prototypes.resources")
+require("prototypes.technology")
+require("styles.icon_styles")
+require("styles.progressbar_styles")
