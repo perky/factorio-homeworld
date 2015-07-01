@@ -37,6 +37,7 @@ data:extend({
 			time = 20
 		},
 		effects = {
+			{type = "unlock-recipe", recipe = "distillery"},
 			{type = "unlock-recipe", recipe = "mashing-beer"},
 			{type = "unlock-recipe", recipe = "fermenting-beer"},
 			{type = "unlock-recipe", recipe = "fill-beer-barrel"},

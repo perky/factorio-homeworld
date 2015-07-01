@@ -47,6 +47,19 @@ data:extend({
     result = "farm"
   },
 
+  {
+    type = "recipe",
+    name = "distillery",
+    enabled = "false",
+    ingredients = {
+      {"steel-plate", 5},
+      {"iron-gear-wheel", 5},
+      {"electronic-circuit", 2},
+      {"pipe", 3}
+    },
+    result = "distillery"
+  },
+
   -- SMELTING RECIPES
 
 	{
