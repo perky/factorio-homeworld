@@ -9,6 +9,7 @@ require("actors.fishery_actor")
 require("actors.portal_actor")
 require("actors.farm_actor")
 require("actors.sawmill_actor")
+require("water_drain")
 
 actors = {}
 homeworld = nil
@@ -63,7 +64,8 @@ local function OnPlayerCreated( playerindex )
 	if playerindex ~= 1 then return end
 
 	local player = game.getplayer(playerindex)
-	player.insert{name = "fishery", count = 10}
+	--player.insert{name = "fishery", count = 10}
+	--player.insert{name = "offshore-pump", count = 10}
 	--[[
 	player.insert{name = "homeworld_portal", count = 1}
 	player.insert{name = "wood", count = 300}
@@ -92,6 +94,8 @@ local function OnPlayerBuiltEntity( entity )
 	elseif entity.name == "farm" then
 		AddActor( Farm.CreateActor{entity = entity} )
 	end
+
+	--WaterDrain.OnBuiltEntity(entity)
 end
 
 local function OnEntityDestroy( entity )
@@ -125,6 +129,8 @@ local function OnTick()
 			end
 		end
 	end
+
+	--WaterDrain.OnTick()
 end
 
 local function OnChunkGenerated( area )

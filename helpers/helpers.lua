@@ -29,6 +29,31 @@ function FindTilesInArea( area, tileNameFilter )
 	return foundTiles
 end
 
+function FindTilePropertiesInArea( area, tileNameFilter )
+	local foundTiles = {}
+	local aa = area[1]
+	local bb = area[2]
+	local width = bb.x - aa.x
+	local height = bb.y - aa.y
+	for _y = 0, height do
+		for _x = 0, width do
+			local pos = {
+				x = aa.x + _x,
+				y = aa.y + _y
+			}
+			local tile = game.gettile(pos.x, pos.y)
+			local tileProps = game.gettileproperties(pos.x, pos.y)
+			if tile.name == tileNameFilter then
+				table.insert(foundTiles, {
+					name = tile.name,
+					position = pos,
+				})
+			end
+		end
+	end
+	return foundTiles
+end
+
 function PrettyNumber( number )
 	if number < 1000 then
 		return string.format("%i", number)
@@ -50,16 +75,16 @@ end
 function iarea( area )
 	local aa = area[1]
 	local bb = area[2]
-	local _x = aa[1]
-	local _y = aa[2]
+	local _x = aa.x
+	local _y = aa.y
 	return function()
 		local x = _x
 		local y = _y
 		_x = _x + 1
-		if _x > bb[1] then
-			_x = aa[1]
+		if _x > bb.x then
+			_x = aa.x
 			_y = _y + 1
-			if _y > bb[2] then
+			if _y > bb.y then
 				return nil
 			end
 		end
@@ -69,8 +94,8 @@ end
 
 function SquareArea( origin, radius )
 	return {
-		{origin.x - radius, origin.y - radius},
-		{origin.x + radius, origin.y + radius}
+		{x=origin.x - radius, y=origin.y - radius},
+		{x=origin.x + radius, y=origin.y + radius}
 	}
 end
 
@@ -86,4 +111,32 @@ function ShuffleTable( tbl )
 		dieRoll = rand(i)
 		tbl[i], tbl[dieRoll] = tbl[dieRoll], tbl[i]
 	end
+end
+
+function DistanceSqr( p1, p2 )
+	local dx = p2.x - p1.x
+	local dy = p2.y - p1.y
+	return dx*dx + dy*dy
+end
+
+function Distance( p1, p2 )
+	return math.sqrt(DistanceSqr(p1, p2))
+end
+
+function GetNearest( objects, point )
+	if #objects == 0 then
+		return nil
+	end
+
+	local maxDist = math.huge
+	local nearest = objects[1]
+	for _, tile in ipairs(objects) do
+		local dist = DistanceSqr(point, tile.position)
+		if dist < maxDist then
+			maxDist = dist
+			nearest = tile
+		end
+	end
+
+	return nearest
 end

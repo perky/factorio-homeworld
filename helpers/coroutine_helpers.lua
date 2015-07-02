@@ -17,17 +17,44 @@ function QueueEvent( event, data )
 	table.insert(queued_events, {event = event, data = data})
 end
 
+function SafeResumeCoroutine( co, arg1 )
+	if coroutine.status(co) == "dead" then
+		return false
+	else
+		local success, err = coroutine.resume(co, arg1)
+		if success then
+			return true
+		else
+			if err then
+				game.player.print(err)
+			end
+			return false
+		end
+	end
+end
+
 local function ResumeRoutine( routine, index )
 	if routine then
 		local status = coroutine.status(routine.co)
-		if status == "dead" then
+		if status == "dead" and index then
 			table.remove(routines, index)
+			return false
 		elseif status == "suspended" then
 			local success, result1 = coroutine.resume(routine.co, routine.args)
-			if success and result1 == KILL_ROUTINE then
-				table.remove(routines, index)
-			elseif not success and result1 then
-				game.player.print(tostring(result1))
+			if success then
+				if result1 == KILL_ROUTINE and index then
+					table.remove(routines, index)
+					return false
+				else
+					return true, result1
+				end
+			else
+				if result1 then
+					game.player.print(tostring(result1))
+					return false, result1
+				else
+					return false
+				end
 			end
 		end
 	end
@@ -39,13 +66,13 @@ function StartCoroutine( func, args, autoResume )
 	end
 
 	local co = coroutine.create(func)
+	local routine = { co = co, args = args }
 	if autoResume then
-		local routine = { co = co, args = args }
 		table.insert(routines, routine)
 		ResumeRoutine(routine, #routines)
 	end
 
-	return co
+	return routine
 end
 
 function ResumeRoutines()
