@@ -155,6 +155,55 @@ game.onevent(defines.events.onchunkgenerated, function(event) OnChunkGenerated(e
 game.onevent(defines.events.ontick, OnTick)
 game.onevent(defines.events.onresourcedepleted, function(event) OnResourceDepleted(event.entity) end)
 
+local function terraformRoutine(maxStep)
+	local current = {x=game.player.position.x, y=game.player.position.y}
+	local stepCount = 1
+	local totalCount = 0
+	local right, down, left, up = 1, 2, 3, 4
+	local offsetsMap = {
+		[right] = {x=1, y=0},
+		[down]  = {x=0, y=1},
+		[left]  = {x=-1, y=0},
+		[up]    = {x=0, y=-1}
+	}
+	local state = right
+	local offset = offsetsMap[state]
+
+	while totalCount < maxStep do
+		for step = 0, stepCount do
+			local p1 = current
+			local p2 = {current.x - 1, current.y - 1}
+			local p3 = {current.x, current.y - 1}
+			local p4 = {current.x - 1, current.y}
+			local p5 = {current.x + 1, current.y + 1}
+			local p6 = {current.x + 1, current.y}
+			local p7 = {current.x, current.y + 1}
+			game.settiles{
+				{name="dirt-dark", position=p1},
+				{name="dirt-dark", position=p2},
+				{name="dirt-dark", position=p3},
+				{name="dirt-dark", position=p4},
+				{name="dirt-dark", position=p5},
+				{name="dirt-dark", position=p6},
+				{name="dirt-dark", position=p7}
+			}
+			current.x = current.x + offset.x
+			current.y = current.y + offset.y
+			totalCount = totalCount + 1
+			WaitForTicks(2)
+			if totalCount >= maxStep then
+				break
+			end
+		end
+		stepCount = stepCount + 1
+		state = state + 1
+		if state > up then
+			state = right
+		end
+		offset = offsetsMap[state]
+	end
+end
+
 remote.addinterface("homeworld", {
 	SetPopulation = function(amount)
 		homeworld.population = amount
@@ -173,5 +222,9 @@ remote.addinterface("homeworld", {
 			local count = homeworld:GetNeedItemCount(need)
 			homeworld:InsertItem(need.item, count)
 		end
+	end,
+
+	Terraform = function(maxStep)
+		StartCoroutine(terraformRoutine, maxStep)
 	end
 })
