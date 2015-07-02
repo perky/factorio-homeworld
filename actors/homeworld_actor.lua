@@ -193,7 +193,7 @@ ActorClass("Homeworld", {
 	max_growth_rate = 35,
 	max_decline_rate = 15,
 	update_population_rate = 15 * SECONDS,
-	grace_period = 15 * MINUTES
+	grace_period = 20 * MINUTES
 })
 
 function Homeworld:Init()
