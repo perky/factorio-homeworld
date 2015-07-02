@@ -86,7 +86,7 @@ data:extend({
     },
 
     {
-        type = "container",
+        type = "smart-container",
         name = "homeworld_portal",
         icon = "__base__/graphics/icons/lab.png",
         flags = {"player-creation", "placeable-player"},
@@ -96,14 +96,111 @@ data:extend({
         collision_box = {{-3.2, -3.2}, {3.2, 3.2}},
         selection_box = {{-3.5, -3.5}, {3.5, 3.5}},
         picture = {
-            filename = "__homeworld__/graphics/entity/portal.png",
-            width = 180,
-            height = 180,
-            shift = {0, 0}
+            filename = "__homeworld__/graphics/entity/homeworld-portal.png",
+            width = 358,
+            height = 312,
+            shift = {0, 0},
+            scale = 0.7
+        },
+        connection_point =
+        {
+          shadow =
+          {
+            red = {0.7, -0.3},
+            green = {0.7, -0.3}
+          },
+          wire =
+          {
+            red = {0.3, -0.8},
+            green = {0.3, -0.8}
+          }
         },
         inventory_size = 64,
         open_sound = { filename = "__base__/sound/metallic-chest-open.ogg", volume=0.65 },
-        close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 },    
+        close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 },
+    },
+
+    {
+        type = "explosion",
+        name = "portal-sound",
+        flags = {"not-on-map"},
+        animations =
+        {
+            {
+                filename = "__core__/graphics/empty.png",
+                priority = "extra-high",
+                width = 1,
+                height = 1,
+                frame_count = 1
+            }
+        },
+        sound =
+        {
+            {
+                filename = "__homeworld__/sound/portal.ogg",
+                volume = 1
+            }
+        },
+        created_effect =
+        {
+          type = "direct",
+          action_delivery =
+          {
+            type = "instant",
+            target_effects =
+            {
+              type = "create-entity",
+              entity_name = "portal-fx",
+            }
+          }
+        }
+    },
+
+    {
+        type = "smoke",
+        name = "portal-fx",
+        flags = {"not-on-map"},
+        show_when_smoke_off = true,
+        animation =
+        {
+            filename = "__homeworld__/graphics/entity/homeworld-portal-on.png",
+            priority = "high",
+            width = 358,
+            height = 312,
+            frame_count = 4,
+            animation_speed = 0.2,
+            scale = 0.7,
+            shift = {-0.52, 0.45}
+        },
+        light = {intensity = 1, size = 20},
+        cyclic = true,
+        duration = 60 * 15,
+        slow_down_factor = 0,
+        wind_speed_factor = 0,
+        movement_slow_down_factor = 0,
+        fade_away_duration = 60*2,
+        color = {r=1,g=1,b=1,a=1}
+    },
+
+    {
+        type = "explosion",
+        name = "portal-sound-fx",
+        duration = 60 * 15,
+        flags = {"not-on-map"},
+        
+        animations = {{
+            filename = "__homeworld__/graphics/empty.png",
+            width = 1,
+            height = 1,
+            frame_count = 1
+        }},
+        sound =
+        {
+          {
+            filename = "__base__/sound/accumulator-working.ogg",
+            volume = 0.5
+          },
+        }
     },
 
     {

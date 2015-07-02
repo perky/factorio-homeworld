@@ -7,6 +7,7 @@ ActorClass("Portal", {
 
 function Portal:Init()
 	self.enabled = true
+
 	game.onevent(HOMEWORLD_EVENTS.HOMEWORLD_ONLINE, function()
 		StartCoroutine(self.DoPortalRoutine, self)
 	end)
@@ -34,6 +35,9 @@ function Portal:DoPortalRoutine()
 			self.countdown_tick = self.countdown_tick - 1
 			coroutine.yield()
 		end
+
+		-- Create portal FX.
+		game.createentity({name = "portal-sound", position = self.entity.position})
 
 		local inventory = self.entity.getinventory(1)
 		local contents = inventory.getcontents()
