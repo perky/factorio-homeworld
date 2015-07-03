@@ -66,10 +66,11 @@ local function OnPlayerCreated( playerindex )
 	local player = game.getplayer(playerindex)
 	--player.insert{name = "fishery", count = 10}
 	--player.insert{name = "offshore-pump", count = 10}
+	player.insert{name = "raw-fish", count = 300}
 	--[[
 	player.insert{name = "homeworld_portal", count = 1}
 	player.insert{name = "wood", count = 300}
-	player.insert{name = "raw-fish", count = 300}
+	
 	player.insert{name = "fishery", count = 10}
 	player.insert{name = "sawmill", count = 10}
 	player.insert{name = "farm", count = 10}
@@ -93,6 +94,8 @@ local function OnPlayerBuiltEntity( entity )
 		AddActor(portal)
 	elseif entity.name == "farm" then
 		AddActor( Farm.CreateActor{entity = entity} )
+	elseif entity.name == "radar" then
+		homeworld:OnRadarBuilt(entity)
 	end
 
 	--WaterDrain.OnBuiltEntity(entity)
@@ -108,6 +111,10 @@ local function OnEntityDestroy( entity )
 			end
 			return
 		end
+	end
+
+	if entity.name == "radar" then
+		homeworld:OnRadarDestroy(entity)
 	end
 end
 

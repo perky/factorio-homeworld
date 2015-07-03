@@ -90,6 +90,7 @@ data:extend({
         name = "homeworld_portal",
         icon = "__base__/graphics/icons/lab.png",
         flags = {"player-creation", "placeable-player"},
+        render_layer = "floor",
         max_health = 150,
         corpse = "big-remnants",
         dying_explosion = "huge-explosion",
@@ -97,10 +98,11 @@ data:extend({
         selection_box = {{-3.5, -3.5}, {3.5, 3.5}},
         picture = {
             filename = "__homeworld__/graphics/entity/homeworld-portal.png",
+            priority = "low",
             width = 358,
             height = 312,
             shift = {0, 0},
-            scale = 0.7
+            scale = 0.625
         },
         connection_point =
         {
@@ -169,38 +171,18 @@ data:extend({
             height = 312,
             frame_count = 4,
             animation_speed = 0.2,
-            scale = 0.7,
+            scale = 0.625,
             shift = {-0.52, 0.45}
         },
         light = {intensity = 1, size = 20},
         cyclic = true,
-        duration = 60 * 15,
+        duration = 60 * 6,
         slow_down_factor = 0,
         wind_speed_factor = 0,
         movement_slow_down_factor = 0,
-        fade_away_duration = 60*2,
+        fade_away_duration = 60*1,
+        fade_in_duration = 60*1,
         color = {r=1,g=1,b=1,a=1}
-    },
-
-    {
-        type = "explosion",
-        name = "portal-sound-fx",
-        duration = 60 * 15,
-        flags = {"not-on-map"},
-        
-        animations = {{
-            filename = "__homeworld__/graphics/empty.png",
-            width = 1,
-            height = 1,
-            frame_count = 1
-        }},
-        sound =
-        {
-          {
-            filename = "__base__/sound/accumulator-working.ogg",
-            volume = 0.5
-          },
-        }
     },
 
     {

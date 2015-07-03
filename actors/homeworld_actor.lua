@@ -193,30 +193,48 @@ ActorClass("Homeworld", {
 	max_growth_rate = 35,
 	max_decline_rate = 15,
 	update_population_rate = 15 * SECONDS,
-	grace_period = 20 * MINUTES
+	grace_period = 5 * MINUTES
 })
 
 function Homeworld:Init()
 	self.enabled = true
 	self.inventory = {}
-	StartCoroutine(self.GracePeriodRoutine, self)
+	self.radars = {}
+
+	game.player.setgoaldescription(game.localise("homeworld-first-goal"))
 end
 
 function Homeworld:OnLoad()
 	self.enabled = true
+	if not self.online and not self.connected_by_radar then
+		game.player.setgoaldescription(game.localise("homeworld-first-goal"))
+	end
+
 	if self.online then
 		for _, need in ipairs(self:CurrentNeeds()) do
 			StartCoroutine(function() self:ConsumeNeed(need, self.population_tier) end)
 		end
 		StartCoroutine(self.UpdatePopulation, self)
-	else
+	elseif self.grace_period_started then
+		self.grace_period = 5*SECONDS
 		StartCoroutine(self.GracePeriodRoutine, self)
 	end
+
+	StartCoroutine(self.CheckRadarsRoutine, self)
+	self.radarRoutineStarted = true
 end
 
 function Homeworld:GracePeriodRoutine()
+	self.grace_period_started = true
+
+	-- Wait until grace period has finished.
 	while self.grace_period > 0 do
 		self.grace_period = self.grace_period - 1
+		coroutine.yield()
+	end
+
+	-- Wait until we are connected by radar.
+	while not self.connected_by_radar do
 		coroutine.yield()
 	end
 
@@ -224,13 +242,15 @@ function Homeworld:GracePeriodRoutine()
 	self.online = true
 	self:SetTier(1)
 	StartCoroutine(self.UpdatePopulation, self)
-
-	GUI.PushParent(game.player.gui.top)
-	self.top_button = GUI.Button("homeworld_button", "Homeworld", "ToggleGUI", self)
-	GUI.PopParent()
-
 	QueueEvent(HOMEWORLD_EVENTS.HOMEWORLD_ONLINE, {homeworld = self})
-	game.player.print("Homeworld portal online.")
+
+	-- Print feedback to player
+	game.player.print(game.localise("homeworld-get-response"))
+	-- Reset the gui.
+	if self.gui then
+		self:CloseGUI()
+		self:OpenGUI()
+	end
 end
 
 
@@ -283,7 +303,6 @@ function Homeworld:ConsumeNeed( need, tier )
 		local totalNeeded = self:GetNeedItemCount(need)
 		local consumptionPerTick = totalNeeded / need.consumption_duration
 		local tickRate = 1
-		--game.player.print(string.format("Consume %.2f/s %s over %.1f minutes", consumptionPerTick*60, need.item, need.consumption_duration/MINUTES))
 
 		if consumptionPerTick < 1 then
 			tickRate = 1 / consumptionPerTick
@@ -377,16 +396,24 @@ function Homeworld:ToggleGUI()
 end
 
 function Homeworld:OpenGUI()
-	GUI.PushParent(game.player.gui.left)
-	self.gui = GUI.Frame("homeworld_gui", "Homeworld", GUI.VERTICAL)
-	GUI.PushParent(self.gui)
-	GUI.PushParent(GUI.Flow("population", GUI.HORIZONTAL))
-		GUI.Label("pop_label", "Population:")
-		GUI.Label("pop_value", "0/0")
-	GUI.PopParent()
-	GUI.ProgressBar("population_bar", 1)
-	GUI.PopAll()
-	self:CreateNeedsGUI()
+	if self.online then
+		GUI.PushParent(game.player.gui.left)
+		self.gui = GUI.Frame("homeworld_gui", "Homeworld", GUI.VERTICAL)
+		GUI.PushParent(self.gui)
+		GUI.PushParent(GUI.Flow("population", GUI.HORIZONTAL))
+			GUI.Label("pop_label", {"population"})
+			GUI.Label("pop_value", "0/0")
+		GUI.PopParent()
+		GUI.ProgressBar("population_bar", 1)
+		GUI.PopAll()
+		self:CreateNeedsGUI()
+	else
+		GUI.PushParent(game.player.gui.left)
+		self.gui = GUI.Frame("homeworld_gui", "Homeworld", GUI.VERTICAL)
+		GUI.PushParent(self.gui)
+		GUI.Label("info", {"homeworld-start-transmission"})
+		GUI.PopAll()
+	end
 end
 
 function Homeworld:CreateNeedsGUI()
@@ -402,7 +429,7 @@ function Homeworld:CreateNeedsGUI()
 			GUI.PushParent(GUI.Flow("label_icon", GUI.HORIZONTAL))
 				GUI.Icon("icon", need.item)
 				GUI.PushParent(GUI.Flow("labels", GUI.VERTICAL))
-					GUI.Label("item", need.item)
+					GUI.Label("item", game.getlocaliseditemname(need.item))
 					GUI.Label("consumption", "")
 				GUI.PopParent()
 			GUI.PopParent()
@@ -412,8 +439,10 @@ function Homeworld:CreateNeedsGUI()
 end
 
 function Homeworld:UpdateGUI()
-	self.top_button.caption = string.format("Homeworld [%s T%u]", PrettyNumber(self.population), self.population_tier)
-	if not self.gui then return end
+	if self.online and self.top_button then
+		self.top_button.caption = string.format("Homeworld [%s T%u]", PrettyNumber(self.population), self.population_tier)
+	end
+	if not self.gui or not self.online then return end
 
 	local maxPop = needs_prototype[self.population_tier].upgrade_population
 	local minPop = needs_prototype[self.population_tier].downgrade_population
@@ -425,8 +454,12 @@ function Homeworld:UpdateGUI()
 		local amountNeeded = math.floor(self:GetNeedItemCount(need))
 		local amountInStock = self:GetItemCount(need.item)
 		needgui.satisfaction.value = amountInStock / amountNeeded
-		needgui.label_icon.labels.item.caption = string.format("%s [%s / %s]", need.item, PrettyNumber(amountInStock), PrettyNumber(amountNeeded))
-		needgui.label_icon.labels.consumption.caption = durationLocaleKey[need.consumption_duration]
+		local labels = needgui.label_icon.labels
+		GUI.SetLabelCaptionLocalised(labels.item, 
+									 game.getlocaliseditemname(need.item), 
+									 string.format(" [%s/%s]", PrettyNumber(amountInStock), PrettyNumber(amountNeeded))
+		)
+		labels.consumption.caption = durationLocaleKey[need.consumption_duration]
 	end
 end
 
@@ -435,3 +468,62 @@ function Homeworld:CloseGUI()
 	self.gui = nil
 end
 
+function Homeworld:CreateTopButtonGUI()
+	if not self.top_button then
+		GUI.PushParent(game.player.gui.top)
+		self.top_button = GUI.Button("homeworld_button", "Homeworld", "ToggleGUI", self)
+		GUI.PopParent()
+	end
+end
+
+function Homeworld:CheckRadarsRoutine()
+	while self.enabled do
+		WaitForTicks(5*SECONDS)
+		local poweredRadarDoesExist = false
+		for i, radar in ipairs(self.radars) do
+			if radar and radar.valid and radar.energy > 1 then
+				poweredRadarDoesExist = true
+				break
+			end
+		end
+		if poweredRadarDoesExist and not self.connected_by_radar then
+			self:CreateTopButtonGUI()
+			self.connected_by_radar = true
+			game.player.print(game.localise("homeworld-start-transmission"))
+			game.player.setgoaldescription("")
+			if self.online then
+				game.player.print(game.localise("homeworld-get-response"))
+			elseif not self.grace_period_started then
+				StartCoroutine(self.GracePeriodRoutine, self)
+			end
+		elseif not poweredRadarDoesExist and self.connected_by_radar then
+			self.connected_by_radar = false
+			GUI.DestroyButton(self.top_button)
+			self.top_button = nil
+			if self.gui then
+				self.gui.destroy()
+				self.gui = nil
+			end
+			if self.online then
+				game.player.print(game.localise("homeworld-lose-transmission"))
+			end
+		end
+	end
+end
+
+function Homeworld:OnRadarBuilt( radarEntity )
+	table.insert(self.radars, radarEntity)
+	if #self.radars == 1 and not self.radarRoutineStarted then
+		StartCoroutine(self.CheckRadarsRoutine, self)
+		self.radarRoutineStarted = true
+	end
+end
+
+function Homeworld:OnRadarDestroy( radarEntity )
+	for i, otherRadarEntity in ipairs(self.radars) do
+		if otherRadarEntity.equals(radarEntity) then
+			table.remove(self.radars, i)
+			break
+		end
+	end
+end

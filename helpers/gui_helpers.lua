@@ -42,6 +42,12 @@ function GUI.Label(name, caption, style)
 	return GUI.Parent().add{type = "label", name = name, caption = caption, style = style}
 end
 
+function GUI.SetLabelCaptionLocalised( label, ... )
+	local texts = {...}
+	table.insert(texts, 1, "")
+	label.caption = texts
+end
+
 function GUI.LabelData(name, caption, initialValue)
 	local flow = GUI.PushParent(GUI.Flow(name, GUI.HORIZONTAL))
 	GUI.Label("label", caption, "caption_label_style")
@@ -65,7 +71,7 @@ function GUI.Flow(name, direction)
 end
 
 function GUI.Icon(name, iconName)
-	return GUI.Parent().add{type = "checkbox", style = "arcology-icon-"..iconName, state = true, name = name}
+	return GUI.Parent().add{type = "checkbox", style = "arcology-icon-"..iconName, state = false, name = name}
 end
 
 function GUI.Button(name, caption, methodName, delegate)
@@ -73,6 +79,11 @@ function GUI.Button(name, caption, methodName, delegate)
 	local button = parent.add{type = "button", name = name, caption = caption, style = style}
 	GUI.buttonCallbacks[name] = {onclick = methodName, delegate = delegate}
 	return button
+end
+
+function GUI.DestroyButton( button )
+	GUI.buttonCallbacks[button.name] = nil
+	button.destroy()
 end
 
 function GUI.OnClick( event )
