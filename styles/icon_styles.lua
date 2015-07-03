@@ -28,27 +28,27 @@ styles["arcology-icon-base"] = {
   height = 35,
   hovered_background =
   {
-    filename = "__test-mode__/styles/gui.png",
-    width = 32,
-    height = 32,
-    x = 0,
-    y = 0
+    filename = "__core__/graphics/gui.png",
+    priority = "extra-high-no-scale",
+    width = 36,
+    height = 36,
+    x = 148
   },
   clicked_background =
   {
-    filename = "__test-mode__/styles/gui.png",
-    width = 32,
-    height = 32,
-    x = 0,
-    y = 0
+    filename = "__core__/graphics/gui.png",
+    priority = "extra-high-no-scale",
+    width = 36,
+    height = 36,
+    x = 185
   },
   checked =
   {
-    filename = "__test-mode__/styles/gui.png",
-    width = 32,
-    height = 32,
-    x = 65,
-    y = 0
+    filename = "__core__/graphics/gui.png",
+    priority = "extra-high-no-scale",
+    width = 36,
+    height = 36,
+    x = 185
   }
 }
 
