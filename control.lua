@@ -13,6 +13,7 @@ require("water_drain")
 
 actors = {}
 homeworld = nil
+main_portal = nil
 
 local function AddActor( actor )
 	table.insert(actors, actor)
@@ -29,15 +30,20 @@ local function OnGameLoad()
 		if glob.actors then
 			for i, glob_actor in ipairs(glob.actors) do
 				if glob_actor.className then
+
 					local class = _ENV[glob_actor.className]
 					local actor = class.CreateActor(glob_actor)
 					table.insert(actors, actor)
 					if glob_actor.className == "Homeworld" then
 						homeworld = actor
+					elseif glob_actor.className == "Portal" and not main_portal then
+						main_portal = actor
 					end
+
 				end
 			end
 		end
+
 		-- defer the loading of actors, so that we aren't changing game state here.
 		StartCoroutine(function()
 			WaitForTicks(1)
@@ -239,5 +245,15 @@ remote.addinterface("homeworld", {
 
 	Terraform = function(maxStep)
 		StartCoroutine(terraformRoutine, maxStep)
+	end,
+
+	InsertItemToPortal = function(item, count)
+		if main_portal then
+			local inventory = main_portal.entity.getinventory(1)
+			local stack = {item = item, count = count}
+			if inventory.caninsert(stack) then
+				inventory.insert(stack)
+			end
+		end
 	end
 })

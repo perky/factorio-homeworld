@@ -31,8 +31,8 @@ needs_prototype = {
 		name = "Tier 1", 
 		upgrade_population = 5000,
 		downgrade_population = -1,
-		grow_rate = { min = 2, max = 12 },
-		decline_rate = { min = 1, max = 12 },
+		grow_rate = { min = 6, max = 9 },
+		decline_rate = { min = 4, max = 8 },
 		needs = {
 			{
 				item = "raw-fish",
@@ -44,6 +44,32 @@ needs_prototype = {
 				max_per_min = 100,
 				consumption_duration = FAST
 			}
+		},
+		rewards = {
+			{
+				{item = "basic-bullet-magazine", amount = 300},
+				{item = "armor", amount = 3}
+			},
+			{
+				{item = "heavy-armor", amount = 4},
+				{item = "basic-grenade", amount = 16}
+			},
+			{
+				{item = "poison-capsule", amount = 2},
+				{item = "piercing-bullet-magazine", amount = 200}
+			},
+			{
+				{item = "shotgun-shell", amount = 600}
+			},
+			{
+				{item = "speed-module", amount = 3}
+			},
+			{
+				{item = "effectivity-module", amount = 3}
+			},
+			{
+				{item = "productivity-module", amount = 3}
+			},
 		}
 	},
 
@@ -51,8 +77,8 @@ needs_prototype = {
 		name = "Tier 2", 
 		upgrade_population = 10000,
 		downgrade_population = 3000,
-		grow_rate = { min = 3, max = 15 },
-		decline_rate = { min = 2, max = 17 },
+		grow_rate = { min = 10, max = 15 },
+		decline_rate = { min = 5, max = 17 },
 		needs = {
 			{
 				item = "raw-fish",
@@ -69,6 +95,32 @@ needs_prototype = {
 				max_per_min = 300,
 				consumption_duration = SLOW
 			}
+		},
+		rewards = {
+			{
+				{item = "flame-thrower-ammo", amount = 500},
+				{item = "heavy-armor", amount = 10}
+			},
+			{
+				{item = "rocket", amount = 10},
+				{item = "basic-grenade", amount = 80}
+			},
+			{
+				{item = "piercing-shotgun-shell", amount = 200},
+				{item = "piercing-bullet-magazine", amount = 400}
+			},
+			{
+				{item = "speed-module-2", amount = 5},
+				{item = "effectivity-module", amount = 10},
+			},
+			{
+				{item = "effectivity-module-2", amount = 5},
+				{item = "productivity-module", amount = 10},
+			},
+			{
+				{item = "productivity-module-2", amount = 5},
+				{item = "speed-module", amount = 10},
+			},
 		}
 	},
 
@@ -76,7 +128,7 @@ needs_prototype = {
 		name = "Tier 3",
 		upgrade_population = 25000,
 		downgrade_population = 8000,
-		grow_rate = { min = 5, max = 19 },
+		grow_rate = { min = 10, max = 19 },
 		decline_rate = { min = 5, max = 20 },
 		needs = {
 			{
@@ -104,6 +156,31 @@ needs_prototype = {
 				max_per_min = 500,
 				consumption_duration = SLOW
 			}
+		},
+		rewards = {
+			{
+				{item = "laser-turret", amount = 100}
+			},
+			{
+				{item = "express-transport-belt", amount = 500},
+				{item = "basic-grenade", amount = 50}
+			},
+			{
+				{item = "piercing-shotgun-shell", amount = 800},
+				{item = "solar-panel", amount = 200}
+			},
+			{
+				{item = "speed-module-3", amount = 10},
+				{item = "effectivity-module-2", amount = 20},
+			},
+			{
+				{item = "effectivity-module-3", amount = 10},
+				{item = "productivity-module-2", amount = 20},
+			},
+			{
+				{item = "productivity-module-3", amount = 10},
+				{item = "speed-module-2", amount = 20},
+			},
 		}
 	},
 
@@ -111,7 +188,7 @@ needs_prototype = {
 		name = "Tier 4",
 		upgrade_population = 50000,
 		downgrade_population = 18000,
-		grow_rate = { min = 10, max = 35 },
+		grow_rate = { min = 20, max = 35 },
 		decline_rate = { min = 10, max = 40 },
 		needs = {
 			{
@@ -139,6 +216,23 @@ needs_prototype = {
 				max_per_min = 200,
 				consumption_duration = VERY_SLOW
 			}
+		},
+		rewards = {
+			{
+				{item = "straight-rail", amount = 500},
+				{item = "curved-rail", amount = 250},
+				{item = "speed-module-3", amount = 1},
+			},
+			{
+				{item = "express-transport-belt", amount = 500},
+				{item = "tank", amount = 1},
+				{item = "speed-module-3", amount = 3},
+			},
+			{
+				{item = "alien-science-pack", amount = 100},
+				{item = "logistic-robot", amount = 300},
+				{item = "construction-robot", amount = 300},
+			}
 		}
 	},
 
@@ -146,7 +240,7 @@ needs_prototype = {
 		name = "Tier 5",
 		upgrade_population = 100000,
 		downgrade_population = 40000,
-		grow_rate = { min = 20, max = 75 },
+		grow_rate = { min = 30, max = 75 },
 		decline_rate = { min = 20, max = 85 },
 		needs = {
 			{
@@ -179,6 +273,22 @@ needs_prototype = {
 				max_per_min = 200,
 				consumption_duration = SUPER_SLOW
 			}
+		},
+		rewards = {
+			{
+				{item = "straight-rail", amount = 250},
+			},
+			{
+				{item = "tank", amount = 2},
+				{item = "logistic-robot", amount = 500},
+				{item = "construction-robot", amount = 500},
+			},
+			{
+				{item = "alien-science-pack", amount = 200},
+				{item = "science-pack-3", amount = 500},
+				{item = "science-pack-2", amount = 400},
+				{item = "science-pack-1", amount = 300},
+			}
 		}
 	},
 }
@@ -200,12 +310,18 @@ function Homeworld:Init()
 	self.enabled = true
 	self.inventory = {}
 	self.radars = {}
+	self.collected_reward_tiers = {}
 
 	game.player.setgoaldescription(game.localise("homeworld-first-goal"))
 end
 
 function Homeworld:OnLoad()
 	self.enabled = true
+	if self.gui then
+		self.gui.destroy()
+		self.gui = nil
+	end
+
 	if not self.online and not self.connected_by_radar then
 		game.player.setgoaldescription(game.localise("homeworld-first-goal"))
 	end
@@ -376,6 +492,18 @@ function Homeworld:UpdatePopulation()
 end
 
 function Homeworld:SetTier( tier )
+	-- Give the player rewards via the portal.
+	if tier > self.population_tier and not self.collected_reward_tiers[self.population_tier] then
+		local possibleRewards = needs_prototype[self.population_tier].rewards
+		local chosenRewards = math.random(#possibleRewards)
+		local rewards = rewards[chosenRewards]
+		for _, reward in ipairs(rewards) do
+			remote.call("homeworld", "InserItemToPortal", reward.item, reward.amount)
+		end
+		self.collected_reward_tiers[self.population_tier] = true
+		game.player.print("You have been given some gifts. Collect them at the portal.")
+	end
+
 	self.population_tier = tier
 	for _, need in ipairs(self:CurrentNeeds()) do
 		StartCoroutine(function() self:ConsumeNeed(need, tier) end)
