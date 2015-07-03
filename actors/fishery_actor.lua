@@ -1,7 +1,7 @@
 ActorClass("Fishery", {
 	open_gui_on_selected = true,
 	max_rawfish_yield = 120,
-	max_pollution = 900,
+	max_pollution = 2000,
 	max_fish = 13,
 	max_fish_reproduction = 3,
 	fish_reproduction_chance = 0.4,
