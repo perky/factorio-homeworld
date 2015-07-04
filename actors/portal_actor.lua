@@ -64,8 +64,9 @@ function Portal:TransferItemsRoutine()
 		end
 		
 		-- Create portal FX.
-		game.createentity({name = "portal-sound", position = self.entity.position})
+		game.createentity({name = "portal-sound", position = self.entity.position, force = game.forces.player})
 		self.countdown_tick = self.transfer_interval
+		coroutine.yield()
 	end
 end
 
@@ -93,6 +94,7 @@ function Portal:DoPortalRoutine()
 			end
 		end
 		self.countdown_tick = self.transfer_interval
+		coroutine.yield()
 	end
 end
 

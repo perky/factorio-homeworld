@@ -65,7 +65,7 @@ function Fishery:ReproductionRoutine()
 			if cullAmount > 0 then
 				for i = self.max_fish, self.max_fish + cullAmount do
 					if nearbyFish[i] and nearbyFish[i].valid then
-						nearbyFish[i].die()
+						nearbyFish[i].destroy()
 					end
 				end
 			end

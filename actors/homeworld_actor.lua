@@ -48,7 +48,7 @@ needs_prototype = {
 		rewards = {
 			{
 				{item = "basic-bullet-magazine", amount = 300},
-				{item = "armor", amount = 3}
+				{item = "basic-armor", amount = 3}
 			},
 			{
 				{item = "heavy-armor", amount = 4},
@@ -336,13 +336,13 @@ function Homeworld:OnLoad()
 		StartCoroutine(self.GracePeriodRoutine, self)
 	end
 
-	StartCoroutine(self.CheckRadarsRoutine, self)
+	--StartCoroutine(self.CheckRadarsRoutine, self)
 	self.radarRoutineStarted = true
 end
 
 function Homeworld:GracePeriodRoutine()
 	self.grace_period_started = true
-
+	game.player.print("homeworld grace period routine")
 	-- Wait until grace period has finished.
 	while self.grace_period > 0 do
 		self.grace_period = self.grace_period - 1
@@ -434,6 +434,8 @@ function Homeworld:ConsumeNeed( need, tier )
 			end
 			WaitForTicks(tickRate)
 		end
+
+		coroutine.yield()
 	end
 end
 
@@ -488,17 +490,21 @@ function Homeworld:UpdatePopulation()
 			game.player.print(string.format("Homeworld population downgraded to tier %i. Needs changed.", self.population_tier))
 			WaitForTicks(2 * SECONDS) -- wait before changing population to prevent flipping between tiers.
 		end
+		coroutine.yield()
 	end
 end
 
 function Homeworld:SetTier( tier )
 	-- Give the player rewards via the portal.
+	if not self.collected_reward_tiers then
+		self.collected_reward_tiers = {}
+	end
 	if tier > self.population_tier and not self.collected_reward_tiers[self.population_tier] then
 		local possibleRewards = needs_prototype[self.population_tier].rewards
 		local chosenRewards = math.random(#possibleRewards)
-		local rewards = rewards[chosenRewards]
+		local rewards = possibleRewards[chosenRewards]
 		for _, reward in ipairs(rewards) do
-			remote.call("homeworld", "InserItemToPortal", reward.item, reward.amount)
+			remote.call("homeworld", "InsertItemToPortal", reward.item, reward.amount)
 		end
 		self.collected_reward_tiers[self.population_tier] = true
 		game.player.print("You have been given some gifts. Collect them at the portal.")

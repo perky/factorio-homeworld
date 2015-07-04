@@ -74,10 +74,17 @@ function GUI.Icon(name, iconName)
 	return GUI.Parent().add{type = "checkbox", style = "arcology-icon-"..iconName, state = false, name = name}
 end
 
-function GUI.Button(name, caption, methodName, delegate)
+function GUI.TextField(name, defaultText)
+	if defaultText == nil then
+		defaultText = ""
+	end
+	return GUI.Parent().add{type = "textfield", name = name, text = defaultText}
+end
+
+function GUI.Button(name, caption, methodName, delegate, args)
 	local parent = GUI.Parent()
 	local button = parent.add{type = "button", name = name, caption = caption, style = style}
-	GUI.buttonCallbacks[name] = {onclick = methodName, delegate = delegate}
+	GUI.buttonCallbacks[name] = {onclick = methodName, delegate = delegate, args = args}
 	return button
 end
 
@@ -90,7 +97,10 @@ function GUI.OnClick( event )
 	local element = event.element
 	local callback = GUI.buttonCallbacks[element.name]
 	if callback then
-		callback.delegate[callback.onclick](callback.delegate)
+		local func = callback.delegate[callback.onclick]
+		if func then
+			func(callback.delegate, callback.args)
+		end
 	end
 end
 game.onevent(defines.events.onguiclick, GUI.OnClick)

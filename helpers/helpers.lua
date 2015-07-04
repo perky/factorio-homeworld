@@ -119,10 +119,6 @@ function DistanceSqr( p1, p2 )
 	return dx*dx + dy*dy
 end
 
-function Distance( p1, p2 )
-	return math.sqrt(DistanceSqr(p1, p2))
-end
-
 function GetNearest( objects, point )
 	if #objects == 0 then
 		return nil

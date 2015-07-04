@@ -4,3 +4,5 @@ HOMEWORLD_EVENTS.HOMEWORLD_ONLINE = game.generateeventname()
 SECONDS = 60
 MINUTES = 3600
 GAME_DAY = 25000
+
+HOMEWORLD_PORTAL_EID = "homeworld_portal_smart"

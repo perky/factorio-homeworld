@@ -1,4 +1,5 @@
 require("defines")
+require("util")
 require("homeworld_defines")
 require("helpers.helpers")
 require("helpers.gui_helpers")
@@ -25,6 +26,25 @@ local function OnGameInit()
 	modHasInitialised = true
 end
 
+local function AfterGameLoad()
+	for _, actor in ipairs(actors) do
+		if actor.OnLoad then
+			actor:OnLoad()
+		end
+	end
+
+	-- Recreate homeworld if it does not exist.
+	if not homeworld then
+		if game.player.gui.top.homeworld_button then
+			game.player.gui.top.homeworld_button.destroy()
+		end
+		if game.player.gui.left.homeworld_gui then
+			game.player.gui.left.homeworld_gui.destroy()
+		end
+		homeworld = AddActor( Homeworld.CreateActor() )
+	end
+end
+
 local function OnGameLoad()
 	if not modHasInitialised then
 		if glob.actors then
@@ -46,13 +66,10 @@ local function OnGameLoad()
 
 		-- defer the loading of actors, so that we aren't changing game state here.
 		StartCoroutine(function()
-			WaitForTicks(1)
-			for _, actor in ipairs(actors) do
-				if actor.OnLoad then
-					actor:OnLoad()
-				end
-			end
+			WaitForTicks(1*SECONDS)
+			AfterGameLoad()
 		end)
+
 		modHasInitialised = true
 	end
 
@@ -170,7 +187,7 @@ game.onevent(defines.events.onentitydied, function(event) OnEntityDestroy(event.
 game.onevent(defines.events.onpreplayermineditem, function(event) OnEntityDestroy(event.entity) end)
 game.onevent(defines.events.onrobotpremined, function(event) OnEntityDestroy(event.entity) end)
 game.onevent(defines.events.onplayercreated, function(event) OnPlayerCreated(event.playerindex) end)
-game.onevent(defines.events.onchunkgenerated, function(event) OnChunkGenerated(event.area) end)
+--game.onevent(defines.events.onchunkgenerated, function(event) OnChunkGenerated(event.area) end)
 game.onevent(defines.events.ontick, OnTick)
 game.onevent(defines.events.onresourcedepleted, function(event) OnResourceDepleted(event.entity) end)
 
@@ -250,7 +267,7 @@ remote.addinterface("homeworld", {
 	InsertItemToPortal = function(item, count)
 		if main_portal then
 			local inventory = main_portal.entity.getinventory(1)
-			local stack = {item = item, count = count}
+			local stack = {name = item, count = count}
 			if inventory.caninsert(stack) then
 				inventory.insert(stack)
 			end

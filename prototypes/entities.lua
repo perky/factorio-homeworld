@@ -117,9 +117,9 @@ data:extend({
             green = {0.3, -0.8}
           }
         },
-        inventory_size = 64,
+        inventory_size = 32,
         open_sound = { filename = "__base__/sound/metallic-chest-open.ogg", volume=0.65 },
-        close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 },
+        close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 },    
     },
 
     {
