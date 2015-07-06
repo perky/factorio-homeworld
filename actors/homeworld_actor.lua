@@ -87,7 +87,7 @@ needs_prototype = {
 			},
 			{
 				item = "bread",
-				max_per_min = 1000,
+				max_per_min = 1600,
 				consumption_duration = FAST
 			},
 			{
@@ -143,12 +143,12 @@ needs_prototype = {
 			},
 			{
 				item = "water-barrel",
-				max_per_min = 700,
+				max_per_min = 500,
 				consumption_duration = NORMAL
 			},
 			{
 				item = "beer",
-				max_per_min = 500,
+				max_per_min = 250,
 				consumption_duration = FAST
 			},
 			{
@@ -203,17 +203,17 @@ needs_prototype = {
 			},
 			{
 				item = "beer",
-				max_per_min = 700,
+				max_per_min = 450,
 				consumption_duration = FAST
 			},
 			{
 				item = "building-materials",
-				max_per_min = 800,
+				max_per_min = 700,
 				consumption_duration = VERY_SLOW
 			},
 			{
 				item = "battery",
-				max_per_min = 200,
+				max_per_min = 50,
 				consumption_duration = VERY_SLOW
 			}
 		},
@@ -245,22 +245,22 @@ needs_prototype = {
 		needs = {
 			{
 				item = "luxury-meal",
-				max_per_min = 2000,
+				max_per_min = 4000,
 				consumption_duration = FAST
 			},
 			{
 				item = "wine",
-				max_per_min = 1000,
+				max_per_min = 820,
 				consumption_duration = SLOW
 			},
 			{
 				item = "beer",
-				max_per_min = 1700,
+				max_per_min = 550,
 				consumption_duration = NORMAL
 			},
 			{
 				item = "portable-electronics",
-				max_per_min = 2000,
+				max_per_min = 20,
 				consumption_duration = SUPER_SLOW
 			},
 			{
@@ -270,7 +270,7 @@ needs_prototype = {
 			},
 			{
 				item = "rockets",
-				max_per_min = 200,
+				max_per_min = 50,
 				consumption_duration = SUPER_SLOW
 			}
 		},
@@ -297,13 +297,12 @@ ActorClass("Homeworld", {
 	population = 100,
 	max_population = 10000,
 	min_population = 10,
-	population_tier = 1,
+	population_tier = 0,
 	min_satisfaction_for_growth = 0.4,
 	max_satisfaction_for_decline = 0.15,
 	max_growth_rate = 35,
 	max_decline_rate = 15,
-	update_population_rate = 15 * SECONDS,
-	grace_period = 5 * MINUTES
+	update_population_rate = 15 * SECONDS
 })
 
 function Homeworld:Init()
@@ -317,55 +316,17 @@ end
 
 function Homeworld:OnLoad()
 	self.enabled = true
-	if self.gui then
-		self.gui.destroy()
-		self.gui = nil
-	end
+	self:CloseGUI()
 
-	if not self.online and not self.connected_by_radar then
+	if not self.connected_by_radar then
 		game.player.setgoaldescription(game.localise("homeworld-first-goal"))
 	end
 
-	if self.online then
+	if self.connected_by_radar then
 		for _, need in ipairs(self:CurrentNeeds()) do
 			StartCoroutine(function() self:ConsumeNeed(need, self.population_tier) end)
 		end
 		StartCoroutine(self.UpdatePopulation, self)
-	elseif self.grace_period_started then
-		self.grace_period = 5*SECONDS
-		StartCoroutine(self.GracePeriodRoutine, self)
-	end
-
-	--StartCoroutine(self.CheckRadarsRoutine, self)
-	self.radarRoutineStarted = true
-end
-
-function Homeworld:GracePeriodRoutine()
-	self.grace_period_started = true
-	game.player.print("homeworld grace period routine")
-	-- Wait until grace period has finished.
-	while self.grace_period > 0 do
-		self.grace_period = self.grace_period - 1
-		coroutine.yield()
-	end
-
-	-- Wait until we are connected by radar.
-	while not self.connected_by_radar do
-		coroutine.yield()
-	end
-
-	-- After grace period, start need and population routines.
-	self.online = true
-	self:SetTier(1)
-	StartCoroutine(self.UpdatePopulation, self)
-	QueueEvent(HOMEWORLD_EVENTS.HOMEWORLD_ONLINE, {homeworld = self})
-
-	-- Print feedback to player
-	game.player.print(game.localise("homeworld-get-response"))
-	-- Reset the gui.
-	if self.gui then
-		self:CloseGUI()
-		self:OpenGUI()
 	end
 end
 
@@ -395,12 +356,15 @@ function Homeworld:RemoveItem(itemName, count)
 end
 
 function Homeworld:OnDestroy()
-	-- body
 end
 
 function Homeworld:OnTick()
-	if self.online then
+	if self.gui then
 		self:UpdateGUI()
+	end
+
+	if game.tick % (1*SECONDS) == 0 then
+		self:CheckRadars()
 	end
 end
 
@@ -499,7 +463,7 @@ function Homeworld:SetTier( tier )
 	if not self.collected_reward_tiers then
 		self.collected_reward_tiers = {}
 	end
-	if tier > self.population_tier and not self.collected_reward_tiers[self.population_tier] then
+	if tier > self.population_tier and needs_prototype[self.population_tier] and not self.collected_reward_tiers[self.population_tier] then
 		local possibleRewards = needs_prototype[self.population_tier].rewards
 		local chosenRewards = math.random(#possibleRewards)
 		local rewards = possibleRewards[chosenRewards]
@@ -530,7 +494,7 @@ function Homeworld:ToggleGUI()
 end
 
 function Homeworld:OpenGUI()
-	if self.online then
+	if self.connected_by_radar then
 		GUI.PushParent(game.player.gui.left)
 		self.gui = GUI.Frame("homeworld_gui", "Homeworld", GUI.VERTICAL)
 		GUI.PushParent(self.gui)
@@ -573,10 +537,13 @@ function Homeworld:CreateNeedsGUI()
 end
 
 function Homeworld:UpdateGUI()
-	if self.online and self.top_button then
+	if self.connected_by_radar and self.top_button then
 		self.top_button.caption = string.format("Homeworld [%s T%u]", PrettyNumber(self.population), self.population_tier)
 	end
-	if not self.gui or not self.online then return end
+
+	if not self.gui then
+		return
+	end
 
 	local maxPop = needs_prototype[self.population_tier].upgrade_population
 	local minPop = needs_prototype[self.population_tier].downgrade_population
@@ -598,11 +565,23 @@ function Homeworld:UpdateGUI()
 end
 
 function Homeworld:CloseGUI()
-	self.gui.destroy()
-	self.gui = nil
+	if self.gui then
+		self.gui.destroy()
+		self.gui = nil
+	end
 end
 
-function Homeworld:CreateTopButtonGUI()
+function Homeworld:OnConnectedToRadar()
+	game.player.print(game.localise("homeworld-start-transmission"))
+	game.player.print(game.localise("homeworld-get-response"))
+	game.player.setgoaldescription("")
+
+	if self.population_tier == 0 then
+		self:SetTier(1)
+		QueueEvent(HOMEWORLD_EVENTS.HOMEWORLD_ONLINE, {homeworld = self})
+		StartCoroutine(self.UpdatePopulation, self)
+	end
+
 	if not self.top_button then
 		GUI.PushParent(game.player.gui.top)
 		self.top_button = GUI.Button("homeworld_button", "Homeworld", "ToggleGUI", self)
@@ -610,47 +589,38 @@ function Homeworld:CreateTopButtonGUI()
 	end
 end
 
-function Homeworld:CheckRadarsRoutine()
-	while self.enabled do
-		WaitForTicks(5*SECONDS)
-		local poweredRadarDoesExist = false
-		for i, radar in ipairs(self.radars) do
-			if radar and radar.valid and radar.energy > 1 then
-				poweredRadarDoesExist = true
-				break
-			end
+function Homeworld:OnDisconnectedFromRadar()
+	game.player.print(game.localise("homeworld-lose-transmission"))
+
+	if self.top_button then
+		self.top_button.destroy()
+		self.top_button = nil
+		self:CloseGUI()
+	end
+end
+
+function Homeworld:CheckRadars()
+	local poweredRadarDoesExist = false
+	for i, radar in ipairs(self.radars) do
+		if radar and radar.valid and radar.energy > 1 then
+			poweredRadarDoesExist = true
+			break
 		end
-		if poweredRadarDoesExist and not self.connected_by_radar then
-			self:CreateTopButtonGUI()
-			self.connected_by_radar = true
-			game.player.print(game.localise("homeworld-start-transmission"))
-			game.player.setgoaldescription("")
-			if self.online then
-				game.player.print(game.localise("homeworld-get-response"))
-			elseif not self.grace_period_started then
-				StartCoroutine(self.GracePeriodRoutine, self)
-			end
-		elseif not poweredRadarDoesExist and self.connected_by_radar then
-			self.connected_by_radar = false
-			GUI.DestroyButton(self.top_button)
-			self.top_button = nil
-			if self.gui then
-				self.gui.destroy()
-				self.gui = nil
-			end
-			if self.online then
-				game.player.print(game.localise("homeworld-lose-transmission"))
-			end
+	end
+
+	if poweredRadarDoesExist then
+		if not self.connected_by_radar then
+			self:OnConnectedToRadar()
 		end
+		self.connected_by_radar = true
+	elseif self.connected_by_radar then
+		self:OnDisconnectedFromRadar()
+		self.connected_by_radar = false
 	end
 end
 
 function Homeworld:OnRadarBuilt( radarEntity )
 	table.insert(self.radars, radarEntity)
-	if #self.radars == 1 and not self.radarRoutineStarted then
-		StartCoroutine(self.CheckRadarsRoutine, self)
-		self.radarRoutineStarted = true
-	end
 end
 
 function Homeworld:OnRadarDestroy( radarEntity )

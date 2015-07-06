@@ -1,6 +1,6 @@
 ActorClass("Fishery", {
 	open_gui_on_selected = true,
-	max_rawfish_yield = 120,
+	max_yield_per_minute = 360,
 	max_pollution = 2000,
 	max_fish = 13,
 	max_fish_reproduction = 3,
@@ -95,7 +95,8 @@ function Fishery:FisheryRoutine()
 
 		-- Harvest fish
 		local inventory = self.entity.getinventory(1)
-		local count = math.floor(self.yield * self.max_rawfish_yield)
+		local maxYield = (self.max_yield_per_minute * self.harvest_interval) / (1*MINUTES);
+		local count = math.floor(self.yield * maxYield)
 		if count > 0 then
 			local stack = {name = "raw-fish", count = count}
 			if inventory.caninsert(stack) then

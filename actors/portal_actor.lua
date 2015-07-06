@@ -7,6 +7,7 @@ ActorClass("Portal", {
 
 function Portal:Init()
 	self.enabled = true
+	self.stats = {}
 
 	game.onevent(HOMEWORLD_EVENTS.HOMEWORLD_ONLINE, function()
 		StartCoroutine(self.TransferItemsRoutine, self)
@@ -15,7 +16,7 @@ end
 
 function Portal:OnLoad()
 	self.enabled = true
-	if self.homeworld.online then
+	if self.homeworld.connected_by_radar then
 		StartCoroutine(self.TransferItemsRoutine, self)
 	else
 		game.onevent(HOMEWORLD_EVENTS.HOMEWORLD_ONLINE, function()
@@ -35,7 +36,6 @@ end
 
 function Portal:TransferItemsRoutine()
 	local inventory = self.entity.getinventory(1)
-	self.stats = {}
 
 	while self.enabled do
 		while self.countdown_tick > 0 do
@@ -70,6 +70,7 @@ function Portal:TransferItemsRoutine()
 	end
 end
 
+--[[
 function Portal:DoPortalRoutine()
 	while self.enabled do
 		while self.countdown_tick > 0 do
@@ -97,6 +98,7 @@ function Portal:DoPortalRoutine()
 		coroutine.yield()
 	end
 end
+]]
 
 function Portal:OpenGUI()
 	if game.player.gui.left.portal_gui then
@@ -107,7 +109,6 @@ function Portal:OpenGUI()
 	self.gui = GUI.Frame("portal_gui", "Homeworld Portal", GUI.VERTICAL)
 	GUI.PushParent(self.gui)
 	GUI.LabelData("portal_timer", {"portal-timer-label"})
-	--GUI.Label("countdown", "00:00", "description_title_label_style")
 	GUI.PopAll()
 end
 
@@ -120,7 +121,7 @@ end
 
 function Portal:UpdateGUI()
 	if not self.gui then return end
-	if self.homeworld.online then
+	if self.homeworld.connected_by_radar then
 		if self.countdown_tick >= 0 then
 			local minutes = math.floor(self.countdown_tick / 3600)
 			local seconds = math.floor((self.countdown_tick / 60) % 60)
@@ -128,13 +129,11 @@ function Portal:UpdateGUI()
 			self.gui.portal_timer.data.caption = string.format("%02i:%02i", minutes, seconds)
 		end
 	else
-		local minutes = math.floor(self.homeworld.grace_period / 3600)
-		local seconds = math.floor((self.homeworld.grace_period / 60) % 60)
-		--self.gui.label.caption = "Portal opens in:"
-		self.gui.portal_timer.data.caption = string.format("%02i:%02i", minutes, seconds)
+		self.gui.portal_timer.label.caption = "Waiting for connection to homeworld."
+		self.gui.portal_timer.data.caption = ""
 	end
 
-	if self.stats then
+	if self.stats and self.homeworld.connected_by_radar then
 		if self.gui.stats then
 			self.gui.stats.destroy()
 		end

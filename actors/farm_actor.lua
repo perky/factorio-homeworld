@@ -15,16 +15,16 @@ ActorClass("Farm", {
 	pollution_multiplier = 1,
 	max_pollution = 1500,
 	radius = 5,
-	base_wheat_yield = 500,
-	base_hops_yield = 400,
-	base_veg_yield = 400,
-	base_grapes_yield = 300
+	max_wheat_yield_per_min = 200,
+	max_hops_yield_per_min = 100,
+	max_veg_yield_per_min = 100,
+	max_grapes_yield_per_min = 50,
 })
 
 function Farm:Init()
 	self.enabled = true
 	local pos = self.entity.position
-	local area = {{pos.x - self.radius, pos.y - self.radius}, {pos.x + self.radius, pos.y + self.radius}}
+	local area = SquareArea(pos, self.radius)
 	local totalArea = 0
 	local totalRichness = 0
 	for x, y in iarea(area) do
@@ -69,10 +69,15 @@ function Farm:FarmRoutine()
 
 		self:CalculateYield()
 		local inventory = self.entity.getinventory(1)
-		inventory.insert{name = "wheat", count = math.floor(self.base_wheat_yield * self.yield)}
-		inventory.insert{name = "hops", count = math.floor(self.base_hops_yield * self.yield)}
-		inventory.insert{name = "vegetables", count = math.floor(self.base_veg_yield * self.yield)}
-		inventory.insert{name = "grapes", count = math.floor(self.base_grapes_yield * self.yield)}
+
+		local maxWheatYield = (self.max_wheat_yield_per_min * self.production_rate) / (1*MINUTES)
+		local maxHopsYield = (self.max_hops_yield_per_min * self.production_rate) / (1*MINUTES)
+		local maxVegYield = (self.max_veg_yield_per_min * self.production_rate) / (1*MINUTES)
+		local maxGrapesYield = (self.max_grapes_yield_per_min * self.production_rate) / (1*MINUTES)
+		inventory.insert{name = "wheat", count = math.floor(maxWheatYield * self.yield)}
+		inventory.insert{name = "hops", count = math.floor(maxHopsYield * self.yield)}
+		inventory.insert{name = "vegetables", count = math.floor(maxVegYield * self.yield)}
+		inventory.insert{name = "grapes", count = math.floor(maxGrapesYield * self.yield)}
 		
 		self:UpdateGUI()
 	end

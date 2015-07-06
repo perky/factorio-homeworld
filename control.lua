@@ -24,9 +24,11 @@ end
 
 local function OnGameInit()
 	modHasInitialised = true
+	homeworld = AddActor( Homeworld.CreateActor() )
 end
 
 local function AfterGameLoad()
+	game.player.print("after load")
 	for _, actor in ipairs(actors) do
 		if actor.OnLoad then
 			actor:OnLoad()
@@ -46,6 +48,7 @@ local function AfterGameLoad()
 end
 
 local function OnGameLoad()
+	game.player.print("on load")
 	if not modHasInitialised then
 		if glob.actors then
 			for i, glob_actor in ipairs(glob.actors) do
@@ -98,7 +101,6 @@ local function OnPlayerCreated( playerindex )
 	player.insert{name = "sawmill", count = 10}
 	player.insert{name = "farm", count = 10}
 	]]--
-	homeworld = AddActor( Homeworld.CreateActor() )
 
 	-- Spawn Portal.
 	local portalSpawnPos = game.findnoncollidingposition("homeworld_portal", game.player.position, 30, 1)
@@ -272,5 +274,9 @@ remote.addinterface("homeworld", {
 				inventory.insert(stack)
 			end
 		end
+	end,
+
+	GetHomeworld = function ()
+		return homeworld
 	end
 })
