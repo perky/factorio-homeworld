@@ -1,5 +1,6 @@
 ActorClass("Sawmill", {
 	saw_interval = 10 * SECONDS,
+	raw_wood_per_tree = 10,
 	work_radius = 20
 })
 
@@ -21,17 +22,17 @@ end
 function Sawmill:SawRoutine()
 	WaitForTicks(3 * SECONDS)
 
-	local inventory = self.entity.getinventory(1)
+	local inventory = self.entity.get_inventory(1)
 	local pos = self.entity.position
 	local r = self.work_radius
-	local ents = game.findentities{{pos.x - r, pos.y - r},{pos.x + r, pos.y + r}}
+	local ents = world_surface.find_entities{{pos.x - r, pos.y - r},{pos.x + r, pos.y + r}}
 	
 	ShuffleTable(ents)
 	for _, ent in ipairs(ents) do
 		if ent and ent.valid and ent.type == "tree" then
 			ent.destroy()
-			local item = {name = "raw-wood", count = 5}
-			while not inventory.caninsert(item) do
+			local item = {name = "raw-wood", count = self.raw_wood_per_tree}
+			while not inventory.can_insert(item) do
 				coroutine.yield()
 			end
 			inventory.insert(item)

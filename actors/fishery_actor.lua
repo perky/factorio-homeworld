@@ -12,6 +12,8 @@ ActorClass("Fishery", {
 
 function Fishery:Init()
 	self.enabled = true
+	self.gui = {}
+
 	StartCoroutine(self.FisheryRoutine, self)
 	StartCoroutine(self.ReproductionRoutine, self)
 end
@@ -30,7 +32,7 @@ function Fishery:ReproductionRoutine()
 		WaitForTicks(self.reproduction_interval)
 
 		local pos = self.entity.position
-		local nearbyFish = game.findentitiesfiltered{
+		local nearbyFish = world_surface.find_entities_filtered{
 			area = {{pos.x - self.fishing_radius, pos.y - self.fishing_radius},
 					{pos.x + self.fishing_radius, pos.y + self.fishing_radius}},
 			name = "fish"
@@ -53,7 +55,7 @@ function Fishery:ReproductionRoutine()
 			if nearbyFish[1] and nearbyFish[1].valid then
 				local spawnPos = nearbyFish[1].position
 				for i = 0, reproduction_amount do
-					game.createentity{name = "fish", force = game.forces.neutral, position = spawnPos}
+					world_surface.create_entity{name = "fish", force = game.forces.neutral, position = spawnPos}
 				end
 			end
 		end
@@ -65,7 +67,7 @@ function Fishery:ReproductionRoutine()
 			if cullAmount > 0 then
 				for i = self.max_fish, self.max_fish + cullAmount do
 					if nearbyFish[i] and nearbyFish[i].valid then
-						nearbyFish[i].destroy()
+						nearbyFish[i].die()
 					end
 				end
 			end
@@ -75,11 +77,11 @@ end
 
 function Fishery:FisheryRoutine()
 	while self.enabled do
-		local pollution = math.min(game.getpollution(self.entity.position), self.max_pollution)
+		local pollution = math.min(world_surface.get_pollution(self.entity.position), self.max_pollution)
 		self.water_purity = RemapNumber(pollution, 0, self.max_pollution, 1, 0)
 
 		local pos = self.entity.position
-		local nearbyFish = game.findentitiesfiltered{
+		local nearbyFish = world_surface.find_entities_filtered{
 			area = {{pos.x - self.fishing_radius, pos.y - self.fishing_radius},
 					{pos.x + self.fishing_radius, pos.y + self.fishing_radius}},
 			name = "fish"
@@ -88,18 +90,18 @@ function Fishery:FisheryRoutine()
 		local fishCount = math.min(#nearbyFish, self.max_fish)
 		self.fish_population = RemapNumber(fishCount, 0, self.max_fish, 0, 1)
 		self.yield = self.fish_population * self.water_purity
-		self:UpdateGUI()
+		self:UpdateGUIForAllPlayers()
 
 		-- Wait to harvest
 		WaitForTicks(self.harvest_interval)
 
 		-- Harvest fish
-		local inventory = self.entity.getinventory(1)
+		local inventory = self.entity.get_inventory(1)
 		local maxYield = (self.max_yield_per_minute * self.harvest_interval) / (1*MINUTES);
 		local count = math.floor(self.yield * maxYield)
 		if count > 0 then
 			local stack = {name = "raw-fish", count = count}
-			if inventory.caninsert(stack) then
+			if inventory.can_insert(stack) then
 				inventory.insert(stack)
 			end
 
@@ -112,24 +114,30 @@ function Fishery:FisheryRoutine()
 	end
 end
 
-function Fishery:OpenGUI()
-	GUI.PushLeftSection()
-	self.gui = GUI.PushParent(GUI.Frame("fishery", "Fishery", GUI.VERTICAL))
+function Fishery:OpenGUI( playerIndex )
+	GUI.PushParent(game.players[playerIndex].gui.left)
+	self.gui[playerIndex] = GUI.PushParent(GUI.Frame("fishery", "Fishery", GUI.VERTICAL))
 	GUI.LabelData("purity", "Water Purity:", "0%")
 	GUI.LabelData("population", "Fish Population:", "0%")
 	GUI.LabelData("yield", "Yield:", "0%")
-	self:UpdateGUI()
+	self:UpdateGUI(playerIndex)
 end
 
-function Fishery:CloseGUI()
-	if self.gui then
-		self.gui.destroy()
-		self.gui = nil
+function Fishery:CloseGUI( playerIndex )
+	if self.gui[playerIndex] then
+		self.gui[playerIndex].destroy()
+		self.gui[playerIndex] = nil
 	end
 end
 
-function Fishery:UpdateGUI()
-	if not self.gui or not self.yield then return end
+function Fishery:UpdateGUIForAllPlayers()
+	for playerIndex = 1, #game.players do
+		self:_UpdateGUI(playerIndex)
+	end
+end
+
+function Fishery:UpdateGUI( playerIndex )
+	if not self.gui[playerIndex] or not self.yield then return end
 
 	-- calculate rolling average of fish_population
 	if not self.fish_roll_avg then

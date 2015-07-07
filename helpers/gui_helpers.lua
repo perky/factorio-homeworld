@@ -5,8 +5,8 @@ GUI = {
 GUI.VERTICAL = "vertical"
 GUI.HORIZONTAL = "horizontal"
 
-function GUI.PushLeftSection()
-	return GUI.PushParent(game.player.gui.left)
+function GUI.PushLeftSection( playerIndex )
+	return GUI.PushParent(game.players[playerIndex].gui.left)
 end
 
 function GUI.PushParent( parent )
@@ -94,13 +94,15 @@ function GUI.DestroyButton( button )
 end
 
 function GUI.OnClick( event )
-	local element = event.element
-	local callback = GUI.buttonCallbacks[element.name]
+	local playerIndex = event.player_index
+	local button = event.element
+	local callback = GUI.buttonCallbacks[button.name]
+
 	if callback then
 		local func = callback.delegate[callback.onclick]
 		if func then
-			func(callback.delegate, callback.args)
+			func(callback.delegate, playerIndex, callback.args)
 		end
 	end
 end
-game.onevent(defines.events.onguiclick, GUI.OnClick)
+game.on_event(defines.events.on_gui_click, GUI.OnClick)

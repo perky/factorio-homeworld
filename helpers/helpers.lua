@@ -10,6 +10,18 @@ function ActorClass( name, class )
 	return class
 end
 
+function PrintToAllPlayers( text )
+	for playerIndex = 1, #game.players do
+		game.players[playerIndex].print(text)
+	end
+end
+
+function SetGoalForAllPlayers( goalText )
+	for playerIndex = 1, #game.players do
+		game.players[playerIndex].set_goal_description(goalText)
+	end
+end
+
 function FindTilesInArea( area, tileNameFilter )
 	local foundTiles = {}
 	local aa = area[1]

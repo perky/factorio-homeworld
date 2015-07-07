@@ -8,19 +8,18 @@ ActorClass("Portal", {
 function Portal:Init()
 	self.enabled = true
 	self.stats = {}
+	self.gui = {}
 
 	game.onevent(HOMEWORLD_EVENTS.HOMEWORLD_ONLINE, function()
-		StartCoroutine(self.TransferItemsRoutine, self)
+		self:OnHomeworldOnline()
 	end)
 end
 
 function Portal:OnLoad()
 	self.enabled = true
-	if self.homeworld.connected_by_radar then
-		StartCoroutine(self.TransferItemsRoutine, self)
-	else
+	if not self.homeworld_is_online then
 		game.onevent(HOMEWORLD_EVENTS.HOMEWORLD_ONLINE, function()
-			StartCoroutine(self.TransferItemsRoutine, self)
+			self:OnHomeworldOnline()
 		end)
 	end
 end
@@ -30,125 +29,101 @@ function Portal:OnDestroy()
 	DestroyRoutines(self)
 end
 
+function Portal:OnHomeworldOnline()
+	self.homeworld_is_online = true
+end
+
 function Portal:OnTick()
-	self:UpdateGUI()
-end
-
-function Portal:TransferItemsRoutine()
-	local inventory = self.entity.getinventory(1)
-
-	while self.enabled do
-		while self.countdown_tick > 0 do
-			self.countdown_tick = self.countdown_tick - 1
-			coroutine.yield()
+	for playerIndex = 1, #game.players do
+		if self.gui[playerIndex]
+			self:UpdateGUI(playerIndex)
 		end
-
-		local needs = self.homeworld:CurrentNeeds()
-		for _, need in ipairs(needs) do
-			local count = inventory.getitemcount(need.item)
-			if count > 0 then
-				inventory.remove({name = need.item, count = count})
-				self.homeworld:InsertItem(need.item, count)
-			end
-
-			-- Update stats
-			local stat = self.stats[need.item]
-			if not stat then
-				stat = {}
-				self.stats[need.item] = stat
-			end
-			table.insert(stat, count)
-			if #stat > 60 then
-				table.remove(stat, 1)
-			end
-		end
-		
-		-- Create portal FX.
-		game.createentity({name = "portal-sound", position = self.entity.position, force = game.forces.player})
-		self.countdown_tick = self.transfer_interval
-		coroutine.yield()
-	end
-end
-
---[[
-function Portal:DoPortalRoutine()
-	while self.enabled do
-		while self.countdown_tick > 0 do
-			self.countdown_tick = self.countdown_tick - 1
-			coroutine.yield()
-		end
-
-		-- Create portal FX.
-		game.createentity({name = "portal-sound", position = self.entity.position})
-
-		local inventory = self.entity.getinventory(1)
-		local contents = inventory.getcontents()
-		for item, count in pairs(contents) do
-			local remaining = count
-			local chunk = 10
-			while remaining > 0 do
-				local take = math.min(chunk, remaining)
-				inventory.remove{name = item, count = take}
-				self.homeworld:InsertItem(item, take)
-				remaining = remaining - take
-				coroutine.yield()
-			end
-		end
-		self.countdown_tick = self.transfer_interval
-		coroutine.yield()
-	end
-end
-]]
-
-function Portal:OpenGUI()
-	if game.player.gui.left.portal_gui then
-		game.player.gui.left.portal_gui.destroy()
 	end
 
-	GUI.PushParent(game.player.gui.left)
-	self.gui = GUI.Frame("portal_gui", "Homeworld Portal", GUI.VERTICAL)
-	GUI.PushParent(self.gui)
+	-- Wait until homeworld is online.
+	if not self.homeworld_is_online then
+		return
+	end
+
+	-- Wait until the countdown reaches 0.
+	if self.countdown_tick > 0 then
+		self.countdown_tick = self.countdown_tick - 1
+		return
+	end
+	self.countdown_tick = self.transfer_interval
+
+	local needs = self.homeworld:CurrentNeeds()
+	for _, need in ipairs(needs) do
+		local count = inventory.getitemcount(need.item)
+		if count > 0 then
+			inventory.remove({name = need.item, count = count})
+			self.homeworld:InsertItem(need.item, count)
+		end
+
+		-- Update stats
+		local stat = self.stats[need.item]
+		if not stat then
+			stat = {}
+			self.stats[need.item] = stat
+		end
+		table.insert(stat, count)
+		if #stat > 60 then
+			table.remove(stat, 1)
+		end
+	end
+
+	-- Create portal FX.
+	world_surface.create_entity({name = "portal-sound", position = self.entity.position, force = game.forces.player})
+end
+
+function Portal:OpenGUI( playerIndex )
+	local player = game.players[playerIndex]
+	if player.gui.left.portal_gui then
+		player.gui.left.portal_gui.destroy()
+	end
+
+	GUI.PushParent(player.gui.left)
+	self.gui[playerIndex] = GUI.Frame("portal_gui", "Homeworld Portal", GUI.VERTICAL)
+	GUI.PushParent(self.gui[playerIndex])
 	GUI.LabelData("portal_timer", {"portal-timer-label"})
 	GUI.PopAll()
 end
 
-function Portal:CloseGUI()
-	if self.gui then
-		self.gui.destroy()
-		self.gui = nil
+function Portal:CloseGUI( playerIndex )
+	if self.gui[playerIndex] then
+		self.gui[playerIndex].destroy()
+		self.gui[playerIndex] = nil
 	end
 end
 
-function Portal:UpdateGUI()
-	if not self.gui then return end
-	if self.homeworld.connected_by_radar then
+function Portal:UpdateGUI( playerIndex )
+	if self.homeworld_is_online then
 		if self.countdown_tick >= 0 then
 			local minutes = math.floor(self.countdown_tick / 3600)
 			local seconds = math.floor((self.countdown_tick / 60) % 60)
-			--self.gui.portal_timer.data.caption = "Transfering contents in:"
 			self.gui.portal_timer.data.caption = string.format("%02i:%02i", minutes, seconds)
 		end
-	else
-		self.gui.portal_timer.label.caption = "Waiting for connection to homeworld."
-		self.gui.portal_timer.data.caption = ""
-	end
 
-	if self.stats and self.homeworld.connected_by_radar then
-		if self.gui.stats then
-			self.gui.stats.destroy()
-		end
-		GUI.PushParent(self.gui)
-		GUI.PushParent(GUI.Frame("stats", "Stats", GUI.VERTICAL))
-			for item, stat in pairs(self.stats) do
-				GUI.PushParent(GUI.Flow("stat_"..item, GUI.HORIZONTAL))
-				GUI.Icon("item_icon", item)
-				GUI.Label("item_name", game.getlocaliseditemname(item))
-				local avg = self:GetStatAvg(item)
-				GUI.Label("item_avg", string.format("[%s/m]", PrettyNumber(avg)))
-				GUI.PopParent()
+		if self.stats then
+			if self.gui[playerIndex].stats then
+				self.gui[playerIndex].stats.destroy()
 			end
-		GUI.PopAll()
-	end
+			GUI.PushParent(self.gui[playerIndex])
+			GUI.PushParent(GUI.Frame("stats", "Stats", GUI.VERTICAL))
+				for item, stat in pairs(self.stats) do
+					GUI.PushParent(GUI.Flow("stat_"..item, GUI.HORIZONTAL))
+					GUI.Icon("item_icon", item)
+					GUI.Label("item_name", game.getlocaliseditemname(item))
+					local avg = self:GetStatAvg(item)
+					GUI.Label("item_avg", string.format("[%s/m]", PrettyNumber(avg)))
+					GUI.PopParent()
+				end
+			GUI.PopAll()
+		end
+	else
+		self.gui[playerIndex].portal_timer.label.caption = "Waiting for connection to homeworld."
+		self.gui[playerIndex].portal_timer.data.caption = ""
+	end	
 end
 
 function Portal:GetStatAvg( item )

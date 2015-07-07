@@ -310,16 +310,20 @@ function Homeworld:Init()
 	self.inventory = {}
 	self.radars = {}
 	self.collected_reward_tiers = {}
+	self.gui = {}
+	self.top_button = {}
 
-	game.player.setgoaldescription(game.localise("homeworld-first-goal"))
+	SetGoalForAllPlayers(game.localise("homeworld-first-goal"))
 end
 
 function Homeworld:OnLoad()
 	self.enabled = true
-	self:CloseGUI()
+	for playerIndex = 1, #game.players do
+		self:CloseGUI(game.players[playerIndex])
+	end
 
 	if not self.connected_by_radar then
-		game.player.setgoaldescription(game.localise("homeworld-first-goal"))
+		SetGoalForAllPlayers(game.localise("homeworld-first-goal"))
 	end
 
 	if self.connected_by_radar then
@@ -359,8 +363,10 @@ function Homeworld:OnDestroy()
 end
 
 function Homeworld:OnTick()
-	if self.gui then
-		self:UpdateGUI()
+	for playerIndex = 1, #game.players do
+		if self.gui[playerIndex] then
+			self:UpdateGUI(playerIndex)
+		end
 	end
 
 	if game.tick % (1*SECONDS) == 0 then
@@ -447,11 +453,11 @@ function Homeworld:UpdatePopulation()
 		local nextTier = needs_prototype[self.population_tier + 1]
 		if nextTier and self.population >= currentTier.upgrade_population then
 			self:SetTier(self.population_tier + 1)
-			game.player.print(string.format("Homeworld population upgraded to tier %i. Needs changed.", self.population_tier))
+			PrintToAllPlayers(string.format("Homeworld population upgraded to tier %i. Needs changed.", self.population_tier))
 			WaitForTicks(2 * SECONDS) -- wait before changing population to prevent flipping between tiers.
 		elseif self.population < currentTier.downgrade_population then
 			self:SetTier(self.population_tier - 1)
-			game.player.print(string.format("Homeworld population downgraded to tier %i. Needs changed.", self.population_tier))
+			PrintToAllPlayers(string.format("Homeworld population downgraded to tier %i. Needs changed.", self.population_tier))
 			WaitForTicks(2 * SECONDS) -- wait before changing population to prevent flipping between tiers.
 		end
 		coroutine.yield()
@@ -471,7 +477,7 @@ function Homeworld:SetTier( tier )
 			remote.call("homeworld", "InsertItemToPortal", reward.item, reward.amount)
 		end
 		self.collected_reward_tiers[self.population_tier] = true
-		game.player.print("You have been given some gifts. Collect them at the portal.")
+		PrintToAllPlayers("You have been given some gifts. Collect them at the portal.")
 	end
 
 	self.population_tier = tier
@@ -485,42 +491,43 @@ function Homeworld:CurrentNeeds()
 	return needs_prototype[self.population_tier].needs
 end
 
-function Homeworld:ToggleGUI()
-	if self.gui then
-		self:CloseGUI()
+function Homeworld:ToggleGUI( playerIndex )
+	if self.gui[playerIndex] then
+		self:CloseGUI(playerIndex)
 	else
-		self:OpenGUI()
+		self:OpenGUI(playerIndex)
 	end
 end
 
-function Homeworld:OpenGUI()
+function Homeworld:OpenGUI( playerIndex )
+	local player = game.players[playerIndex]
 	if self.connected_by_radar then
-		GUI.PushParent(game.player.gui.left)
-		self.gui = GUI.Frame("homeworld_gui", "Homeworld", GUI.VERTICAL)
-		GUI.PushParent(self.gui)
+		GUI.PushParent(player.gui.left)
+		self.gui[playerIndex] = GUI.Frame("homeworld_gui", "Homeworld", GUI.VERTICAL)
+		GUI.PushParent(self.gui[playerIndex])
 		GUI.PushParent(GUI.Flow("population", GUI.HORIZONTAL))
 			GUI.Label("pop_label", {"population"})
 			GUI.Label("pop_value", "0/0")
 		GUI.PopParent()
 		GUI.ProgressBar("population_bar", 1)
 		GUI.PopAll()
-		self:CreateNeedsGUI()
+		self:CreateNeedsGUI(playerIndex)
 	else
-		GUI.PushParent(game.player.gui.left)
-		self.gui = GUI.Frame("homeworld_gui", "Homeworld", GUI.VERTICAL)
-		GUI.PushParent(self.gui)
+		GUI.PushParent(player.gui.left)
+		self.gui[playerIndex] = GUI.Frame("homeworld_gui", "Homeworld", GUI.VERTICAL)
+		GUI.PushParent(self.gui[playerIndex])
 		GUI.Label("info", {"homeworld-start-transmission"})
 		GUI.PopAll()
 	end
 end
 
-function Homeworld:CreateNeedsGUI()
-	if not self.gui then return end
-	if self.gui.needs then
-		self.gui.needs.destroy()
+function Homeworld:CreateNeedsGUI( playerIndex )
+	if not self.gui[playerIndex] then return end
+	if self.gui[playerIndex].needs then
+		self.gui[playerIndex].needs.destroy()
 	end
 	GUI.PopAll()
-	GUI.PushParent(self.gui)
+	GUI.PushParent(self.gui[playerIndex])
 	GUI.PushParent(GUI.Frame("needs", "Needs", GUI.VERTICAL))
 	for i, need in ipairs(self:CurrentNeeds()) do
 		GUI.PushParent(GUI.Flow("need_"..i, GUI.VERTICAL))
@@ -536,22 +543,23 @@ function Homeworld:CreateNeedsGUI()
 	end
 end
 
-function Homeworld:UpdateGUI()
+function Homeworld:UpdateGUI( playerIndex )
+	local player = game.players[playerIndex]
 	if self.connected_by_radar and self.top_button then
 		self.top_button.caption = string.format("Homeworld [%s T%u]", PrettyNumber(self.population), self.population_tier)
 	end
 
-	if not self.gui then
+	if not self.gui[playerIndex] then
 		return
 	end
 
 	local maxPop = needs_prototype[self.population_tier].upgrade_population
 	local minPop = needs_prototype[self.population_tier].downgrade_population
 	local barValue = (self.population - minPop) / (maxPop - minPop)
-	self.gui.population.pop_value.caption = string.format("%u / %u - T%u", self.population, maxPop, self.population_tier)
-	self.gui.population_bar.value = barValue
+	self.gui[playerIndex].population.pop_value.caption = string.format("%u / %u - T%u", self.population, maxPop, self.population_tier)
+	self.gui[playerIndex].population_bar.value = barValue
 	for i, need in ipairs(self:CurrentNeeds()) do
-		local needgui = self.gui.needs["need_"..i]
+		local needgui = self.gui[playerIndex].needs["need_"..i]
 		local amountNeeded = math.floor(self:GetNeedItemCount(need))
 		local amountInStock = self:GetItemCount(need.item)
 		needgui.satisfaction.value = amountInStock / amountNeeded
@@ -564,17 +572,33 @@ function Homeworld:UpdateGUI()
 	end
 end
 
-function Homeworld:CloseGUI()
-	if self.gui then
-		self.gui.destroy()
-		self.gui = nil
+function Homeworld:CloseGUI( playerIndex )
+	if self.gui[playerIndex] then
+		self.gui[playerIndex].destroy()
+		self.gui[playerIndex] = nil
+	end
+end
+
+function Homeworld:CreateTopButton()
+	for playerIndex = 1, #game.players do
+		local player = game.players[playerIndex]
+		GUI.PushParent(player.gui.top)
+		self.top_button[playerIndex] = GUI.Button("homeworld_button", "Homeworld", "ToggleGUI", self)
+		GUI.PopParent()
+	end
+end
+
+function Homeworld:DestroyTopButton()
+	for playerIndex = 1, #game.players do
+		self.top_button[playerIndex].destroy()
+		self.top_button[playerIndex] = nil
 	end
 end
 
 function Homeworld:OnConnectedToRadar()
-	game.player.print(game.localise("homeworld-start-transmission"))
-	game.player.print(game.localise("homeworld-get-response"))
-	game.player.setgoaldescription("")
+	PrintToAllPlayers(game.localise("homeworld-start-transmission"))
+	PrintToAllPlayers(game.localise("homeworld-get-response"))
+	SetGoalForAllPlayers("")
 
 	if self.population_tier == 0 then
 		self:SetTier(1)
@@ -582,21 +606,12 @@ function Homeworld:OnConnectedToRadar()
 		StartCoroutine(self.UpdatePopulation, self)
 	end
 
-	if not self.top_button then
-		GUI.PushParent(game.player.gui.top)
-		self.top_button = GUI.Button("homeworld_button", "Homeworld", "ToggleGUI", self)
-		GUI.PopParent()
-	end
+	self:CreateTopButton()
 end
 
 function Homeworld:OnDisconnectedFromRadar()
-	game.player.print(game.localise("homeworld-lose-transmission"))
-
-	if self.top_button then
-		self.top_button.destroy()
-		self.top_button = nil
-		self:CloseGUI()
-	end
+	PrintToAllPlayers(game.localise("homeworld-lose-transmission"))
+	self:DestroyTopButton()
 end
 
 function Homeworld:CheckRadars()
@@ -625,7 +640,7 @@ end
 
 function Homeworld:OnRadarDestroy( radarEntity )
 	for i, otherRadarEntity in ipairs(self.radars) do
-		if otherRadarEntity.equals(radarEntity) then
+		if otherRadarEntity == radarEntity then
 			table.remove(self.radars, i)
 			break
 		end

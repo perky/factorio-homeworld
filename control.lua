@@ -1,3 +1,8 @@
+actors = {}
+homeworld = nil
+main_portal = nil
+world_surface = nil
+
 require("defines")
 require("util")
 require("homeworld_defines")
@@ -12,9 +17,6 @@ require("actors.farm_actor")
 require("actors.sawmill_actor")
 require("water_drain")
 
-actors = {}
-homeworld = nil
-main_portal = nil
 
 local function AddActor( actor )
 	table.insert(actors, actor)
@@ -28,7 +30,6 @@ local function OnGameInit()
 end
 
 local function AfterGameLoad()
-	game.player.print("after load")
 	for _, actor in ipairs(actors) do
 		if actor.OnLoad then
 			actor:OnLoad()
@@ -48,12 +49,12 @@ local function AfterGameLoad()
 end
 
 local function OnGameLoad()
-	game.player.print("on load")
 	if not modHasInitialised then
-		if glob.actors then
-			for i, glob_actor in ipairs(glob.actors) do
-				if glob_actor.className then
+		world_surface = game.players[1].surface
 
+		if global.actors then
+			for i, glob_actor in ipairs(global.actors) do
+				if glob_actor.className then
 					local class = _ENV[glob_actor.className]
 					local actor = class.CreateActor(glob_actor)
 					table.insert(actors, actor)
@@ -76,37 +77,28 @@ local function OnGameLoad()
 		modHasInitialised = true
 	end
 
-	if glob.guiButtonCallbacks then
-		GUI.buttonCallbacks = glob.guiButtonCallbacks
+	if global.guiButtonCallbacks then
+		GUI.buttonCallbacks = global.guiButtonCallbacks
 	end
 end
 
 local function OnGameSave()
-	glob.actors = actors
-	glob.guiButtonCallbacks = GUI.buttonCallbacks
+	global.actors = actors
+	global.guiButtonCallbacks = GUI.buttonCallbacks
 end
 
-local function OnPlayerCreated( playerindex )
-	if playerindex ~= 1 then return end
+local function OnPlayerCreated( player_index )
+	if player_index == 1 then
+		local player = game.get_player(player_index)
+		local surface = player.surface
+		world_surface = surface
 
-	local player = game.getplayer(playerindex)
-	--player.insert{name = "fishery", count = 10}
-	--player.insert{name = "offshore-pump", count = 10}
-	player.insert{name = "raw-fish", count = 300}
-	--[[
-	player.insert{name = "homeworld_portal", count = 1}
-	player.insert{name = "wood", count = 300}
-	
-	player.insert{name = "fishery", count = 10}
-	player.insert{name = "sawmill", count = 10}
-	player.insert{name = "farm", count = 10}
-	]]--
-
-	-- Spawn Portal.
-	local portalSpawnPos = game.findnoncollidingposition("homeworld_portal", game.player.position, 30, 1)
-	local portalEntity = game.createentity({name = "homeworld_portal", position = portalSpawnPos, force = game.forces.player})
-	local portal = Portal.CreateActor{entity = portalEntity, homeworld = homeworld}
-	AddActor(portal)
+		-- Spawn Portal.
+		local portalSpawnPos = surface.find_non_colliding_position("homeworld_portal", game.player.position, 30, 1)
+		local portalEntity = surface.create_entity({name = "homeworld_portal", position = portalSpawnPos, force = game.forces.player})
+		local portal = Portal.CreateActor{entity = portalEntity, homeworld = homeworld}
+		AddActor(portal)
+	end
 end
 
 local function OnPlayerBuiltEntity( entity )
@@ -122,7 +114,6 @@ local function OnPlayerBuiltEntity( entity )
 	elseif entity.name == "radar" then
 		homeworld:OnRadarBuilt(entity)
 	end
-
 	--WaterDrain.OnBuiltEntity(entity)
 end
 
@@ -150,14 +141,18 @@ local function OnTick()
 		if actor.OnTick then
 			actor:OnTick()
 		end
-		if actor.open_gui_on_selected then
-			local openedEntity = game.player.opened
-			if openedEntity ~= nil and openedEntity.equals(actor.entity) and not actor.gui_opened then
-				actor:OpenGUI()
-				actor.gui_opened = true
-			elseif actor.gui_opened and openedEntity == nil then
-				actor:CloseGUI()
-				actor.gui_opened = false
+
+		for playerIndex = 1, #game.players do
+			if actor.open_gui_on_selected then
+				local player = game.players[playerIndex]
+				local openedEntity = player.opened
+				if openedEntity ~= nil and openedEntity.equals(actor.entity) and not actor.gui_opened[playerIndex] then
+					actor:OpenGUI(playerIndex)
+					actor.gui_opened[playerIndex] = true
+				elseif actor.gui_opened[playerIndex] and openedEntity == nil then
+					actor:CloseGUI(playerIndex)
+					actor.gui_opened[playerIndex] = false
+				end
 			end
 		end
 	end
@@ -165,34 +160,24 @@ local function OnTick()
 	--WaterDrain.OnTick()
 end
 
-local function OnChunkGenerated( area )
-	--[[
-	local portals = game.findentitiesfiltered{area = area, name = "homeworld_portal"}
-	for _, entity in ipairs(portals) do
-		local portal = AddActor( PortalActor(entity) )
-		portal.homeworld = homeworld
-	end
-	]]--
-end
-
 local function OnResourceDepleted( resource )
 	if resource.name == "sand-source" then
-		game.settiles{{name = "dirt-dark", position = resource.position}}
+		world_surface.set_tiles{{name = "dirt-dark", position = resource.position}}
 	end
 end
 
-game.oninit(OnGameInit)
-game.onload(OnGameLoad)
-game.onsave(OnGameSave)
-game.onevent(defines.events.onbuiltentity, function(event) OnPlayerBuiltEntity(event.createdentity) end)
-game.onevent(defines.events.onentitydied, function(event) OnEntityDestroy(event.entity) end)
-game.onevent(defines.events.onpreplayermineditem, function(event) OnEntityDestroy(event.entity) end)
-game.onevent(defines.events.onrobotpremined, function(event) OnEntityDestroy(event.entity) end)
-game.onevent(defines.events.onplayercreated, function(event) OnPlayerCreated(event.playerindex) end)
---game.onevent(defines.events.onchunkgenerated, function(event) OnChunkGenerated(event.area) end)
-game.onevent(defines.events.ontick, OnTick)
-game.onevent(defines.events.onresourcedepleted, function(event) OnResourceDepleted(event.entity) end)
+game.on_init(OnGameInit)
+game.on_load(OnGameLoad)
+game.on_save(OnGameSave)
+game.on_event(defines.events.on_built_entity, function(event) OnPlayerBuiltEntity(event.createdentity) end)
+game.on_event(defines.events.on_entity_died, function(event) OnEntityDestroy(event.entity) end)
+game.on_event(defines.events.on_pre_player_mined_item, function(event) OnEntityDestroy(event.entity) end)
+game.on_event(defines.events.on_robot_pre_mined, function(event) OnEntityDestroy(event.entity) end)
+game.on_event(defines.events.on_player_created, function(event) OnPlayerCreated(event.player_index) end)
+game.on_event(defines.events.on_tick, OnTick)
+game.on_event(defines.events.on_resource_depleted, function(event) OnResourceDepleted(event.entity) end)
 
+--[[
 local function terraformRoutine(maxStep)
 	local current = {x=game.player.position.x, y=game.player.position.y}
 	local stepCount = 1
@@ -241,8 +226,9 @@ local function terraformRoutine(maxStep)
 		offset = offsetsMap[state]
 	end
 end
+]]
 
-remote.addinterface("homeworld", {
+remote.add_interface("homeworld", {
 	SetPopulation = function(amount)
 		homeworld.population = amount
 	end,
@@ -260,10 +246,6 @@ remote.addinterface("homeworld", {
 			local count = homeworld:GetNeedItemCount(need)
 			homeworld:InsertItem(need.item, count)
 		end
-	end,
-
-	Terraform = function(maxStep)
-		StartCoroutine(terraformRoutine, maxStep)
 	end,
 
 	InsertItemToPortal = function(item, count)
