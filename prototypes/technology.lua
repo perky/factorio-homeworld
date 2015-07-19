@@ -2,10 +2,14 @@ local fluidTech = data.raw.technology["fluid-handling"]
 local alienTech = data.raw.technology["alien-technology"]
 local battery = data.raw.technology["battery"]
 local plastics = data.raw.technology["plastics"]
+local concreteTech = data.raw.technology["concrete"]
 table.insert(fluidTech.effects, {type = "unlock-recipe", recipe = "fill-water-barrel"})
 table.insert(alienTech.effects, {type = "unlock-recipe", recipe = "homeworld-portal"})
 table.insert(battery.effects, {type = "unlock-recipe", recipe = "portable-electronics"})
 table.insert(plastics.effects, {type = "unlock-recipe", recipe = "synthetic-wood"})
+table.insert(concreteTech.effects, {type = "unlock-recipe", recipe = "building-materials"})
+
+concreteTech.prerequisites = {"advanced-material-processing-2", "carpentry"}
 
 data:extend({
 	{
@@ -50,7 +54,7 @@ data:extend({
 
 	{
 		type = "technology",
-		name = "carpentry-masonry",
+		name = "carpentry",
 		icon = "__homeworld__/graphics/icons/furniture.png",
 		prerequisites = {"stone-walls", "agriculture"},
 		unit = {
@@ -59,9 +63,8 @@ data:extend({
 			time = 20
 		},
 		effects = {
-			{type = "unlock-recipe", recipe = "furniture"},
-			{type = "unlock-recipe", recipe = "concrete"},
-			{type = "unlock-recipe", recipe = "building-materials"},
+			{type = "unlock-recipe", recipe = "furniture"}
 		}
 	},
 })
+

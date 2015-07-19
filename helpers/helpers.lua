@@ -12,17 +12,21 @@ end
 
 function PrintToAllPlayers( text )
 	for playerIndex = 1, #game.players do
-		game.players[playerIndex].print(text)
+		if game.players[playerIndex] ~= nil then
+			game.players[playerIndex].print(text)
+		end
 	end
 end
 
 function SetGoalForAllPlayers( goalText )
 	for playerIndex = 1, #game.players do
-		game.players[playerIndex].set_goal_description(goalText)
+		if game.players[playerIndex] ~= nil then
+			game.players[playerIndex].set_goal_description(goalText)
+		end
 	end
 end
 
-function FindTilesInArea( area, tileNameFilter )
+function FindTilesInArea( surface, area, tileNameFilter )
 	local foundTiles = {}
 	local aa = area[1]
 	local bb = area[2]
@@ -32,7 +36,7 @@ function FindTilesInArea( area, tileNameFilter )
 		for _x = 0, width do
 			local x = aa.x + _x
 			local y = aa.y + _y
-			local tile = game.gettile(x, y)
+			local tile = surface.get_tile(x, y)
 			if tile.name == tileNameFilter then
 				table.insert(foundTiles, tile)
 			end
@@ -41,7 +45,7 @@ function FindTilesInArea( area, tileNameFilter )
 	return foundTiles
 end
 
-function FindTilePropertiesInArea( area, tileNameFilter )
+function FindTilePropertiesInArea( surface, area, tileNameFilter )
 	local foundTiles = {}
 	local aa = area[1]
 	local bb = area[2]
@@ -53,8 +57,8 @@ function FindTilePropertiesInArea( area, tileNameFilter )
 				x = aa.x + _x,
 				y = aa.y + _y
 			}
-			local tile = game.gettile(pos.x, pos.y)
-			local tileProps = game.gettileproperties(pos.x, pos.y)
+			local tile = surface.get_tile(pos.x, pos.y)
+			local tileProps = surface.get_tile_properties(pos.x, pos.y)
 			if tile.name == tileNameFilter then
 				table.insert(foundTiles, {
 					name = tile.name,

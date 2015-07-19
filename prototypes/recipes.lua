@@ -1,5 +1,11 @@
 -- Overwrite vanilla recipes
 data.raw.recipe["empty-barrel"].results[1].amount = 10
+data.raw.recipe["concrete"].ingredients = {
+  {"stone-brick", 2},
+  {"sand", 10},
+  {"iron-ore", 1},
+  {type="fluid", name="water", amount=10}
+}
 
 data:extend({
 
@@ -127,15 +133,6 @@ data:extend({
     energy_required = 2,
   	result = "portable-electronics"
 	},
-
-  {
-    type = "recipe",
-    name = "concrete",
-    enabled = "false",
-    ingredients = {{"sand", 10}, {"stone", 1}},
-    result = "concrete",
-    result_count = 5
-  },
 
   {
     type = "recipe",

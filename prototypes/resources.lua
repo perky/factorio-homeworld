@@ -38,12 +38,16 @@ data:extend({
 	      },
 	    },
 	    stage_counts = {0},
-	    stages = { filename = "__homeworld__/graphics/empty.png",
-	      priority = "extra-high",
-	      width = 16,
-	      height = 16,
-	      frame_count = 1,
-	      direction_count = 1
+	    stages = { 
+	      sheet = {
+	      	filename = "__homeworld__/graphics/empty.png",
+	     	 priority = "extra-high",
+	      	width = 16,
+	      	height = 16,
+	      	frame_count = 1,
+	      	direction_count = 1,
+	      	variation_count = 1
+	      }
 	    },
 	    map_color = {r=0.48, g=0.36, b=0.128}
 	},

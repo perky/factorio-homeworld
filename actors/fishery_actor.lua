@@ -32,7 +32,8 @@ function Fishery:ReproductionRoutine()
 		WaitForTicks(self.reproduction_interval)
 
 		local pos = self.entity.position
-		local nearbyFish = world_surface.find_entities_filtered{
+		local surface = self.entity.surface
+		local nearbyFish = surface.find_entities_filtered{
 			area = {{pos.x - self.fishing_radius, pos.y - self.fishing_radius},
 					{pos.x + self.fishing_radius, pos.y + self.fishing_radius}},
 			name = "fish"
@@ -40,7 +41,7 @@ function Fishery:ReproductionRoutine()
 		local fishCount = #nearbyFish
 
 		local r = self.fishing_radius * 2
-		local nearbyFishery = game.findentitiesfiltered{
+		local nearbyFishery = surface.count_entities_filtered{
 			area = {{pos.x - r, pos.y - r},
 					{pos.x + r, pos.y + r}},
 			name = "fishery"

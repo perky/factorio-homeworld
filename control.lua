@@ -9,7 +9,6 @@ require("homeworld_defines")
 require("helpers.helpers")
 require("helpers.gui_helpers")
 require("helpers.coroutine_helpers")
-require("actors.arcology_actor")
 require("actors.homeworld_actor")
 require("actors.fishery_actor")
 require("actors.portal_actor")
@@ -87,17 +86,22 @@ local function OnGameSave()
 	global.guiButtonCallbacks = GUI.buttonCallbacks
 end
 
+local function SpawnHomeworldPortal( player )
+	local surface = player.surface
+	local portalSpawnPos = surface.find_non_colliding_position("homeworld_portal", player.position, 30, 1)
+	local portalEntity = surface.create_entity({name = "homeworld_portal", position = portalSpawnPos, force = player.force})
+	local portal = Portal.CreateActor{entity = portalEntity, homeworld = homeworld}
+	AddActor(portal)
+	portal:RegisterForRewards()
+end
+
 local function OnPlayerCreated( player_index )
 	if player_index == 1 then
 		local player = game.get_player(player_index)
 		local surface = player.surface
 		world_surface = surface
 
-		-- Spawn Portal.
-		local portalSpawnPos = surface.find_non_colliding_position("homeworld_portal", game.player.position, 30, 1)
-		local portalEntity = surface.create_entity({name = "homeworld_portal", position = portalSpawnPos, force = game.forces.player})
-		local portal = Portal.CreateActor{entity = portalEntity, homeworld = homeworld}
-		AddActor(portal)
+		SpawnHomeworldPortal(player)
 	end
 end
 
@@ -120,7 +124,7 @@ end
 local function OnEntityDestroy( entity )
 	for i=1, #actors do
 		local actor = actors[i]
-		if actor and actor.entity and actor.entity.equals(entity) then
+		if actor and actor.entity and actor.entity == entity then
 			table.remove(actors, i)
 			if actor.OnDestroy then
 				actor:OnDestroy()
@@ -144,9 +148,12 @@ local function OnTick()
 
 		for playerIndex = 1, #game.players do
 			if actor.open_gui_on_selected then
+				if not actor.gui_opened then
+					actor.gui_opened = {}
+				end
 				local player = game.players[playerIndex]
 				local openedEntity = player.opened
-				if openedEntity ~= nil and openedEntity.equals(actor.entity) and not actor.gui_opened[playerIndex] then
+				if openedEntity ~= nil and openedEntity == actor.entity and not actor.gui_opened[playerIndex] then
 					actor:OpenGUI(playerIndex)
 					actor.gui_opened[playerIndex] = true
 				elseif actor.gui_opened[playerIndex] and openedEntity == nil then
@@ -169,9 +176,9 @@ end
 game.on_init(OnGameInit)
 game.on_load(OnGameLoad)
 game.on_save(OnGameSave)
-game.on_event(defines.events.on_built_entity, function(event) OnPlayerBuiltEntity(event.createdentity) end)
+game.on_event(defines.events.on_built_entity, function(event) OnPlayerBuiltEntity(event.created_entity) end)
 game.on_event(defines.events.on_entity_died, function(event) OnEntityDestroy(event.entity) end)
-game.on_event(defines.events.on_pre_player_mined_item, function(event) OnEntityDestroy(event.entity) end)
+game.on_event(defines.events.on_preplayer_mined_item, function(event) OnEntityDestroy(event.entity) end)
 game.on_event(defines.events.on_robot_pre_mined, function(event) OnEntityDestroy(event.entity) end)
 game.on_event(defines.events.on_player_created, function(event) OnPlayerCreated(event.player_index) end)
 game.on_event(defines.events.on_tick, OnTick)
@@ -229,6 +236,11 @@ end
 ]]
 
 remote.add_interface("homeworld", {
+	SpawnPortal = function( playerIndex )
+		local player = game.players[playerIndex]
+		SpawnHomeworldPortal(player)
+	end,
+
 	SetPopulation = function(amount)
 		homeworld.population = amount
 	end,
@@ -237,8 +249,10 @@ remote.add_interface("homeworld", {
 		homeworld:InsertItem(itemName, amount)
 	end,
 
-	Online = function()
-		homeworld.grace_period = 1
+	SetHomeworldOnline = function()
+		if main_portal then
+			main_portal:OnHomeworldOnline()
+		end
 	end,
 
 	FillAllNeeds = function()
@@ -248,17 +262,18 @@ remote.add_interface("homeworld", {
 		end
 	end,
 
-	InsertItemToPortal = function(item, count)
+	RegisterPortal = function()
+		main_portal:RegisterForRewards()
+	end,
+
+	AddRewardToMainPortal = function(reward)
+		PrintToAllPlayers(serpent.block(reward))
 		if main_portal then
-			local inventory = main_portal.entity.getinventory(1)
-			local stack = {name = item, count = count}
-			if inventory.caninsert(stack) then
-				inventory.insert(stack)
-			end
+			main_portal:InsertReward(reward)
 		end
 	end,
 
 	GetHomeworld = function ()
 		return homeworld
-	end
+	end,
 })

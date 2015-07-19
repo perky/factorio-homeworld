@@ -26,11 +26,12 @@ function Farm:Init()
 	self.gui = {}
 
 	local pos = self.entity.position
+	local surface = self.entity.surface
 	local area = SquareArea(pos, self.radius)
 	local totalArea = 0
 	local totalRichness = 0
 	for x, y in iarea(area) do
-		local tile = game.gettile(x, y)
+		local tile = surface.get_tile(x, y)
 		local richness = 0
 		if soil_richness[tile.name] then
 			richness = soil_richness[tile.name]

@@ -312,8 +312,9 @@ function Homeworld:Init()
 	self.collected_reward_tiers = {}
 	self.gui = {}
 	self.top_button = {}
+	self.need_timing = {}
 
-	SetGoalForAllPlayers(game.localise("homeworld-first-goal"))
+	SetGoalForAllPlayers({"homeworld-first-goal"})
 end
 
 function Homeworld:OnLoad()
@@ -323,14 +324,7 @@ function Homeworld:OnLoad()
 	end
 
 	if not self.connected_by_radar then
-		SetGoalForAllPlayers(game.localise("homeworld-first-goal"))
-	end
-
-	if self.connected_by_radar then
-		for _, need in ipairs(self:CurrentNeeds()) do
-			StartCoroutine(function() self:ConsumeNeed(need, self.population_tier) end)
-		end
-		StartCoroutine(self.UpdatePopulation, self)
+		SetGoalForAllPlayers({"homeworld-first-goal"})
 	end
 end
 
@@ -372,6 +366,17 @@ function Homeworld:OnTick()
 	if game.tick % (1*SECONDS) == 0 then
 		self:CheckRadars()
 	end
+
+	if self.connected_by_radar then
+		if (game.tick % self.update_population_rate) == 0 then
+			self:UpdatePopulation()
+		end
+
+		local needs = self:CurrentNeeds()
+		for i, need in ipairs(needs) do
+			self:UpdateNeedConsumption(need)
+		end
+	end
 end
 
 function Homeworld:GetNeedItemCount( need )
@@ -379,111 +384,101 @@ function Homeworld:GetNeedItemCount( need )
 	return (need.max_per_min * (need.consumption_duration / MINUTES) * self.population) / upgradePop
 end
 
-function Homeworld:ConsumeNeed( need, tier )
-	while self.enabled and tier == self.population_tier do
-		-- Wait until we have items to consume.
-		while self:GetItemCount(need.item) == 0 do
-			WaitForTicks(60)
-		end
+function Homeworld:UpdateNeedConsumption( need )
+	local timing = self.need_timing[need.item]
 
-		local totalNeeded = self:GetNeedItemCount(need)
-		local consumptionPerTick = totalNeeded / need.consumption_duration
-		local tickRate = 1
-
-		if consumptionPerTick < 1 then
-			tickRate = 1 / consumptionPerTick
-			consumptionPerTick = 1
-		else
-			consumptionPerTick = math.floor(consumptionPerTick)
-		end
-		
-		for i = 0, need.consumption_duration/tickRate do
-			self:RemoveItem(need.item, consumptionPerTick)
-			if self:GetItemCount(need.item) == 0 or self.population_tier ~= tier then
-				break
+	if timing and timing.counter > 0 then
+		-- Consume the item over time.
+		if (game.tick % timing.tickRate) == 0 then
+			self:RemoveItem(need.item, timing.consumptionPerTick)
+			timing.counter = timing.counter - 1
+			if self:GetItemCount(need.item) == 0 then
+				timing.counter = 0
 			end
-			WaitForTicks(tickRate)
 		end
-
-		coroutine.yield()
+	else
+		-- Otherwise we need to calculate the timing data.
+		timing = {}
+		local totalNeeded = self:GetNeedItemCount(need)
+		timing.consumptionPerTick = totalNeeded / need.consumption_duration
+		timing.tickRate = 1
+		if timing.consumptionPerTick < 1 then
+			timing.tickRate = 1 / timing.consumptionPerTick
+			timing.consumptionPerTick = 1
+		else
+			timing.consumptionPerTick = math.floor(timing.consumptionPerTick)
+		end
+		timing.counter = math.floor(need.consumption_duration / timing.tickRate)
+		self.need_timing[need.item] = timing
 	end
 end
 
 function Homeworld:UpdatePopulation()
-	while self.enabled do
-		WaitForTicks(self.update_population_rate)
-		local canGrow = false
-		local canDecline = false
-		local needsSatisfied = 0
-		local needsUnsatisfied = 0
-		local needCount = 0
-		for _, need in ipairs(self:CurrentNeeds()) do
-			local totalNeeded = self:GetNeedItemCount(need)
-			local satisfaction = self:GetItemCount(need.item) / totalNeeded
-			if satisfaction >= self.min_satisfaction_for_growth then
-				needsSatisfied = needsSatisfied + 1
-			elseif satisfaction <= self.max_satisfaction_for_decline then
-				needsUnsatisfied = needsUnsatisfied + 1
-			end
-			needCount = needCount + 1
+	local canGrow = false
+	local canDecline = false
+	local needsSatisfied = 0
+	local needsUnsatisfied = 0
+	local needCount = 0
+	for _, need in ipairs(self:CurrentNeeds()) do
+		local totalNeeded = self:GetNeedItemCount(need)
+		local satisfaction = self:GetItemCount(need.item) / totalNeeded
+		if satisfaction >= self.min_satisfaction_for_growth then
+			needsSatisfied = needsSatisfied + 1
+		elseif satisfaction <= self.max_satisfaction_for_decline then
+			needsUnsatisfied = needsUnsatisfied + 1
 		end
+		needCount = needCount + 1
+	end
 
-		local tier = needs_prototype[self.population_tier]
-		local canGrow = (needsSatisfied == needCount)
-		local canDecline = (needsUnsatisfied > 0)
+	local tier = needs_prototype[self.population_tier]
+	local canGrow = (needsSatisfied == needCount)
+	local canDecline = (needsUnsatisfied > 0)
 
-		if canGrow then
-			local growAmount = math.random(tier.grow_rate.min, tier.grow_rate.max)
-			for i = 0, growAmount do
-				self.population = self.population + 1
-				WaitForTicks(5)
-			end
-		elseif canDecline then
-			local declineAmount = math.random(tier.decline_rate.min, tier.decline_rate.max)
-			for i = 0, declineAmount do
-				self.population = self.population - 1
-				if self.population < self.min_population then
-					self.population = self.min_population
-				end
-				WaitForTicks(5)
-			end
+	if canGrow then
+		local growAmount = math.random(tier.grow_rate.min, tier.grow_rate.max)
+		self.population = self.population + growAmount
+	elseif canDecline then
+		local declineAmount = math.random(tier.decline_rate.min, tier.decline_rate.max)
+		self.population = self.population - declineAmount
+		if self.population < self.min_population then
+			self.population = self.min_population
 		end
+	end
 
-		local currentTier = needs_prototype[self.population_tier]
-		local nextTier = needs_prototype[self.population_tier + 1]
-		if nextTier and self.population >= currentTier.upgrade_population then
-			self:SetTier(self.population_tier + 1)
-			PrintToAllPlayers(string.format("Homeworld population upgraded to tier %i. Needs changed.", self.population_tier))
-			WaitForTicks(2 * SECONDS) -- wait before changing population to prevent flipping between tiers.
-		elseif self.population < currentTier.downgrade_population then
-			self:SetTier(self.population_tier - 1)
-			PrintToAllPlayers(string.format("Homeworld population downgraded to tier %i. Needs changed.", self.population_tier))
-			WaitForTicks(2 * SECONDS) -- wait before changing population to prevent flipping between tiers.
-		end
-		coroutine.yield()
+	local currentTier = needs_prototype[self.population_tier]
+	local nextTier = needs_prototype[self.population_tier + 1]
+	if nextTier and self.population >= currentTier.upgrade_population then
+		self:SetTier(self.population_tier + 1)
+		PrintToAllPlayers(string.format("Homeworld population upgraded to tier %i. Needs changed.", self.population_tier))
+	elseif self.population < currentTier.downgrade_population then
+		self:SetTier(self.population_tier - 1)
+		PrintToAllPlayers(string.format("Homeworld population downgraded to tier %i. Needs changed.", self.population_tier))
 	end
 end
 
 function Homeworld:SetTier( tier )
-	-- Give the player rewards via the portal.
+
 	if not self.collected_reward_tiers then
 		self.collected_reward_tiers = {}
 	end
-	if tier > self.population_tier and needs_prototype[self.population_tier] and not self.collected_reward_tiers[self.population_tier] then
-		local possibleRewards = needs_prototype[self.population_tier].rewards
+
+	local shouldGiveRewards = (tier > self.population_tier) and (not self.collected_reward_tiers[self.population_tier])
+	local lastTier = self.population_tier
+	self.population_tier = tier
+
+	if shouldGiveRewards and needs_prototype[lastTier] then
+		local possibleRewards = needs_prototype[lastTier].rewards
 		local chosenRewards = math.random(#possibleRewards)
 		local rewards = possibleRewards[chosenRewards]
+		PrintToAllPlayers(serpent.block(rewards))
 		for _, reward in ipairs(rewards) do
-			remote.call("homeworld", "InsertItemToPortal", reward.item, reward.amount)
+			game.raise_event(HOMEWORLD_EVENTS.ON_REWARD, reward)
 		end
-		self.collected_reward_tiers[self.population_tier] = true
-		PrintToAllPlayers("You have been given some gifts. Collect them at the portal.")
+		self.collected_reward_tiers[lastTier] = true
+		PrintToAllPlayers({"homeworld-give-gifts"})
 	end
 
-	self.population_tier = tier
-	for _, need in ipairs(self:CurrentNeeds()) do
-		StartCoroutine(function() self:ConsumeNeed(need, tier) end)
-	end
+	self.need_timing = {}
 	self:CreateNeedsGUI()
 end
 
@@ -534,7 +529,7 @@ function Homeworld:CreateNeedsGUI( playerIndex )
 			GUI.PushParent(GUI.Flow("label_icon", GUI.HORIZONTAL))
 				GUI.Icon("icon", need.item)
 				GUI.PushParent(GUI.Flow("labels", GUI.VERTICAL))
-					GUI.Label("item", game.getlocaliseditemname(need.item))
+					GUI.Label("item", game.get_localised_item_name(need.item))
 					GUI.Label("consumption", "")
 				GUI.PopParent()
 			GUI.PopParent()
@@ -565,7 +560,7 @@ function Homeworld:UpdateGUI( playerIndex )
 		needgui.satisfaction.value = amountInStock / amountNeeded
 		local labels = needgui.label_icon.labels
 		GUI.SetLabelCaptionLocalised(labels.item, 
-									 game.getlocaliseditemname(need.item), 
+									 game.get_localised_item_name(need.item), 
 									 string.format(" [%s/%s]", PrettyNumber(amountInStock), PrettyNumber(amountNeeded))
 		)
 		labels.consumption.caption = durationLocaleKey[need.consumption_duration]
@@ -596,21 +591,20 @@ function Homeworld:DestroyTopButton()
 end
 
 function Homeworld:OnConnectedToRadar()
-	PrintToAllPlayers(game.localise("homeworld-start-transmission"))
-	PrintToAllPlayers(game.localise("homeworld-get-response"))
+	PrintToAllPlayers({"homeworld-start-transmission"})
+	PrintToAllPlayers({"homeworld-get-response"})
 	SetGoalForAllPlayers("")
 
 	if self.population_tier == 0 then
 		self:SetTier(1)
-		QueueEvent(HOMEWORLD_EVENTS.HOMEWORLD_ONLINE, {homeworld = self})
-		StartCoroutine(self.UpdatePopulation, self)
+		remote.call("homeworld", "SetHomeworldOnline")
 	end
 
 	self:CreateTopButton()
 end
 
 function Homeworld:OnDisconnectedFromRadar()
-	PrintToAllPlayers(game.localise("homeworld-lose-transmission"))
+	PrintToAllPlayers({"homeworld-lose-transmission"})
 	self:DestroyTopButton()
 end
 

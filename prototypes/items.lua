@@ -1,5 +1,6 @@
 data.raw.capsule["raw-fish"].stack_size = 1024
 data.raw.item["empty-barrel"].stack_size = 256
+data.raw.item["concrete"].stack_size = 1024
 
 data:extend({
 	{
@@ -88,16 +89,6 @@ data:extend({
 	    icon = "__homeworld__/graphics/icons/glass.png",
 	    flags = {"goes-to-main-inventory"},
 	    subgroup = "intermediate-product",
-	    stack_size = 1024
-  	},
-
-  	{
-	    type = "item",
-	    name = "concrete",
-	    icon = "__homeworld__/graphics/icons/concrete.png",
-	    flags = {"goes-to-main-inventory"},
-	    subgroup = "intermediate-product",
-	    order = "s",
 	    stack_size = 1024
   	},
 

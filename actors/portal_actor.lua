@@ -10,18 +10,30 @@ function Portal:Init()
 	self.stats = {}
 	self.gui = {}
 
-	game.onevent(HOMEWORLD_EVENTS.HOMEWORLD_ONLINE, function()
+	game.on_event(HOMEWORLD_EVENTS.HOMEWORLD_ONLINE, function()
 		self:OnHomeworldOnline()
 	end)
+
+	if self.homeworld and self.homeworld.connected_by_radar then
+		self.homeworld_is_online = true
+	end
 end
 
 function Portal:OnLoad()
 	self.enabled = true
-	if not self.homeworld_is_online then
-		game.onevent(HOMEWORLD_EVENTS.HOMEWORLD_ONLINE, function()
-			self:OnHomeworldOnline()
-		end)
+	game.on_event(HOMEWORLD_EVENTS.HOMEWORLD_ONLINE, function()
+		self:OnHomeworldOnline()
+	end)
+	if self.can_receive_rewards then
+		self:RegisterForRewards()
 	end
+end
+
+function Portal:RegisterForRewards()
+	game.on_event(HOMEWORLD_EVENTS.ON_REWARD, function(reward)
+		self:InsertReward(reward)
+	end)
+	self.can_receive_rewards = true
 end
 
 function Portal:OnDestroy()
@@ -35,7 +47,7 @@ end
 
 function Portal:OnTick()
 	for playerIndex = 1, #game.players do
-		if self.gui[playerIndex]
+		if self.gui[playerIndex] then
 			self:UpdateGUI(playerIndex)
 		end
 	end
@@ -52,9 +64,10 @@ function Portal:OnTick()
 	end
 	self.countdown_tick = self.transfer_interval
 
+	local inventory = self.entity.get_inventory(1)
 	local needs = self.homeworld:CurrentNeeds()
 	for _, need in ipairs(needs) do
-		local count = inventory.getitemcount(need.item)
+		local count = inventory.get_item_count(need.item)
 		if count > 0 then
 			inventory.remove({name = need.item, count = count})
 			self.homeworld:InsertItem(need.item, count)
@@ -73,7 +86,15 @@ function Portal:OnTick()
 	end
 
 	-- Create portal FX.
-	world_surface.create_entity({name = "portal-sound", position = self.entity.position, force = game.forces.player})
+	self.entity.surface.create_entity({name = "portal-sound", position = self.entity.position, force = self.entity.force, target = self.entity})
+end
+
+function Portal:InsertReward( reward )
+	local inventory = self.entity.get_inventory(1)
+	local itemStack = {name = reward.item, count = reward.amount}
+	if inventory.can_insert(itemStack) then
+		inventory.insert(itemStack)
+	end
 end
 
 function Portal:OpenGUI( playerIndex )
@@ -101,7 +122,7 @@ function Portal:UpdateGUI( playerIndex )
 		if self.countdown_tick >= 0 then
 			local minutes = math.floor(self.countdown_tick / 3600)
 			local seconds = math.floor((self.countdown_tick / 60) % 60)
-			self.gui.portal_timer.data.caption = string.format("%02i:%02i", minutes, seconds)
+			self.gui[playerIndex].portal_timer.data.caption = string.format("%02i:%02i", minutes, seconds)
 		end
 
 		if self.stats then
@@ -113,7 +134,7 @@ function Portal:UpdateGUI( playerIndex )
 				for item, stat in pairs(self.stats) do
 					GUI.PushParent(GUI.Flow("stat_"..item, GUI.HORIZONTAL))
 					GUI.Icon("item_icon", item)
-					GUI.Label("item_name", game.getlocaliseditemname(item))
+					GUI.Label("item_name", game.get_localised_item_name(item))
 					local avg = self:GetStatAvg(item)
 					GUI.Label("item_avg", string.format("[%s/m]", PrettyNumber(avg)))
 					GUI.PopParent()

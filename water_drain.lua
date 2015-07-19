@@ -47,14 +47,16 @@ _pumpWater = function( pump )
 
 	-- Find shallow water tiles immediatly near pump
 	local origin = pump.entity.position
+	local surface = pump.entity.surface
 	local area = SquareArea(origin, 1)
-	local nearbyShallowWaterTiles = FindTilePropertiesInArea(area, "water")
+	local nearbyShallowWaterTiles = FindTilePropertiesInArea(surface, area, "water")
 	if #nearbyShallowWaterTiles == 0 then return end
 	local nearestShallowWaterTile = GetNearest(nearbyShallowWaterTiles, origin).position
 	local counter, tileIndex = 0, 0
 	local waterTiles, tileCount
 	
-	while (game.gettile(nearestShallowWaterTile.x, nearestShallowWaterTile.y).name == "water") do
+
+	while (surface.get_tile(nearestShallowWaterTile.x, nearestShallowWaterTile.y).name == "water") do
 		-- wait until the pump is pumping
 		while not pump.entity.fluidbox[1] do
 			coroutine.yield()
@@ -96,16 +98,16 @@ _pumpWater = function( pump )
 			if tileIndex == 0 then break end
 
 			if tilePos then
-				local tile = game.gettile(tilePos.x, tilePos.y)
+				local tile = surface.get_tile(tilePos.x, tilePos.y)
 				if tile and tile.valid and (tile.name == "deepwater" or tile.name == "water") then
 					local area = SquareArea(tilePos, SEARCH_OFFSET-1)
 					local newTiles = {}
 					for x, y in iarea(area) do
 						table.insert(newTiles, {name = DRAINED_TILE, position = {x, y}})
 					end
-					game.settiles(newTiles)
+					surface.set_tiles(newTiles)
 					-- create and destroy any entity to update the map (stole this idea from landfill :D)
-					game.createentity({name = "stone", position = tilePos, force = game.forces.neutral}).destroy()
+					surface.create_entity({name = "stone", position = tilePos, force = game.forces.neutral}).destroy()
 				end
 			end
 		end
@@ -161,7 +163,6 @@ _findWaterTiles2 = function( pos )
 		
 		if tile.name == "water" or tile.name == "deepwater" and not visited[_getKey(node)] then
 			visited[_getKey(node)] = true
-			--game.settiles{{name = "grass", position = node}}
 			table.insert(waterTiles, node)
 			local west =  {x = node.x-SEARCH_OFFSET, y = node.y}
 			local east =  {x = node.x+SEARCH_OFFSET, y = node.y}

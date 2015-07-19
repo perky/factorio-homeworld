@@ -85,7 +85,7 @@ function ResumeRoutines()
 		for i = #queued_events, 0, -1 do
 			local e = queued_events[i]
 			if e then
-				game.raiseevent(e.event, e.data)
+				game.raise_event(e.event, e.data)
 				table.remove(queued_events, i)
 			end
 		end

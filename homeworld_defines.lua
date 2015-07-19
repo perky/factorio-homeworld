@@ -1,5 +1,6 @@
 HOMEWORLD_EVENTS = {}
-HOMEWORLD_EVENTS.HOMEWORLD_ONLINE = game.generateeventname()
+HOMEWORLD_EVENTS.HOMEWORLD_ONLINE = game.generate_event_name()
+HOMEWORLD_EVENTS.ON_REWARD = game.generate_event_name()
 
 SECONDS = 60
 MINUTES = 3600

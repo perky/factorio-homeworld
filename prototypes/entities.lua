@@ -6,7 +6,7 @@ data:extend({
     	flags = {"placeable-player", "player-creation"},
     	max_health = 150,
     	corpse = "big-remnants",
-    	dying_explosion = "huge-explosion",
+    	dying_explosion = "medium-explosion",
     	collision_box = {{-1.2, -1.2}, {1.2, 1.2}},
     	selection_box = {{-1.5, -1.5}, {1.5, 1.5}},
     	picture = {
@@ -93,7 +93,7 @@ data:extend({
         render_layer = "floor",
         max_health = 150,
         corpse = "big-remnants",
-        dying_explosion = "huge-explosion",
+        dying_explosion = "medium-explosion",
         collision_box = {{-3.2, -3.2}, {3.2, 3.2}},
         selection_box = {{-3.5, -3.5}, {3.5, 3.5}},
         picture = {
@@ -162,7 +162,6 @@ data:extend({
         type = "smoke",
         name = "portal-fx",
         flags = {"not-on-map"},
-        show_when_smoke_off = true,
         animation =
         {
             filename = "__homeworld__/graphics/entity/homeworld-portal-on.png",
@@ -170,19 +169,17 @@ data:extend({
             width = 358,
             height = 312,
             frame_count = 4,
-            animation_speed = 0.2,
+            animation_speed = 1,
             scale = 0.625,
             shift = {-0.52, 0.45}
         },
-        light = {intensity = 1, size = 20},
+        render_layer = "smoke",
         cyclic = true,
+        affected_by_wind = false,
         duration = 60 * 6,
-        slow_down_factor = 0,
-        wind_speed_factor = 0,
         movement_slow_down_factor = 0,
-        fade_away_duration = 60*1,
-        fade_in_duration = 60*1,
-        color = {r=1,g=1,b=1,a=1}
+        fade_away_duration = 60,
+        show_when_smoke_off = true
     },
 
     {
@@ -193,7 +190,7 @@ data:extend({
     minable = {hardness = 0.2, mining_time = 0.5, result = "distillery"},
     max_health = 300,
     corpse = "big-remnants",
-    dying_explosion = "huge-explosion",
+    dying_explosion = "medium-explosion",
     collision_box = {{-1.4, -1.4}, {1.4, 1.4}},
     selection_box = {{-1.5, -1.5}, {1.5, 1.5}},
     module_slots = 2,
