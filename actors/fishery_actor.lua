@@ -1,7 +1,7 @@
 ActorClass("Fishery", {
 	open_gui_on_selected = true,
 	max_yield_per_minute = 360,
-	max_pollution = 2000,
+	max_pollution = 4000,
 	max_fish = 13,
 	max_fish_reproduction = 3,
 	fish_reproduction_chance = 0.4,
@@ -28,11 +28,12 @@ function Fishery:OnDestroy()
 end
 
 function Fishery:ReproductionRoutine()
+	local surface = self.entity.surface
+	local pos = self.entity.position
+
 	while self.enabled do
 		WaitForTicks(self.reproduction_interval)
 
-		local pos = self.entity.position
-		local surface = self.entity.surface
 		local nearbyFish = surface.find_entities_filtered{
 			area = {{pos.x - self.fishing_radius, pos.y - self.fishing_radius},
 					{pos.x + self.fishing_radius, pos.y + self.fishing_radius}},
@@ -41,12 +42,11 @@ function Fishery:ReproductionRoutine()
 		local fishCount = #nearbyFish
 
 		local r = self.fishing_radius * 2
-		local nearbyFishery = surface.count_entities_filtered{
+		local fisheryCount = surface.count_entities_filtered{
 			area = {{pos.x - r, pos.y - r},
 					{pos.x + r, pos.y + r}},
 			name = "fishery"
 		}
-		local fisheryCount = #nearbyFishery
 
 		-- Reproduce fish
 		local chance = self.fish_reproduction_chance * (1/fisheryCount)
@@ -56,7 +56,7 @@ function Fishery:ReproductionRoutine()
 			if nearbyFish[1] and nearbyFish[1].valid then
 				local spawnPos = nearbyFish[1].position
 				for i = 0, reproduction_amount do
-					world_surface.create_entity{name = "fish", force = game.forces.neutral, position = spawnPos}
+					surface.create_entity{name = "fish", force = game.forces.neutral, position = spawnPos}
 				end
 			end
 		end
@@ -77,12 +77,15 @@ function Fishery:ReproductionRoutine()
 end
 
 function Fishery:FisheryRoutine()
+	local surface = self.entity.surface
+	local pos = self.entity.position
+
 	while self.enabled do
-		local pollution = math.min(world_surface.get_pollution(self.entity.position), self.max_pollution)
+		local pollution = math.min(surface.get_pollution(self.entity.position), self.max_pollution)
 		self.water_purity = RemapNumber(pollution, 0, self.max_pollution, 1, 0)
 
 		local pos = self.entity.position
-		local nearbyFish = world_surface.find_entities_filtered{
+		local nearbyFish = surface.find_entities_filtered{
 			area = {{pos.x - self.fishing_radius, pos.y - self.fishing_radius},
 					{pos.x + self.fishing_radius, pos.y + self.fishing_radius}},
 			name = "fish"
@@ -133,7 +136,7 @@ end
 
 function Fishery:UpdateGUIForAllPlayers()
 	for playerIndex = 1, #game.players do
-		self:_UpdateGUI(playerIndex)
+		self:UpdateGUI(playerIndex)
 	end
 end
 
@@ -156,7 +159,8 @@ function Fishery:UpdateGUI( playerIndex )
 	local fishPopAvg = math.floor(fishPopSum / #self.fish_roll_avg)
 
 	local format = "%i%%"
-	self.gui.purity.data.caption = string.format(format, math.floor(self.water_purity * 100))
-	self.gui.population.data.caption = string.format(format, fishPopAvg)
-	self.gui.yield.data.caption = string.format(format, math.floor(self.yield * 100))
+	local currentGUI = self.gui[playerIndex]
+	currentGUI.purity.data.caption = string.format(format, math.floor(self.water_purity * 100))
+	currentGUI.population.data.caption = string.format(format, fishPopAvg)
+	currentGUI.yield.data.caption = string.format(format, math.floor(self.yield * 100))
 end

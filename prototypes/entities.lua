@@ -33,9 +33,10 @@ data:extend({
         selection_box = {{-1.5, -1.5}, {1.5, 1.5}},
         picture = {
             filename = "__homeworld__/graphics/entity/fishery.png",
-            width = 96,
-            height = 96,
-            shift = {0, 0}
+            width = 192,
+            height = 230,
+            scale = 0.8,
+            shift = {0, -0.8}
         },
         inventory_size = 1,
         open_sound = { filename = "__base__/sound/metallic-chest-open.ogg", volume=0.65 },
@@ -43,20 +44,37 @@ data:extend({
     },
 
     {
-        type = "container",
+        type = "furnace",
         name = "sawmill",
         icon = "__homeworld__/graphics/icons/sawmill.png",
         flags = {"player-creation", "placeable-player"},
         minable = {mining_time = 0.3, result = "sawmill"},
         max_health = 50,
         corpse = "big-remnants",
-        collision_box = {{-1.2, -1.2}, {1.2, 1.2}},
-        selection_box = {{-1.5, -1.5}, {1.5, 1.5}},
-        picture = {
+        collision_box = {{-1.8, -1.8}, {1.8, 1.8}},
+        selection_box = {{-1.8, -1.8}, {1.8, 1.8}},
+        animation = {
             filename = "__homeworld__/graphics/entity/sawmill.png",
-            width = 96,
-            height = 96,
-            shift = {0, 0}
+            priority = "extra-high",
+            width = 260,
+            height = 240,
+            frame_count = 12,
+            line_length = 6,
+            shift = {0.40625, -0.71875},
+            animation_speed = 4
+        },
+        
+        crafting_categories = {"sawmill"},
+        crafting_speed = 0.1,
+        energy_usage = "15kW",
+        source_inventory_size = 1,
+        result_inventory_size = 5,
+        energy_source =
+        {
+          type = "burner",
+          effectivity = 1,
+          emissions = 0.002,
+          fuel_inventory_size = 1
         },
         inventory_size = 12,
         open_sound = { filename = "__base__/sound/metallic-chest-open.ogg", volume=0.65 },
@@ -171,7 +189,8 @@ data:extend({
             frame_count = 4,
             animation_speed = 1,
             scale = 0.625,
-            shift = {-0.52, 0.45}
+            shift = {-0.52, 0.45},
+            tint = {r = 1, g = 1, b = 1, a = 1}
         },
         render_layer = "smoke",
         cyclic = true,

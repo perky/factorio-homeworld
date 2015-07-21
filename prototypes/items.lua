@@ -216,6 +216,15 @@ data:extend({
 
   	{
 	    type = "item",
+	    name = "sawmill-tree",
+	    icon = "__base__/graphics/icons/tree-03.png",
+	    flags = {"goes-to-main-inventory"},
+	    subgroup = "raw-material",
+	    stack_size = 32
+  	},
+
+  	{
+	    type = "item",
 	    name = "luxury-meal",
 	    icon = "__homeworld__/graphics/icons/luxury-meal.png",
 	    flags = {"goes-to-main-inventory"},

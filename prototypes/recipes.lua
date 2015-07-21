@@ -9,6 +9,22 @@ data.raw.recipe["concrete"].ingredients = {
 
 data:extend({
 
+  -- SAWMILLL RECIPE
+  {
+    type = "recipe-category",
+    name = "sawmill"
+  },
+  {
+    type = "recipe",
+    category = "sawmill",
+    name = "collect-wood",
+    enabled = "true",
+    energy_required = 2,
+    ingredients = {{"sawmill-tree", 1}},
+    result = "raw-wood",
+    result_count = 5
+  },
+
   -- MACHINE RECIPES
 
 	{

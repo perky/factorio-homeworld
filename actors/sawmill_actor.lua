@@ -22,7 +22,7 @@ end
 function Sawmill:SawRoutine()
 	WaitForTicks(3 * SECONDS)
 
-	local inventory = self.entity.get_inventory(1)
+	local inputInventory = self.entity.get_inventory(2)
 	local pos = self.entity.position
 	local r = self.work_radius
 	local ents = world_surface.find_entities{{pos.x - r, pos.y - r},{pos.x + r, pos.y + r}}
@@ -31,11 +31,11 @@ function Sawmill:SawRoutine()
 	for _, ent in ipairs(ents) do
 		if ent and ent.valid and ent.type == "tree" then
 			ent.destroy()
-			local item = {name = "raw-wood", count = self.raw_wood_per_tree}
-			while not inventory.can_insert(item) do
+			local item = {name = "sawmill-tree", count = 1}
+			while not inputInventory.can_insert(item) do
 				coroutine.yield()
 			end
-			inventory.insert(item)
+			inputInventory.insert(item)
 			WaitForTicks(self.saw_interval)
 		else
 			coroutine.yield()
