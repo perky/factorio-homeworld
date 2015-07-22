@@ -94,8 +94,8 @@ data:extend({
         picture = {
             filename = "__homeworld__/graphics/entity/farm.png",
             priority = "low",
-            width = 288,
-            height = 288,
+            width = 450,
+            height = 450,
             shift = {0, 0}
         },
         inventory_size = 30,
@@ -368,3 +368,45 @@ for key, value in pairs(miningDrill) do
     end
 end
 data:extend{sandCollector}
+
+-- copy farm.
+function Farm(name, image)
+  data:extend({
+    {
+      type = "container",
+      name = name,
+      icon = "__base__/graphics/icons/fish.png",
+      flags = {"player-creation", "placeable-player"},
+      minable = {mining_time = 0.3, result = "farm"},
+      max_health = 50,
+      corpse = "big-remnants",
+      collision_box = {{-4.5, -4.5}, {4.5, 4.5}},
+      selection_box = {{-4, -4}, {4, 4}},
+      picture = {
+          filename = "__homeworld__/graphics/entity/" .. image,
+          priority = "low",
+          width = 450,
+          height = 450,
+          shift = {0, 0}
+      },
+      inventory_size = 30,
+      open_sound = { filename = "__base__/sound/metallic-chest-open.ogg", volume=0.65 },
+      close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 }
+    },
+    {
+      type = "item",
+      name = name,
+      icon = "__homeworld__/graphics/icons/farm.png",
+      flags = { "goes-to-quickbar" },
+      subgroup = "extraction-machine",
+      place_result = name,
+      stack_size = 16
+    },
+  });
+end
+
+Farm("farm", "farm.png")
+Farm("farm_01", "farm_01.png")
+Farm("farm_02", "farm_02.png")
+Farm("farm_03", "farm_03.png")
+Farm("farm_full", "farm_full.png")

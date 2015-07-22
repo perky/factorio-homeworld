@@ -9,6 +9,14 @@ local soil_richness = {
 	["sand-dark"]   = 0.05
 }
 
+local farm_stage_entity = {
+	{name = "farm", stock = 0},
+	{name = "farm_01", stock = 30},
+	{name = "farm_02", stock = 200},
+	{name = "farm_03", stock = 300},
+	{name = "farm_full", stock = 400},
+}
+
 ActorClass("Farm", {
 	open_gui_on_selected = true,
 	production_rate = 1 * GAME_DAY,
@@ -24,6 +32,7 @@ ActorClass("Farm", {
 function Farm:Init()
 	self.enabled = true
 	self.gui = {}
+	self.stage = 1
 
 	local pos = self.entity.position
 	local surface = self.entity.surface
@@ -44,11 +53,13 @@ function Farm:Init()
 	self:CalculateYield()
 
 	StartCoroutine(self.FarmRoutine, self)
+	StartCoroutine(self.StageRoutine, self)
 end
 
 function Farm:OnLoad()
 	self.enabled = true
 	StartCoroutine(self.FarmRoutine, self)
+	StartCoroutine(self.StageRoutine, self)
 end
 
 function Farm:OnDestroy()
@@ -63,6 +74,52 @@ function Farm:CalculateYield()
 		self.air_purity = 0
 	end
 	self.yield = math.max(self.soil_richness * self.air_purity, 0)
+end
+
+function Farm:SetEntityStage( stage )
+	local surface = self.entity.surface
+	local contents = self.entity.get_inventory(1).get_contents()
+	local newFarmEntity = surface.create_entity{
+		name = farm_stage_entity[stage].name,
+		force = self.entity.force,
+		position = self.entity.position
+	}
+	self.entity.destroy()
+	self.entity = newFarmEntity
+	local newInventory = newFarmEntity.get_inventory(1)
+	for itemName, itemCount in pairs(contents) do
+		newInventory.insert{name = itemName, count = itemCount}
+	end
+end
+
+function Farm:StageRoutine()
+	self:SetEntityStage(self.stage)
+
+	while self.enabled do
+		WaitForTicks(10 * SECONDS)
+
+		local inventory = self.entity.get_inventory(1)
+		local wheatCount = inventory.get_item_count("wheat")
+		local hopCount = inventory.get_item_count("hops")
+		local totalStock = wheatCount + hopCount
+
+		local currentFarmStageIndex = self.stage
+		local currentFarmStage = farm_stage_entity[self.stage]
+
+		for i, farmStage in ipairs(farm_stage_entity) do
+			if totalStock >= farmStage.stock then
+				currentFarmStage = farmStage
+				currentFarmStageIndex = i
+			end
+		end
+
+		if currentFarmStageIndex ~= self.stage then
+			self.stage = currentFarmStageIndex
+			self:SetEntityStage(self.stage)
+		end
+
+		coroutine.yield()
+	end
 end
 
 function Farm:FarmRoutine()
@@ -82,6 +139,8 @@ function Farm:FarmRoutine()
 		inventory.insert{name = "grapes", count = math.floor(maxGrapesYield * self.yield)}
 		
 		self:UpdateGUIForAllPlayers()
+
+		coroutine.yield()
 	end
 end
 

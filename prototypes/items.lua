@@ -43,15 +43,7 @@ data:extend({
 		stack_size = 16
 	},
 
-	{
-		type = "item",
-		name = "farm",
-		icon = "__homeworld__/graphics/icons/farm.png",
-		flags = { "goes-to-quickbar" },
-		subgroup = "extraction-machine",
-		place_result = "farm",
-		stack_size = 16
-	},
+	
 
 	{
 		type = "item",
