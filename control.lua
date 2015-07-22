@@ -14,6 +14,8 @@ require("actors.fishery_actor")
 require("actors.portal_actor")
 require("actors.farm_actor")
 require("actors.sawmill_actor")
+require("actors.terraformer_actor")
+require("actors.seeder_actor")
 require("water_drain")
 
 
@@ -117,6 +119,10 @@ local function OnPlayerBuiltEntity( entity )
 		AddActor( Farm.CreateActor{entity = entity} )
 	elseif entity.name == "radar" then
 		homeworld:OnRadarBuilt(entity)
+	elseif entity.name == "terraformer" then
+		AddActor( Terraformer.CreateActor{entity = entity} )
+	elseif entity.name == "seeder" then
+		AddActor( Seeder.CreateActor{entity = entity} )
 	end
 	--WaterDrain.OnBuiltEntity(entity)
 end
@@ -146,8 +152,8 @@ local function OnTick()
 			actor:OnTick()
 		end
 
-		for playerIndex = 1, #game.players do
-			if actor.open_gui_on_selected then
+		if actor.open_gui_on_selected then
+			for playerIndex = 1, #game.players do
 				if not actor.gui_opened then
 					actor.gui_opened = {}
 				end
@@ -183,57 +189,6 @@ game.on_event(defines.events.on_robot_pre_mined, function(event) OnEntityDestroy
 game.on_event(defines.events.on_player_created, function(event) OnPlayerCreated(event.player_index) end)
 game.on_event(defines.events.on_tick, OnTick)
 game.on_event(defines.events.on_resource_depleted, function(event) OnResourceDepleted(event.entity) end)
-
---[[
-local function terraformRoutine(maxStep)
-	local current = {x=game.player.position.x, y=game.player.position.y}
-	local stepCount = 1
-	local totalCount = 0
-	local right, down, left, up = 1, 2, 3, 4
-	local offsetsMap = {
-		[right] = {x=1, y=0},
-		[down]  = {x=0, y=1},
-		[left]  = {x=-1, y=0},
-		[up]    = {x=0, y=-1}
-	}
-	local state = right
-	local offset = offsetsMap[state]
-
-	while totalCount < maxStep do
-		for step = 0, stepCount do
-			local p1 = current
-			local p2 = {current.x - 1, current.y - 1}
-			local p3 = {current.x, current.y - 1}
-			local p4 = {current.x - 1, current.y}
-			local p5 = {current.x + 1, current.y + 1}
-			local p6 = {current.x + 1, current.y}
-			local p7 = {current.x, current.y + 1}
-			game.settiles{
-				{name="dirt-dark", position=p1},
-				{name="dirt-dark", position=p2},
-				{name="dirt-dark", position=p3},
-				{name="dirt-dark", position=p4},
-				{name="dirt-dark", position=p5},
-				{name="dirt-dark", position=p6},
-				{name="dirt-dark", position=p7}
-			}
-			current.x = current.x + offset.x
-			current.y = current.y + offset.y
-			totalCount = totalCount + 1
-			WaitForTicks(2)
-			if totalCount >= maxStep then
-				break
-			end
-		end
-		stepCount = stepCount + 1
-		state = state + 1
-		if state > up then
-			state = right
-		end
-		offset = offsetsMap[state]
-	end
-end
-]]
 
 remote.add_interface("homeworld", {
 	SpawnPortal = function( playerIndex )

@@ -1,3 +1,5 @@
+require("terraform_entities")
+
 data:extend({
 	{
 		type = "container",
@@ -140,6 +142,88 @@ data:extend({
         close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 },    
     },
 
+    {
+      type = "accumulator",
+      name = "terraformer",
+      icon = "__homeworld__/graphics/icons/portal.png",
+      flags = {"player-creation", "placeable-player"},
+      minable = {hardness = 0.2, mining_time = 0.5, result = "terraformer"},
+      max_health = 150,
+      corpse = "medium-remnants",
+      collision_box = {{-1.8, -1.8}, {1.8, 1.8}},
+      selection_box = {{-1.8, -1.8}, {1.8, 1.8}},
+      energy_source =
+      {
+        type = "electric",
+        usage_priority = "secondary-input",
+        input_flow_limit = "2MW",
+        buffer_capacity = "2MJ"
+      },
+      picture =
+      {
+        filename = "__homeworld__/graphics/entity/terraformer.png",
+        width = 160,
+        height = 160,
+      },
+      charge_animation = 
+      {
+        filename = "__homeworld__/graphics/entity/terraformer.png",
+        width = 160,
+        height = 160,
+        frame_count = 1
+      },
+      discharge_animation =
+      {
+        filename = "__homeworld__/graphics/entity/terraformer.png",
+        width = 160,
+        height = 160,
+        frame_count = 1
+      },
+      charge_cooldown = 30,
+      discharge_cooldown = 30,
+    },
+--[[
+    {
+      type = "accumulator",
+      name = "seeder",
+      icon = "__homeworld__/graphics/icons/seeder.png",
+      flags = {"player-creation", "placeable-player"},
+      minable = {hardness = 0.2, mining_time = 0.5, result = "seeder"},
+      max_health = 150,
+      corpse = "medium-remnants",
+      collision_box = {{-1.8, -1.8}, {1.8, 1.8}},
+      selection_box = {{-1.8, -1.8}, {1.8, 1.8}},
+      energy_source =
+      {
+        type = "electric",
+        usage_priority = "secondary-input",
+        input_flow_limit = "500kW",
+        buffer_capacity = "500kJ"
+      },
+      picture =
+      {
+        filename = "__homeworld__/graphics/entity/seeder.png",
+        width = 160,
+        height = 160,
+      },
+      charge_animation = 
+      {
+        filename = "__homeworld__/graphics/entity/seeder.png",
+        width = 160,
+        height = 160,
+        frame_count = 1
+      },
+      discharge_animation =
+      {
+        filename = "__homeworld__/graphics/entity/seeder.png",
+        width = 160,
+        height = 160,
+        frame_count = 1
+      },
+      charge_cooldown = 30,
+      discharge_cooldown = 30,
+    },
+]]--
     {
         type = "explosion",
         name = "portal-sound",

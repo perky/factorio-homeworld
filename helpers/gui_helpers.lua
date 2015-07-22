@@ -84,7 +84,8 @@ end
 function GUI.Button(name, caption, methodName, delegate, args)
 	local parent = GUI.Parent()
 	local button = parent.add{type = "button", name = name, caption = caption, style = style}
-	GUI.buttonCallbacks[name] = {onclick = methodName, delegate = delegate, args = args}
+	local identifier = GUI.GetButtonIdentifier(parent.gui.player, button)
+	GUI.buttonCallbacks[identifier] = {onclick = methodName, delegate = delegate, args = args}
 	return button
 end
 
@@ -93,10 +94,15 @@ function GUI.DestroyButton( button )
 	button.destroy()
 end
 
+function GUI.GetButtonIdentifier( player, button )
+	return string.format("p_%s_%s", player.name, button.name)
+end
+
 function GUI.OnClick( event )
 	local playerIndex = event.player_index
 	local button = event.element
-	local callback = GUI.buttonCallbacks[button.name]
+	local identifier = GUI.GetButtonIdentifier(game.players[playerIndex], button)
+	local callback = GUI.buttonCallbacks[identifier]
 
 	if callback then
 		local func = callback.delegate[callback.onclick]

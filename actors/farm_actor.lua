@@ -21,7 +21,7 @@ ActorClass("Farm", {
 	open_gui_on_selected = true,
 	production_rate = 1 * GAME_DAY,
 	pollution_multiplier = 1,
-	max_pollution = 1500,
+	max_pollution = 3000,
 	radius = 5,
 	max_wheat_yield_per_min = 200,
 	max_hops_yield_per_min = 100,

@@ -97,6 +97,31 @@ data:extend({
     result = "sand-collector"
   },
 
+  {
+    type = "recipe",
+    name = "seeder",
+    enabled = "true",
+    ingredients = {
+      {"raw-wood", 100},
+      {"iron-plate", 20},
+      {"battery", 30},
+      {"advanced-circuit", 20}
+    },
+    result = "seeder"
+  },
+
+  {
+    type = "recipe",
+    name = "terraformer",
+    enabled = "true",
+    ingredients = {
+      {"iron-plate", 50},
+      {"battery", 40},
+      {"processing-unit", 20}
+    },
+    result = "terraformer"
+  },
+
   -- SMELTING RECIPES
 
 	{
