@@ -46,7 +46,7 @@ data:extend({
 	{
 		type = "item",
 		name = "terraformer",
-		icon = "__homeworld__/graphics/icons/portal.png",
+		icon = "__homeworld__/graphics/icons/terraformer.png",
 		flags = { "goes-to-quickbar" },
 		subgroup = "extraction-machine",
 		place_result = "terraformer",
@@ -62,7 +62,6 @@ data:extend({
 		place_result = "seeder",
 		stack_size = 16
 	},
-	
 
 	{
 		type = "item",

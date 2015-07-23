@@ -55,7 +55,7 @@ local function OnGameLoad()
 
 		if global.actors then
 			for i, glob_actor in ipairs(global.actors) do
-				if glob_actor.className then
+				if glob_actor.className and ((glob_actor.entity and glob_actor.entity.valid) or (not glob_actor.entity)) then
 					local class = _ENV[glob_actor.className]
 					local actor = class.CreateActor(glob_actor)
 					table.insert(actors, actor)

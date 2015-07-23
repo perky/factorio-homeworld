@@ -100,7 +100,7 @@ data:extend({
   {
     type = "recipe",
     name = "seeder",
-    enabled = "true",
+    enabled = "false",
     ingredients = {
       {"raw-wood", 100},
       {"iron-plate", 20},
@@ -113,7 +113,7 @@ data:extend({
   {
     type = "recipe",
     name = "terraformer",
-    enabled = "true",
+    enabled = "false",
     ingredients = {
       {"iron-plate", 50},
       {"battery", 40},

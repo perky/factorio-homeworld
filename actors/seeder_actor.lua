@@ -1,11 +1,19 @@
+local TREE_TYPES = {
+	["seeder-module-01"] = "tree-01",
+	["seeder-module-02"] = "tree-02",
+	["seeder-module-03"] = "tree-03",
+	["seeder-module-04"] = "tree-04",
+	["seeder-module-05"] = "tree-05",
+}
+
 ActorClass("Seeder", {
-	max_seeder_steps = 500,
-	energy_usage = 20000,
-	seeder_tick_interval = 20
+	max_seeder_steps = 500
 })
 
 function Seeder:Init()
-	self.gui = {}
+	-- set entity to inactive so that we have a chance to read
+	-- the input item before it starts to 'smelt' it.
+	self.entity.active = false
 end
 
 function Seeder:OnLoad()
@@ -15,63 +23,23 @@ function Seeder:OnLoad()
 end
 
 function Seeder:OnDestroy()
-	self:CloseAllGUI()
 	DestroyRoutines(self)
 end
 
 function Seeder:OnTick()
-	if (game.tick % 30) == 0 then -- Twice a second.
-
-		for playerIndex = 1, #game.players do
-			local player = game.players[playerIndex]
-			local distance = util.distance(player.position, self.entity.position)
-			if distance < 4 then
-				self:OpenGUI(playerIndex)
-			else
-				self:CloseGUI(playerIndex)
-			end
-		end
-
+	local inputInventory = self.entity.get_inventory(2)
+	if (not inputInventory.is_empty()) and (not self.is_seeding) then
+		self:StartSeeding()
 	end
 end
 
-function Seeder:OpenGUI( playerIndex )
-	if self.gui[playerIndex] then
-		return
-	end
-
-	GUI.PushLeftSection(playerIndex)
-	self.gui[playerIndex] = GUI.PushParent(GUI.Frame("terraformer_gui", "Terraformer", GUI.VERTICAL))
-
-	if self.is_seeding then
-		GUI.Label("info", "Seeding in progress.")
-	else
-		for treeIndex = 1, 5 do
-			local treeName = string.format("tree-%02d", treeIndex)
-			local buttonCaption = string.format("Start seeding program #%02d", treeIndex)
-			GUI.Button("start_"..treeIndex, buttonCaption, "StartSeeding", self, treeName)
-		end
-	end
-
-	GUI.PopAll()
-end
-
-function Seeder:CloseGUI( playerIndex )
-	if self.gui[playerIndex] then
-		self.gui[playerIndex].destroy()
-		self.gui[playerIndex] = nil
-	end
-end
-
-function Seeder:CloseAllGUI()
-	for playerIndex = 1, #game.players do
-		self:CloseGUI(playerIndex)
-	end
-end
-
-function Seeder:StartSeeding( playerIndex, treeName )
+function Seeder:StartSeeding()
 	self.is_seeding = true
-	self.tree_name = treeName
+
+	local inputInventory = self.entity.get_inventory(2)
+	local input = inputInventory[1].name
+
+	self.tree_name = TREE_TYPES[input]
 
 	-- initialise state variables.
 	self.saved_cursor_position = self.entity.position
@@ -80,13 +48,14 @@ function Seeder:StartSeeding( playerIndex, treeName )
 	self.saved_total_count = 0
 	self.saved_state = RIGHT
 
-	self:CloseAllGUI()
+	self.entity.active = true
 	StartCoroutine(self.SeedingRoutine, self)
 end
 
 function Seeder:SeedingRoutine()
 	local maxStep = self.max_seeder_steps
 	local surface = self.entity.surface
+	local progressInterval = 1 / maxStep
 	
 	-- load in saved state data.
 	local current = self.saved_cursor_position
@@ -96,14 +65,8 @@ function Seeder:SeedingRoutine()
 	local state = self.saved_state
 	local offset = OFFSET_MAP[state]
 
-	while totalCount < maxStep do
+	while totalCount < maxStep and self.entity.is_crafting() do
 		for step = startingStep, stepCount do
-			-- Make sure the entity has enough energy.
-			while self.entity.energy < self.energy_usage do
-				coroutine.yield()
-			end
-			self.entity.energy = self.entity.energy - self.energy_usage
-
 			-- Plant tree. (70% chance)
 			if math.random(1,10) < 7 then
 				local rpos = {x = current.x + math.random()*2, y = current.y + math.random()*2} 
@@ -121,11 +84,16 @@ function Seeder:SeedingRoutine()
 			-- Save our state.
 			self.saved_step = step
 			self.saved_total_count = totalCount
+			self.saved_cursor_position = current
 
 			-- Wait before setting the tiles again.
-			WaitForTicks(self.seeder_tick_interval)
+			coroutine.yield()
+			local nextProgress = self.entity.crafting_progress + progressInterval
+			while self.entity.crafting_progress < nextProgress do
+				coroutine.yield()
+			end
 
-			if totalCount >= maxStep then
+			if totalCount >= maxStep or (not self.entity.is_crafting()) then
 				break
 			end
 		end
@@ -145,6 +113,5 @@ function Seeder:SeedingRoutine()
 	end
 
 	self.is_seeding = false
-	PrintToAllPlayers("Seeding Complete.")
-	self:CloseAllGUI()
+	self.entity.active = false
 end

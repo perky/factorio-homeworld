@@ -78,7 +78,12 @@ data:extend({
 			time = 25
 		},
 		effects = {
-			{type = "unlock-recipe", recipe = "seeder"}
+			{type = "unlock-recipe", recipe = "seeder"},
+			{type = "unlock-recipe", recipe = "craft-seeder-module-01"},
+			{type = "unlock-recipe", recipe = "craft-seeder-module-02"},
+			{type = "unlock-recipe", recipe = "craft-seeder-module-03"},
+			{type = "unlock-recipe", recipe = "craft-seeder-module-04"},
+			{type = "unlock-recipe", recipe = "craft-seeder-module-05"},
 		}
 	},
 
@@ -93,7 +98,12 @@ data:extend({
 			time = 40
 		},
 		effects = {
-			{type = "unlock-recipe", recipe = "seeder"}
+			{type = "unlock-recipe", recipe = "terraformer"},
+			{type = "unlock-recipe", recipe = "craft-terraform-module-sand"},
+			{type = "unlock-recipe", recipe = "craft-terraform-module-grass"},
+			{type = "unlock-recipe", recipe = "craft-terraform-module-dirt"},
+			{type = "unlock-recipe", recipe = "craft-terraform-module-stone"},
+			{type = "unlock-recipe", recipe = "craft-terraform-module-concrete"},
 		}
 	},
 })

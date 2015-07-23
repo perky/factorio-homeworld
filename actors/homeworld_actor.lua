@@ -319,15 +319,7 @@ end
 
 function Homeworld:OnLoad()
 	self.enabled = true
-	for playerIndex = 1, #game.players do
-		self:CloseGUI(game.players[playerIndex])
-	end
-
-	if not self.connected_by_radar then
-		SetGoalForAllPlayers({"homeworld-first-goal"})
-	end
 end
-
 
 function Homeworld:InsertItem(itemName, count)
 	if not self.inventory[itemName] then
