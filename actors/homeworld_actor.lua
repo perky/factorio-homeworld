@@ -16,6 +16,7 @@ local NORMAL	= 15 * MINUTES
 local SLOW 		= 20 * MINUTES
 local VERY_SLOW = 30 * MINUTES
 local SUPER_SLOW = 60 * MINUTES
+local NEVER = -1
 local durationLocaleKey = {
 	[SUPER_FAST] = {"duration-super-fast"},
 	[VERY_FAST] = {"duration-very-fast"},
@@ -23,7 +24,8 @@ local durationLocaleKey = {
 	[NORMAL] = {"duration-normal"},
 	[SLOW] = {"duration-slow"},
 	[VERY_SLOW] = {"duration-very-slow"},
-	[SUPER_SLOW] = {"duration-super-slow"}
+	[SUPER_SLOW] = {"duration-super-slow"},
+	[NEVER] = {"duration-never"},
 }
 
 needs_prototype = {
@@ -254,11 +256,6 @@ needs_prototype = {
 				consumption_duration = SLOW
 			},
 			{
-				item = "beer",
-				max_per_min = 550,
-				consumption_duration = NORMAL
-			},
-			{
 				item = "portable-electronics",
 				max_per_min = 20,
 				consumption_duration = SUPER_SLOW
@@ -269,10 +266,20 @@ needs_prototype = {
 				consumption_duration = VERY_SLOW
 			},
 			{
-				item = "rockets",
-				max_per_min = 50,
-				consumption_duration = SUPER_SLOW
-			}
+				item = "rocket",
+				max_per_min = 1000,
+				consumption_duration = NEVER
+			},
+			{
+				item = "seeder",
+				max_per_min = 500,
+				consumption_duration = NEVER
+			},
+			{
+				item = "seeder-module-01",
+				max_per_min = 1000,
+				consumption_duration = NEVER
+			},
 		},
 		rewards = {
 			{
@@ -289,6 +296,51 @@ needs_prototype = {
 				{item = "science-pack-2", amount = 400},
 				{item = "science-pack-1", amount = 300},
 			}
+		}
+	},
+
+	{
+		name = "Tier 6",
+		upgrade_population = 9900000,
+		downgrade_population = 80000,
+		grow_rate = { min = 30, max = 75 },
+		decline_rate = { min = 20, max = 85 },
+		needs = {
+			{
+				item = "terraformer",
+				max_per_min = 500,
+				consumption_duration = NEVER
+			},
+			{
+				item = "terraform-module-grass",
+				max_per_min = 1000,
+				consumption_duration = NEVER
+			},
+			{
+				item = "terraform-module-sand",
+				max_per_min = 1000,
+				consumption_duration = NEVER
+			},
+			{
+				item = "terraform-module-dirt",
+				max_per_min = 1000,
+				consumption_duration = NEVER
+			},
+			{
+				item = "seeder-module-03",
+				max_per_min = 1000,
+				consumption_duration = NEVER
+			},
+			{
+				item = "rocket-silo",
+				max_per_min = 1,
+				consumption_duration = NEVER
+			}
+		},
+		rewards = {
+			{
+				{item = "straight-rail", amount = 250},
+			},
 		}
 	},
 }
@@ -372,11 +424,19 @@ function Homeworld:OnTick()
 end
 
 function Homeworld:GetNeedItemCount( need )
-	local upgradePop = needs_prototype[self.population_tier].upgrade_population
-	return (need.max_per_min * (need.consumption_duration / MINUTES) * self.population) / upgradePop
+	if need.consumption_duration == NEVER then
+		return need.max_per_min
+	else
+		local upgradePop = needs_prototype[self.population_tier].upgrade_population
+		return (need.max_per_min * (need.consumption_duration / MINUTES) * self.population) / upgradePop
+	end
 end
 
 function Homeworld:UpdateNeedConsumption( need )
+	if need.consumption_duration == NEVER then
+		return
+	end
+
 	local timing = self.need_timing[need.item]
 
 	if timing and timing.counter > 0 then
@@ -414,7 +474,14 @@ function Homeworld:UpdatePopulation()
 	for _, need in ipairs(self:CurrentNeeds()) do
 		local totalNeeded = self:GetNeedItemCount(need)
 		local satisfaction = self:GetItemCount(need.item) / totalNeeded
-		if satisfaction >= self.min_satisfaction_for_growth then
+
+		if need.consumption_duration == NEVER then
+			if satisfaction >= 1 then
+				needsSatisfied = needsSatisfied + 1
+			elseif satisfaction <= self.max_satisfaction_for_decline then
+				needsUnsatisfied = needsUnsatisfied + 1
+			end
+		elseif satisfaction >= self.min_satisfaction_for_growth then
 			needsSatisfied = needsSatisfied + 1
 		elseif satisfaction <= self.max_satisfaction_for_decline then
 			needsUnsatisfied = needsUnsatisfied + 1
@@ -449,7 +516,6 @@ function Homeworld:UpdatePopulation()
 end
 
 function Homeworld:SetTier( tier )
-
 	if not self.collected_reward_tiers then
 		self.collected_reward_tiers = {}
 	end
@@ -462,7 +528,6 @@ function Homeworld:SetTier( tier )
 		local possibleRewards = needs_prototype[lastTier].rewards
 		local chosenRewards = math.random(#possibleRewards)
 		local rewards = possibleRewards[chosenRewards]
-		PrintToAllPlayers(serpent.block(rewards))
 		for _, reward in ipairs(rewards) do
 			game.raise_event(HOMEWORLD_EVENTS.ON_REWARD, reward)
 		end
@@ -471,7 +536,13 @@ function Homeworld:SetTier( tier )
 	end
 
 	self.need_timing = {}
-	self:CreateNeedsGUI()
+
+	for playerIndex = 1, #game.players do
+		if self.gui[playerIndex] then
+			self:CloseGUI(playerIndex)
+			self:OpenGUI(playerIndex)
+		end
+	end
 end
 
 function Homeworld:CurrentNeeds()
@@ -525,7 +596,13 @@ function Homeworld:CreateNeedsGUI( playerIndex )
 					GUI.Label("consumption", "")
 				GUI.PopParent()
 			GUI.PopParent()
-			GUI.ProgressBar("satisfaction", 1, 0, "homeworld_need_progressbar_style")
+
+			if need.consumption_duration == NEVER then
+				GUI.ProgressBar("satisfaction", 1, 0, "homeworld_need_all_progressbar_style")
+			else
+				GUI.ProgressBar("satisfaction", 1, 0, "homeworld_need_progressbar_style")
+			end
+			
 		GUI.PopParent()
 	end
 end
@@ -547,15 +624,17 @@ function Homeworld:UpdateGUI( playerIndex )
 	self.gui[playerIndex].population_bar.value = barValue
 	for i, need in ipairs(self:CurrentNeeds()) do
 		local needgui = self.gui[playerIndex].needs["need_"..i]
-		local amountNeeded = math.floor(self:GetNeedItemCount(need))
-		local amountInStock = self:GetItemCount(need.item)
-		needgui.satisfaction.value = amountInStock / amountNeeded
-		local labels = needgui.label_icon.labels
-		GUI.SetLabelCaptionLocalised(labels.item, 
-									 game.get_localised_item_name(need.item), 
-									 string.format(" [%s/%s]", PrettyNumber(amountInStock), PrettyNumber(amountNeeded))
-		)
-		labels.consumption.caption = durationLocaleKey[need.consumption_duration]
+		if needgui then
+			local amountNeeded = math.floor(self:GetNeedItemCount(need))
+			local amountInStock = self:GetItemCount(need.item)
+			needgui.satisfaction.value = amountInStock / amountNeeded
+			local labels = needgui.label_icon.labels
+			GUI.SetLabelCaptionLocalised(labels.item, 
+										 game.get_localised_item_name(need.item), 
+										 string.format(" [%s/%s]", PrettyNumber(amountInStock), PrettyNumber(amountNeeded))
+			)
+			labels.consumption.caption = durationLocaleKey[need.consumption_duration]
+		end
 	end
 end
 
@@ -589,7 +668,7 @@ function Homeworld:OnConnectedToRadar()
 
 	if self.population_tier == 0 then
 		self:SetTier(1)
-		remote.call("homeworld", "SetHomeworldOnline")
+		game.raise_event(HOMEWORLD_EVENTS.HOMEWORLD_ONLINE, {})
 	end
 
 	self:CreateTopButton()

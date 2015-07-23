@@ -132,12 +132,14 @@ function Portal:UpdateGUI( playerIndex )
 			GUI.PushParent(self.gui[playerIndex])
 			GUI.PushParent(GUI.Frame("stats", "Stats", GUI.VERTICAL))
 				for item, stat in pairs(self.stats) do
-					GUI.PushParent(GUI.Flow("stat_"..item, GUI.HORIZONTAL))
-					GUI.Icon("item_icon", item)
-					GUI.Label("item_name", game.get_localised_item_name(item))
 					local avg = self:GetStatAvg(item)
-					GUI.Label("item_avg", string.format("[%s/m]", PrettyNumber(avg)))
-					GUI.PopParent()
+					if avg > 0 then
+						GUI.PushParent(GUI.Flow("stat_"..item, GUI.HORIZONTAL))
+						GUI.Icon("item_icon", item)
+						GUI.Label("item_name", game.get_localised_item_name(item))
+						GUI.Label("item_avg", string.format("[%s/m]", PrettyNumber(avg)))
+						GUI.PopParent()
+					end
 				end
 			GUI.PopAll()
 		end

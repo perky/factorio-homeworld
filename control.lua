@@ -64,7 +64,6 @@ local function OnGameLoad()
 					elseif glob_actor.className == "Portal" and not main_portal then
 						main_portal = actor
 					end
-
 				end
 			end
 		end
