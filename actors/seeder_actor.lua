@@ -40,6 +40,7 @@ function Seeder:StartSeeding()
 	local input = inputInventory[1].name
 
 	self.tree_name = TREE_TYPES[input]
+	PrintToAllPlayers(self.tree_name)
 
 	-- initialise state variables.
 	self.saved_cursor_position = self.entity.position
@@ -65,6 +66,8 @@ function Seeder:SeedingRoutine()
 	local state = self.saved_state
 	local offset = OFFSET_MAP[state]
 
+	WaitForTicks(1*SECONDS)
+
 	while totalCount < maxStep and self.entity.is_crafting() do
 		for step = startingStep, stepCount do
 			-- Plant tree. (70% chance)
@@ -77,8 +80,8 @@ function Seeder:SeedingRoutine()
 			end
 
 			-- Move our 'cursor' along the offset.
-			current.x = current.x + (offset.x * 2)
-			current.y = current.y + (offset.y * 2)
+			current.x = current.x + (offset.x * 1)
+			current.y = current.y + (offset.y * 1)
 			totalCount = totalCount + 1
 
 			-- Save our state.

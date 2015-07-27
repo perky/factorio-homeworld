@@ -91,6 +91,7 @@ end
 
 function Portal:InsertReward( reward )
 	local inventory = self.entity.get_inventory(1)
+	local rewardCount = math.floor(reward.amount * difficulty.reward_amount_modifier)
 	local itemStack = {name = reward.item, count = reward.amount}
 	if inventory.can_insert(itemStack) then
 		inventory.insert(itemStack)

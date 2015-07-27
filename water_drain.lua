@@ -8,26 +8,58 @@ local SEARCH_OFFSET = 2
 local DRAINED_TILE = "grass"
 local WATER_BODY_TOO_BIG = -1
 local SEARCH_INTERVAL = 10
-local WATER_PER_TILE = 1
+local WATER_PER_TILE = 25
+local SEDIMENT = {"stone", "stone", "stone", "stone-rock"}
 local pumps = {}
-local _pumpWater, _findWaterTiles, _findWaterTiles2
+local _pumpWater, _findWaterTiles
+
+function WaterDrain.OnInit()
+	water_drain_has_init = true
+end
+
+function WaterDrain.OnLoad()
+	if not water_drain_has_init then
+		water_drain_has_init = true
+		if global.water_drain then
+			pumps = global.water_drain.pumps
+			for index, pump in ipairs(pumps) do
+				pump.routine = coroutine.create(_pumpWater)
+			end
+		end
+	end
+end
+
+function WaterDrain.OnSave()
+	if not global.water_drain then
+		global.water_drain = {}
+	end
+	global.water_drain.pumps = pumps
+end
 
 function WaterDrain.AddWaterDrainingPump( pumpEntity )
 	local origin = pumpEntity.position
 	local pump = {
 		entity = pumpEntity,
 		routine = coroutine.create(_pumpWater),
-		lastFluidAmount = 0,
-		deltaWater = 0
+		deltaWater = 0,
+		lastWaterAmount
 	}
 	table.insert(pumps, pump)
+end
+
+function WaterDrain.RemoveWaterDrainingPump( pumpEntity )
+	for index, pump in ipairs(pumps) do
+		if pump == pumpEntity then
+			table.remove(pumps, index)
+			break
+		end
+	end
 end
 
 function WaterDrain.OnTick()
 	for _, pump in ipairs(pumps) do
 		if pump.routine then
 			if not SafeResumeCoroutine(pump.routine, pump) then
-				game.player.print("Water reserve fully drained")
 				pump.routine = nil
 			end
 		end
@@ -40,50 +72,103 @@ function WaterDrain.OnBuiltEntity( entity )
 	end
 end
 
+function WaterDrain.OnDestroyEntity( entity )
+	if entity.name == "offshore-pump" then
+		WaterDrain.RemoveWaterDrainingPump( entity )
+	end
+end
+
 -- Private Methods.
+_tileAtPosIsWater = function( surface, pos )
+	local tile = surface.get_tile(pos.x, pos.y)
+	if tile.name ~= "water" then
+		game.player.print(tile.name)
+	end
+	return tile.name == "water"
+end
+
+_waterNearPos = function( surface, pos )
+	local area = SquareArea(pos, 2)
+	local nearbyWater = FindTilesInArea(surface, area, "water")
+	if #nearbyWater > 0 then
+		return true
+	else
+		return false
+	end
+end
+
+_nearestWaterTile = function(surface, pos)
+	local area = SquareArea(pos, 2)
+	local nearbyWater = FindTilePropertiesInArea(surface, area, "water")
+	if #nearbyWater > 0 then
+		return GetNearest(nearbyWater, pos)
+	else
+		return nil
+	end
+end
+
+_drainTilesInArea = function( surface, area )
+	local newTiles = {}
+	for x, y in iarea(area) do
+		table.insert(newTiles, {name = DRAINED_TILE, position = {x, y}})
+	end
+	surface.set_tiles(newTiles)
+end
 
 _pumpWater = function( pump )
-	if not pump.entity.active then return end
+	if pump.fully_drained then
+		return false, "lake is already drained"
+	end
 
-	-- Find shallow water tiles immediatly near pump
 	local origin = pump.entity.position
 	local surface = pump.entity.surface
-	local area = SquareArea(origin, 1)
-	local nearbyShallowWaterTiles = FindTilePropertiesInArea(surface, area, "water")
-	if #nearbyShallowWaterTiles == 0 then return end
-	local nearestShallowWaterTile = GetNearest(nearbyShallowWaterTiles, origin).position
 	local counter, tileIndex = 0, 0
 	local waterTiles, tileCount
 	
+	while pump.entity.valid and _waterNearPos(surface, origin) do
+		local fluid_box = pump.entity.fluidbox[1]
 
-	while (surface.get_tile(nearestShallowWaterTile.x, nearestShallowWaterTile.y).name == "water") do
 		-- wait until the pump is pumping
-		while not pump.entity.fluidbox[1] do
-			coroutine.yield()
+		while not fluid_box do
+			coroutine.yield(true)
+			if pump.entity.valid then
+				fluid_box = pump.entity.fluidbox[1]
+			else
+				return false
+			end
+		end
+		if not pump.entity.valid then
+			return false
 		end
 
 		-- Check how much water the pump is taking.
-		local currentWater = pump.entity.fluidbox[1].amount
-		local deltaWater = math.abs(currentWater - pump.lastFluidAmount)
-		pump.lastFluidAmount = currentWater
-		pump.deltaWater = pump.deltaWater + deltaWater
-		--if currentWater >= 10 then
-		--	pump.entity.fluidbox[1] = {type = "water", amount = 0.01, temperature = 15}
-		--	pump.deltaWater = 0
-		--end
-
+		if not pump.lastWaterAmount then
+			pump.lastWaterAmount = 0
+		end
+		if pump.entity.neighbours[1] and pump.entity.neighbours[1].fluidbox[1] then
+			local waterAmount = pump.entity.neighbours[1].fluidbox[1].amount
+			if waterAmount < 1 then
+				pump.deltaWater = pump.deltaWater + (waterAmount / 10)
+			else
+				local delta = math.abs(waterAmount - pump.lastWaterAmount)
+				if delta > 0 and delta < 0.001 then
+					delta = 0.01
+				end
+				pump.deltaWater = pump.deltaWater + delta
+			end
+			pump.lastWaterAmount = waterAmount
+		end
+ 		
 		if pump.deltaWater >= WATER_PER_TILE then
-			game.player.print("removing water tile")
 			pump.deltaWater = 0
 
 			if counter == 0 or (counter % SEARCH_INTERVAL) == 0 then
-				game.player.print("scanning water body")
 				-- Find all the water tiles in a body of water
-				waterTiles = _findWaterTiles2(nearestShallowWaterTile)
+				local nearestWaterTile = _nearestWaterTile(surface, origin)
+				waterTiles = _findWaterTiles(nearestWaterTile.position, surface)
 				-- End the routine if the water body is too big.
 				if type(waterTiles) == "number" and waterTiles == WATER_BODY_TOO_BIG then
-					game.player.print("water body too big")
-					return
+					return false
 				end
 				tileCount = #waterTiles
 				-- End the routine if no water tiles are found
@@ -101,65 +186,40 @@ _pumpWater = function( pump )
 				local tile = surface.get_tile(tilePos.x, tilePos.y)
 				if tile and tile.valid and (tile.name == "deepwater" or tile.name == "water") then
 					local area = SquareArea(tilePos, SEARCH_OFFSET-1)
-					local newTiles = {}
-					for x, y in iarea(area) do
-						table.insert(newTiles, {name = DRAINED_TILE, position = {x, y}})
-					end
-					surface.set_tiles(newTiles)
+					_drainTilesInArea(surface, area)
 					-- create and destroy any entity to update the map (stole this idea from landfill :D)
-					surface.create_entity({name = "stone", position = tilePos, force = game.forces.neutral}).destroy()
+					local sediment = SEDIMENT[math.random(1, #SEDIMENT)]
+					local stone = surface.create_entity({name = sediment, position = tilePos, force = game.forces.neutral})
+					if math.random(0, 10) ~= 0 then
+						stone.destroy()
+					end
 				end
 			end
 		end
-		coroutine.yield()
+		coroutine.yield(true)
 	end
 
 	-- Water fully drained, disable pump.
-	pump.entity.active = false
-end
-
-_findWaterTiles = function( pos, visitedTiles )
-	if not visitedTiles.positions then
-		visitedTiles.positions = {}
-		visitedTiles.map = {}
+	if pump.entity.valid then
+		pump.entity.active = false
+		-- clear all remaining water tiles in area.
+		_drainTilesInArea(surface, SquareArea(origin, 3))
 	end
-
-	if #visitedTiles.positions > MAX_WATER_BODY_SIZE then
-		return
-	end
-	--game.player.print(string.format("checking tile at x:%i y:%i", pos.x, pos.y))
-	local tile = game.gettile(pos.x, pos.y)
-	if not tile or not tile.valid then return end
-
-	local key = MAX_WATER_BODY_SIZE * pos.x + pos.y
-	if visitedTiles.map[key] then return end
-
-	if tile.name == "water" or tile.name == "deepwater" then
-		visitedTiles.map[key] = pos
-		--game.settiles{{name = "dirt", position=pos}}
-		table.insert(visitedTiles.positions, pos)
-		coroutine.yield()
-
-		_findWaterTiles({x=pos.x+SEARCH_OFFSET, y=pos.y}, visitedTiles)
-		_findWaterTiles({x=pos.x-SEARCH_OFFSET, y=pos.y}, visitedTiles)
-		_findWaterTiles({x=pos.x, y=pos.y-SEARCH_OFFSET}, visitedTiles)
-		return _findWaterTiles({x=pos.x, y=pos.y+SEARCH_OFFSET}, visitedTiles)
-	end
+	pump.fully_drained = true
 end
 
 _getKey = function( pos )
 	return (MAX_WATER_BODY_SIZE * pos.y) + pos.x
 end
 
-_findWaterTiles2 = function( pos )
+_findWaterTiles = function( pos, surface )
 	local nodeQueue = {pos}
 	local visited = {}
 	local waterTiles = {}
 	while #nodeQueue > 0 do
 		local node = nodeQueue[1]
 		table.remove(nodeQueue, 1)
-		local tile = game.gettile(node.x, node.y)
-		--game.player.print(tile.name)
+		local tile = surface.get_tile(node.x, node.y)
 		
 		if tile.name == "water" or tile.name == "deepwater" and not visited[_getKey(node)] then
 			visited[_getKey(node)] = true
@@ -183,10 +243,9 @@ _findWaterTiles2 = function( pos )
 		end
 
 		if #waterTiles % 100 == 0 then
-			coroutine.yield()
+			coroutine.yield(true)
 		end
 		if #waterTiles > MAX_WATER_BODY_SIZE then
-			game.player.print(#waterTiles)
 			return WATER_BODY_TOO_BIG
 		end
 	end

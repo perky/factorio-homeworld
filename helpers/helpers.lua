@@ -58,7 +58,6 @@ function FindTilePropertiesInArea( surface, area, tileNameFilter )
 				y = aa.y + _y
 			}
 			local tile = surface.get_tile(pos.x, pos.y)
-			local tileProps = surface.get_tile_properties(pos.x, pos.y)
 			if tile.name == tileNameFilter then
 				table.insert(foundTiles, {
 					name = tile.name,

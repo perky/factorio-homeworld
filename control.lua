@@ -2,10 +2,13 @@ actors = {}
 homeworld = nil
 main_portal = nil
 world_surface = nil
+difficulty = nil
 
 require("defines")
 require("util")
 require("homeworld_defines")
+require("homeworld_difficulty")
+require("base_needs")
 require("helpers.helpers")
 require("helpers.gui_helpers")
 require("helpers.coroutine_helpers")
@@ -26,8 +29,10 @@ local function AddActor( actor )
 end
 
 local function OnGameInit()
+	difficulty = DIFFICULTY.NORMAL
 	modHasInitialised = true
 	homeworld = AddActor( Homeworld.CreateActor() )
+	WaterDrain.OnInit()
 end
 
 local function AfterGameLoad()
@@ -80,11 +85,19 @@ local function OnGameLoad()
 	if global.guiButtonCallbacks then
 		GUI.buttonCallbacks = global.guiButtonCallbacks
 	end
+	if global.difficulty then
+		difficulty = global.difficulty
+	end
+
+	WaterDrain.OnLoad()
 end
 
 local function OnGameSave()
 	global.actors = actors
 	global.guiButtonCallbacks = GUI.buttonCallbacks
+	global.difficulty = difficulty
+
+	WaterDrain.OnSave()
 end
 
 local function SpawnHomeworldPortal( player )
@@ -96,6 +109,14 @@ local function SpawnHomeworldPortal( player )
 	portal:RegisterForRewards()
 end
 
+local intro_delegate = {}
+
+function intro_delegate:OnSelectDifficulty( player_index, selected_difficulty )
+	local player = game.get_player(player_index)
+	player.gui.center.homeworld_difficulty_selection.destroy()
+	difficulty = selected_difficulty
+end
+
 local function OnPlayerCreated( player_index )
 	if player_index == 1 then
 		local player = game.get_player(player_index)
@@ -103,6 +124,20 @@ local function OnPlayerCreated( player_index )
 		world_surface = surface
 
 		SpawnHomeworldPortal(player)
+
+		GUI.PushParent(player.gui.center)
+		GUI.PushParent(GUI.Frame("homeworld_difficulty_selection", "Select Difficulty", GUI.VERTICAL))
+		local tbl = GUI.PushParent(GUI.Table("difficulty_table", 2))
+			for i, difficultyType in ipairs(DIFFICULTY_SORTED) do
+				GUI.Button("difficulty_button_"..i, {difficultyType.locale_key.."-title"}, "OnSelectDifficulty", intro_delegate, difficultyType)
+				GUI.PushParent(GUI.Flow("labels_"..i, GUI.VERTICAL))
+					for line = 1, difficultyType.description_lines do
+						GUI.Label("difficulty_label_"..line, {difficultyType.locale_key.."-description-"..line})
+					end
+				GUI.PopParent()
+				GUI.TableSpacer(tbl, 2)
+			end
+		GUI.PopAll()
 	end
 end
 
@@ -123,7 +158,8 @@ local function OnPlayerBuiltEntity( entity )
 	elseif entity.name == "seeder" then
 		AddActor( Seeder.CreateActor{entity = entity} )
 	end
-	--WaterDrain.OnBuiltEntity(entity)
+
+	WaterDrain.OnBuiltEntity(entity)
 end
 
 local function OnEntityDestroy( entity )
@@ -141,6 +177,8 @@ local function OnEntityDestroy( entity )
 	if entity.name == "radar" then
 		homeworld:OnRadarDestroy(entity)
 	end
+
+	WaterDrain.OnDestroyEntity(entity)
 end
 
 local function OnTick()
@@ -169,7 +207,9 @@ local function OnTick()
 		end
 	end
 
-	--WaterDrain.OnTick()
+	if difficulty.finite_water then
+		WaterDrain.OnTick()
+	end
 end
 
 local function OnResourceDepleted( resource )
@@ -230,4 +270,8 @@ remote.add_interface("homeworld", {
 	GetHomeworld = function ()
 		return homeworld
 	end,
+
+	SetNeedsPrototype = function( other_needs_prototype )
+		needs_prototype = other_needs_prototype
+	end
 })

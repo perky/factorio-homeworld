@@ -81,8 +81,9 @@ function Fishery:FisheryRoutine()
 	local pos = self.entity.position
 
 	while self.enabled do
-		local pollution = math.min(surface.get_pollution(self.entity.position), self.max_pollution)
-		self.water_purity = RemapNumber(pollution, 0, self.max_pollution, 1, 0)
+		local max_pollution = self.max_pollution / difficulty.pollution_affect_modifier
+		local pollution = math.min(surface.get_pollution(self.entity.position), max_pollution)
+		self.water_purity = RemapNumber(pollution, 0, max_pollution, 1, 0)
 
 		local pos = self.entity.position
 		local nearbyFish = surface.find_entities_filtered{

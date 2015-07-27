@@ -106,21 +106,20 @@ data:extend({
     {
         type = "smart-container",
         name = "homeworld_portal",
-        icon = "__base__/graphics/icons/lab.png",
+        icon = "__homeworld__/graphics/icons/portal.png",
         flags = {"player-creation", "placeable-player"},
         render_layer = "floor",
         max_health = 150,
         corpse = "big-remnants",
         dying_explosion = "medium-explosion",
-        collision_box = {{-3.2, -3.2}, {3.2, 3.2}},
-        selection_box = {{-3.5, -3.5}, {3.5, 3.5}},
+        collision_box = {{-2.2, -1.2}, {2.2, 2.2}},
+        selection_box = {{-2.5, -1.5}, {2.5, 2.5}},
         picture = {
-            filename = "__homeworld__/graphics/entity/homeworld-portal.png",
+            filename = "__homeworld__/graphics/entity/portal/portal.png",
             priority = "low",
-            width = 358,
-            height = 312,
-            shift = {0, 0},
-            scale = 0.625
+            width = 226,
+            height = 163,
+            shift = {0.9375, 0.0625}
         },
         connection_point =
         {
@@ -177,28 +176,21 @@ data:extend({
     },
 
     {
-        type = "smoke",
+        type = "explosion",
         name = "portal-fx",
         flags = {"not-on-map"},
-        animation =
-        {
-            filename = "__homeworld__/graphics/entity/homeworld-portal-on.png",
+        animations =
+        {{
+            filename = "__homeworld__/graphics/entity/portal/portal-animation.png",
             priority = "high",
-            width = 358,
-            height = 312,
-            frame_count = 4,
-            animation_speed = 1,
-            scale = 0.625,
-            shift = {-0.52, 0.45},
+            width = 95,
+            height = 215,
+            frame_count = 50,
+            line_length = 10,
+            animation_speed = 0.2,
+            shift = {-0.5, -1.95},
             tint = {r = 1, g = 1, b = 1, a = 1}
-        },
-        render_layer = "smoke",
-        cyclic = true,
-        affected_by_wind = false,
-        duration = 60 * 6,
-        movement_slow_down_factor = 0,
-        fade_away_duration = 60,
-        show_when_smoke_off = true
+        }},
     },
 
     {

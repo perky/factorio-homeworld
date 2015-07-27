@@ -56,6 +56,16 @@ function GUI.LabelData(name, caption, initialValue)
 	return flow
 end
 
+function GUI.Table( name, colspan )
+	return GUI.Parent().add{type = "table", name = name, colspan = colspan}
+end
+
+function GUI.TableSpacer( tbl, amount )
+	for i = 1, amount do
+		GUI.Label("spacer_"..#tbl.children_names, "")
+	end
+end
+
 function GUI.ProgressBar(name, size, initialValue, style)
 	return GUI.Parent().add{
 		type = "progressbar",

@@ -40,19 +40,20 @@ data:extend({
     {
       sound =
       {
-        filename = "__base__/sound/electric-furnace.ogg",
+        filename = "__homeworld__/sound/terraformer.ogg",
         volume = 0.7
       },
       apparent_volume = 1.5
     },
     animation =
     {
-      filename = "__homeworld__/graphics/entity/seeder.png",
+      filename = "__homeworld__/graphics/entity/seeder/seeder_animation.png",
       priority = "high",
-      width = 160,
-      height = 160,
-      frame_count = 1,
-      scale = 0.75
+      width = 300,
+      height = 300,
+      frame_count = 25,
+      line_length = 5,
+      scale = 1
     },
     fast_replaceable_group = "furnace"
   },
@@ -98,19 +99,21 @@ data:extend({
     {
       sound =
       {
-        filename = "__base__/sound/electric-furnace.ogg",
+        filename = "__homeworld__/sound/terraformer.ogg",
         volume = 0.7
       },
       apparent_volume = 1.5
     },
     animation =
     {
-      filename = "__homeworld__/graphics/entity/terraformer.png",
+      filename = "__homeworld__/graphics/entity/seeder/seeder_animation.png",
       priority = "high",
-      width = 160,
-      height = 160,
-      frame_count = 1,
-      scale = 0.75
+      width = 300,
+      height = 300,
+      frame_count = 25,
+      line_length = 5,
+      scale = 1,
+      tint = {r = 0.5, g = 0.75, b = 1, a = 1}
     },
     fast_replaceable_group = "furnace"
   },
@@ -124,15 +127,6 @@ data:extend({
     type = "recipe-category",
     name = "terraformer"
   },
---[[
-  {
-    type = "item",
-    name = "spent-tree-module",
-    icon = "__homeworld__/graphics/empty.png",
-    flags = { "goes-to-main-inventory" },
-    stack_size = 2
-  }
-]]--
 })
 
 function SeederModule( itemName )
