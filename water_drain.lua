@@ -67,13 +67,13 @@ function WaterDrain.OnTick()
 end
 
 function WaterDrain.OnBuiltEntity( entity )
-	if entity.name == "offshore-pump" then
+	if entity.valid and entity.name == "offshore-pump" then
 		WaterDrain.AddWaterDrainingPump( entity )
 	end
 end
 
 function WaterDrain.OnDestroyEntity( entity )
-	if entity.name == "offshore-pump" then
+	if entity.valid and entity.name == "offshore-pump" then
 		WaterDrain.RemoveWaterDrainingPump( entity )
 	end
 end
