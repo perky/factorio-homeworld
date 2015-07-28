@@ -119,39 +119,36 @@ function Homeworld:UpdateNeedConsumption( need )
 end
 
 function Homeworld:UpdatePopulation()
-	local canGrow = false
-	local canDecline = false
-	local needsSatisfied = 0
-	local needsUnsatisfied = 0
-	local needCount = 0
-	for _, need in ipairs(self:CurrentNeeds()) do
+	local currentNeeds = self:CurrentNeeds()
+
+	-- Get the ranges of satisfaction for growth and decline.
+	local max_grow_satisfaction = #currentNeeds
+	local min_grow_satisfaction = #currentNeeds * self.min_satisfaction_for_growth
+	local max_decline_satisfaction = #currentNeeds * self.max_satisfaction_for_decline
+	local min_decline_satisfaction = 0
+
+	-- Calculate the total satisfaction between needs.
+	local total_satisfaction = 0
+	for _, need in ipairs(currentNeeds) do
 		local totalNeeded = self:GetNeedItemCount(need)
 		local satisfaction = self:GetItemCount(need.item) / totalNeeded
-
-		if need.consumption_duration == NEVER then
-			if satisfaction >= 1 then
-				needsSatisfied = needsSatisfied + 1
-			elseif satisfaction <= self.max_satisfaction_for_decline then
-				needsUnsatisfied = needsUnsatisfied + 1
-			end
-		elseif satisfaction >= self.min_satisfaction_for_growth then
-			needsSatisfied = needsSatisfied + 1
-		elseif satisfaction <= self.max_satisfaction_for_decline then
-			needsUnsatisfied = needsUnsatisfied + 1
-		end
-		needCount = needCount + 1
+		total_satisfaction = total_satisfaction + satisfaction
 	end
 
-	local tier = needs_prototype[self.population_tier]
-	local canGrow = (needsSatisfied == needCount)
-	local canDecline = (needsUnsatisfied > 0)
-
-	if canGrow then
-		local growAmount = math.random(tier.grow_rate.min, tier.grow_rate.max)
+	local currentTier = needs_prototype[self.population_tier]
+	if total_satisfaction >= min_grow_satisfaction then
+		-- Grow population.
+		local growAmount = RemapNumber(total_satisfaction, 
+									   min_grow_satisfaction, max_grow_satisfaction,
+									   currentTier.grow_rate.min, currentTier.grow_rate.max)
 		growAmount = math.floor(growAmount * difficulty.population_growth_modifier)
 		self.population = self.population + growAmount
-	elseif canDecline then
-		local declineAmount = math.random(tier.decline_rate.min, tier.decline_rate.max)
+
+	elseif total_satisfaction <= max_decline_satisfaction then
+		-- Decline population.
+		local declineAmount = RemapNumber(total_satisfaction,
+										  min_decline_satisfaction, max_decline_satisfaction,
+										  currentTier.decline_rate.min, currentTier.decline_rate.max)
 		declineAmount = math.floor(declineAmount * difficulty.population_decline_modifier)
 		self.population = self.population - declineAmount
 		if self.population < self.min_population then
@@ -159,7 +156,7 @@ function Homeworld:UpdatePopulation()
 		end
 	end
 
-	local currentTier = needs_prototype[self.population_tier]
+	-- Upgrade or downgrade tier.
 	local nextTier = needs_prototype[self.population_tier + 1]
 	if nextTier and self.population >= currentTier.upgrade_population then
 		self:SetTier(self.population_tier + 1)
