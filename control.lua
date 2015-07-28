@@ -273,5 +273,9 @@ remote.add_interface("homeworld", {
 
 	SetNeedsPrototype = function( other_needs_prototype )
 		needs_prototype = other_needs_prototype
+	end,
+
+	GetDifficultySettings = function()
+		return difficulty
 	end
 })
