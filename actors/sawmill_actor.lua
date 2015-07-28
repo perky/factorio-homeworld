@@ -6,17 +6,25 @@ ActorClass("Sawmill", {
 
 function Sawmill:Init()
 	self.enabled = true
-	StartCoroutine(self.SawRoutine, self)
+	self:StartRoutines()
 end
 
 function Sawmill:OnLoad()
 	self.enabled = true
-	StartCoroutine(self.SawRoutine, self)
+	self:StartRoutines()
 end
 
 function Sawmill:OnDestroy()
 	self.enabled = false
 	DestroyRoutines(self)
+end
+
+function Sawmill:StartRoutines()
+	StartCoroutine(self.SawRoutine, {delegate = self, validater = self.ValidateRoutine})
+end
+
+function Sawmill:ValidateRoutine()
+	return self.enabled and self.entity and self.entity.valid
 end
 
 function Sawmill:SawRoutine()
@@ -25,7 +33,7 @@ function Sawmill:SawRoutine()
 	local inputInventory = self.entity.get_inventory(2)
 	local pos = self.entity.position
 	local r = self.work_radius
-	while self.enabled and self.entity.valid do
+	while self.enabled do
 		local ents = world_surface.find_entities{{pos.x - r, pos.y - r},{pos.x + r, pos.y + r}}
 		ShuffleTable(ents)
 		for _, ent in ipairs(ents) do

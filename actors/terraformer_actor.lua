@@ -16,7 +16,7 @@ end
 
 function Terraformer:OnLoad()
 	if self.is_terraforming then
-		StartCoroutine(self.TerraformRoutine, self)
+		StartCoroutine(self.TerraformRoutine, {delegate = self, validater = self.ValidateRoutine})
 	end
 end
 
@@ -29,6 +29,10 @@ function Terraformer:OnTick()
 	if (not inputInventory.is_empty()) and (not self.is_terraforming) then
 		self:StartTerraforming()
 	end
+end
+
+function Terraformer:ValidateRoutine()
+	return self.entity and self.entity.valid
 end
 
 function Terraformer:StartTerraforming()
@@ -46,7 +50,7 @@ function Terraformer:StartTerraforming()
 	self.saved_total_count = 0
 	self.saved_state = RIGHT
 
-	StartCoroutine(self.TerraformRoutine, self)
+	StartCoroutine(self.TerraformRoutine, {delegate = self, validater = self.ValidateRoutine})
 end
 
 --[[

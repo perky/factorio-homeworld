@@ -342,6 +342,9 @@ end
 function Homeworld:OnDisconnectedFromRadar()
 	PrintToAllPlayers({"homeworld-lose-transmission"})
 	self:DestroyTopButton()
+	for player_index = 1, #game.players do
+		self:CloseGUI(player_index)
+	end
 end
 
 function Homeworld:CheckRadars()

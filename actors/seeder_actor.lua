@@ -18,7 +18,7 @@ end
 
 function Seeder:OnLoad()
 	if self.is_seeding then
-		StartCoroutine(self.SeedingRoutine, self)
+		StartCoroutine(self.SeedingRoutine, {delegate = self, validater = self.ValidateRoutine})
 	end
 end
 
@@ -31,6 +31,10 @@ function Seeder:OnTick()
 	if (not inputInventory.is_empty()) and (not self.is_seeding) then
 		self:StartSeeding()
 	end
+end
+
+function Seeder:ValidateRoutine()
+	return self.entity and self.entity.valid
 end
 
 function Seeder:StartSeeding()
@@ -50,7 +54,7 @@ function Seeder:StartSeeding()
 	self.saved_state = RIGHT
 
 	self.entity.active = true
-	StartCoroutine(self.SeedingRoutine, self)
+	StartCoroutine(self.SeedingRoutine, {delegate = self, validater = self.ValidateRoutine})
 end
 
 function Seeder:SeedingRoutine()

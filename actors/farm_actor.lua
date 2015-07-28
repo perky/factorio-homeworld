@@ -51,20 +51,30 @@ function Farm:Init()
 
 	self.soil_richness = totalRichness / totalArea
 	self:CalculateYield()
-
-	StartCoroutine(self.FarmRoutine, self)
-	StartCoroutine(self.StageRoutine, self)
+	self:StartRoutines()
 end
 
 function Farm:OnLoad()
 	self.enabled = true
-	StartCoroutine(self.FarmRoutine, self)
-	StartCoroutine(self.StageRoutine, self)
+	self:StartRoutines()
 end
 
 function Farm:OnDestroy()
 	self.enabled = false
+	for i, gui in pairs(self.gui) do
+		gui.destroy()
+	end
+	self.gui = {}
 	DestroyRoutines(self)
+end
+
+function Farm:StartRoutines()
+	StartCoroutine(self.FarmRoutine, {delegate = self, validater = self.ValidateRoutine})
+	StartCoroutine(self.StageRoutine, {delegate = self, validater = self.ValidateRoutine})
+end
+
+function Farm:ValidateRoutine()
+	return self.enabled and self.entity and self.entity.valid
 end
 
 function Farm:CalculateYield()

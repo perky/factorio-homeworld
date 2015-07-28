@@ -13,13 +13,12 @@ ActorClass("Fishery", {
 function Fishery:Init()
 	self.enabled = true
 	self.gui = {}
-
-	StartCoroutine(self.FisheryRoutine, self)
-	StartCoroutine(self.ReproductionRoutine, self)
+	self:StartRoutines()
 end
 
 function Fishery:OnLoad()
-	self:Init()
+	self.enabled = true
+	self:StartRoutines()
 end
 
 function Fishery:OnDestroy()
@@ -29,6 +28,15 @@ function Fishery:OnDestroy()
 	end
 	self.gui = {}
 	DestroyRoutines(self)
+end
+
+function Fishery:StartRoutines()
+	StartCoroutine(self.FisheryRoutine, {delegate = self, validater = self.ValidateRoutine})
+	StartCoroutine(self.ReproductionRoutine, {delegate = self, validater = self.ValidateRoutine})
+end
+
+function Fishery:ValidateRoutine()
+	return self.enabled and self.entity and self.entity.valid
 end
 
 function Fishery:ReproductionRoutine()

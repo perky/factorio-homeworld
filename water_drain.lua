@@ -58,9 +58,21 @@ end
 
 function WaterDrain.OnTick()
 	for _, pump in ipairs(pumps) do
-		if pump.routine then
+		if pump.routine and pump.entity and pump.entity.valid then
 			if not SafeResumeCoroutine(pump.routine, pump) then
 				pump.routine = nil
+			end
+		else
+			pump.routine = nil
+		end
+	end
+
+	-- Clean up the pumps array.
+	if ModuloTimer(1*MINUTES) then
+		for i = #pumps, 1, -1 do
+			local pump = pumps[i]
+			if not pump.routine then
+				table.remove(pumps, i)
 			end
 		end
 	end

@@ -10,6 +10,10 @@ function ActorClass( name, class )
 	return class
 end
 
+function ModuloTimer( ticks )
+	return (game.tick % ticks) == 0
+end
+
 function PrintToAllPlayers( text )
 	for playerIndex = 1, #game.players do
 		if game.players[playerIndex] ~= nil then

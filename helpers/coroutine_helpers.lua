@@ -33,14 +33,31 @@ function SafeResumeCoroutine( co, arg1 )
 	end
 end
 
+local function IsRoutineValid( routine )
+	if routine.validater then
+		if routine.delegate then
+			return routine.validater(routine.delegate, routine.args)
+		else
+			return routine.validater(routine.args)
+		end
+	else
+		return true
+	end
+end
+
 local function ResumeRoutine( routine, index )
 	if routine then
 		local status = coroutine.status(routine.co)
 		if status == "dead" and index then
 			table.remove(routines, index)
 			return false
-		elseif status == "suspended" then
-			local success, result1 = coroutine.resume(routine.co, routine.args)
+		elseif status == "suspended" and IsRoutineValid(routine) then
+			local success, result1
+			if routine.delegate then
+				success, result1 = coroutine.resume(routine.co, routine.delegate, routine.args)
+			else
+				success, result1 = coroutine.resume(routine.co, routine.args)
+			end
 			if success then
 				if result1 == KILL_ROUTINE and index then
 					table.remove(routines, index)
@@ -60,14 +77,11 @@ local function ResumeRoutine( routine, index )
 	end
 end
 
-function StartCoroutine( func, args, autoResume )
-	if autoResume == nil then
-		autoResume = true
-	end
+function StartCoroutine( func, params )
+	local routine = params or {}
+	routine.co = coroutine.create(func)
 
-	local co = coroutine.create(func)
-	local routine = { co = co, args = args }
-	if autoResume then
+	if routine.autoResume == true or routine.autoResume == nil then
 		table.insert(routines, routine)
 		ResumeRoutine(routine, #routines)
 	end
