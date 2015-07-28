@@ -93,6 +93,7 @@ function Homeworld:UpdateNeedConsumption( need )
 
 	if timing and timing.counter > 0 then
 		-- Consume the item over time.
+		timing.tickRate = math.floor(timing.tickRate)
 		if (game.tick % timing.tickRate) == 0 then
 			self:RemoveItem(need.item, timing.consumptionPerTick)
 			timing.counter = timing.counter - 1
@@ -107,7 +108,7 @@ function Homeworld:UpdateNeedConsumption( need )
 		timing.consumptionPerTick = totalNeeded / need.consumption_duration
 		timing.tickRate = 1
 		if timing.consumptionPerTick < 1 then
-			timing.tickRate = 1 / timing.consumptionPerTick
+			timing.tickRate = math.floor((1 / timing.consumptionPerTick) + 0.5)
 			timing.consumptionPerTick = 1
 		else
 			timing.consumptionPerTick = math.floor(timing.consumptionPerTick)
