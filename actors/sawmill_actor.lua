@@ -25,20 +25,22 @@ function Sawmill:SawRoutine()
 	local inputInventory = self.entity.get_inventory(2)
 	local pos = self.entity.position
 	local r = self.work_radius
-	local ents = world_surface.find_entities{{pos.x - r, pos.y - r},{pos.x + r, pos.y + r}}
-	
-	ShuffleTable(ents)
-	for _, ent in ipairs(ents) do
-		if ent and ent.valid and ent.type == "tree" then
-			ent.destroy()
-			local item = {name = "sawmill-tree", count = 1}
-			while not inputInventory.can_insert(item) do
+	while self.enabled and self.entity.valid do
+		local ents = world_surface.find_entities{{pos.x - r, pos.y - r},{pos.x + r, pos.y + r}}
+		ShuffleTable(ents)
+		for _, ent in ipairs(ents) do
+			if ent and ent.valid and ent.type == "tree" then
+				ent.destroy()
+				local item = {name = "sawmill-tree", count = 1}
+				while not inputInventory.can_insert(item) do
+					coroutine.yield()
+				end
+				inputInventory.insert(item)
+				WaitForTicks(self.saw_interval)
+			else
 				coroutine.yield()
 			end
-			inputInventory.insert(item)
-			WaitForTicks(self.saw_interval)
-		else
-			coroutine.yield()
 		end
+		WaitForTicks(5 * SECONDS)
 	end
 end
