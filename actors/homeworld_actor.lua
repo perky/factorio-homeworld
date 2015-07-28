@@ -148,7 +148,7 @@ function Homeworld:UpdatePopulation()
 		-- Decline population.
 		local declineAmount = RemapNumber(total_satisfaction,
 										  min_decline_satisfaction, max_decline_satisfaction,
-										  currentTier.decline_rate.min, currentTier.decline_rate.max)
+										  currentTier.decline_rate.max, currentTier.decline_rate.min)
 		declineAmount = math.floor(declineAmount * difficulty.population_decline_modifier)
 		self.population = self.population - declineAmount
 		if self.population < self.min_population then
