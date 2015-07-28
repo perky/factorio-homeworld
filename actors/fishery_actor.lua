@@ -24,6 +24,10 @@ end
 
 function Fishery:OnDestroy()
 	self.enabled = false
+	for i, gui in pairs(self.gui) do
+		gui.destroy()
+	end
+	self.gui = {}
 	DestroyRoutines(self)
 end
 
