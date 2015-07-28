@@ -118,25 +118,38 @@ function Homeworld:UpdateNeedConsumption( need )
 	end
 end
 
+function Homeworld:GetNeedSatisfaction( need )
+	local totalNeeded = self:GetNeedItemCount(need)
+	local itemCount = math.min(totalNeeded, self:GetItemCount(need.item))
+	local satisfaction = itemCount / totalNeeded
+	return satisfaction
+end
+
 function Homeworld:UpdatePopulation()
 	local currentNeeds = self:CurrentNeeds()
+	local currentTier = needs_prototype[self.population_tier]
+
+	local satisfied_needs = 0
+	local unsatisfied_needs = 0
+	local total_satisfaction = 0
+
+	for _, need in ipairs(currentNeeds) do
+		local satisfaction = self:GetNeedSatisfaction(need)
+		if satisfaction >= self.min_satisfaction_for_growth then
+			satisfied_needs = satisfied_needs + 1
+		elseif satisfaction <= self.max_satisfaction_for_decline then
+			unsatisfied_needs = unsatisfied_needs + 1
+		end
+		total_satisfaction = total_satisfaction + satisfaction
+	end
 
 	-- Get the ranges of satisfaction for growth and decline.
 	local max_grow_satisfaction = #currentNeeds
 	local min_grow_satisfaction = #currentNeeds * self.min_satisfaction_for_growth
-	local max_decline_satisfaction = #currentNeeds * self.max_satisfaction_for_decline
+	local max_decline_satisfaction = #currentNeeds
 	local min_decline_satisfaction = 0
-
-	-- Calculate the total satisfaction between needs.
-	local total_satisfaction = 0
-	for _, need in ipairs(currentNeeds) do
-		local totalNeeded = self:GetNeedItemCount(need)
-		local satisfaction = self:GetItemCount(need.item) / totalNeeded
-		total_satisfaction = total_satisfaction + satisfaction
-	end
-
-	local currentTier = needs_prototype[self.population_tier]
-	if total_satisfaction >= min_grow_satisfaction then
+	
+	if satisfied_needs == #currentNeeds then
 		-- Grow population.
 		local growAmount = RemapNumber(total_satisfaction, 
 									   min_grow_satisfaction, max_grow_satisfaction,
@@ -144,7 +157,7 @@ function Homeworld:UpdatePopulation()
 		growAmount = math.floor(growAmount * difficulty.population_growth_modifier)
 		self.population = self.population + growAmount
 
-	elseif total_satisfaction <= max_decline_satisfaction then
+	elseif unsatisfied_needs > 0 then
 		-- Decline population.
 		local declineAmount = RemapNumber(total_satisfaction,
 										  min_decline_satisfaction, max_decline_satisfaction,
