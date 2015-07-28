@@ -151,8 +151,9 @@ _pumpWater = function( pump )
 				pump.deltaWater = pump.deltaWater + (waterAmount / 10)
 			else
 				local delta = math.abs(waterAmount - pump.lastWaterAmount)
-				if delta > 0 and delta < 0.001 then
-					delta = 0.01
+				local epsilon = 0.0001
+				if delta > 0.0 and delta < epsilon then
+					delta = epsilon
 				end
 				pump.deltaWater = pump.deltaWater + delta
 			end
