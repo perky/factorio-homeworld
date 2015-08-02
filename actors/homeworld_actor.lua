@@ -125,6 +125,44 @@ function Homeworld:GetNeedSatisfaction( need )
 	return satisfaction
 end
 
+function Homeworld:GetSupplies()
+	local currentTier = needs_prototype[self.population_tier]
+	local itemStacks = {}
+
+	if currentTier.supplies then
+		local satisfaction = self:GetCurrentMinNeedSatisfaction()
+		for i, supply in ipairs(currentTier.supplies) do
+			local normalizedSatisfaction = RemapNumber(satisfaction, 
+				supply.satisfaction_range.min, supply.satisfaction_range.max, 0, 1)
+			if normalizedSatisfaction > 0 then
+				local itemCount = RemapNumber(normalizedSatisfaction,
+					0, 1, supply.amount_per_min.min, supply.amount_per_min.max)
+				itemCount = math.max(supply.amount_per_min.min, math.min(itemCount, supply.amount_per_min.max))
+				itemCount = math.floor(itemCount)
+				local itemStack = {name = supply.item, count = itemCount}
+				table.insert(itemStacks, itemStack)
+			end
+		end
+	end
+
+	return itemStacks
+end
+
+function Homeworld:GetCurrentMinNeedSatisfaction()
+	local currentNeeds = self:CurrentNeeds()
+	local minSatisfaction = 99999
+	local minNeed = nil
+	for _, need in ipairs(currentNeeds) do
+		local satisfaction = self:GetNeedSatisfaction(need)
+		if satisfaction < minSatisfaction then
+			minSatisfaction = satisfaction
+			minNeed = need
+		end
+	end
+
+	return minSatisfaction
+end
+
 function Homeworld:UpdatePopulation()
 	local currentNeeds = self:CurrentNeeds()
 	local currentTier = needs_prototype[self.population_tier]
@@ -235,6 +273,7 @@ function Homeworld:OpenGUI( playerIndex )
 		GUI.ProgressBar("population_bar", 1)
 		GUI.PopAll()
 		self:CreateNeedsGUI(playerIndex)
+		self:CreateSuppliesGUI(playerIndex)
 	else
 		GUI.PushParent(player.gui.left)
 		self.gui[playerIndex] = GUI.Frame("homeworld_gui", "Homeworld", GUI.VERTICAL)
@@ -268,6 +307,32 @@ function Homeworld:CreateNeedsGUI( playerIndex )
 				GUI.ProgressBar("satisfaction", 1, 0, "homeworld_need_progressbar_style")
 			end
 			
+		GUI.PopParent()
+	end
+end
+
+function Homeworld:CreateSuppliesGUI( playerIndex )
+	local currentTier = needs_prototype[self.population_tier]
+	if not self.gui[playerIndex] or not currentTier.supplies then 
+		return
+	end
+	if self.gui[playerIndex].supplies then
+		self.gui[playerIndex].supplies.destroy()
+	end
+
+	GUI.PopAll()
+	GUI.PushParent(self.gui[playerIndex])
+	GUI.PushParent(GUI.Frame("supplies", "Supplies", GUI.VERTICAL))
+	for i, supply in ipairs(currentTier.supplies) do
+		GUI.PushParent(GUI.Flow("supply_"..i, GUI.VERTICAL))
+			GUI.PushParent(GUI.Flow("label_icon", GUI.HORIZONTAL))
+				GUI.Icon("icon", supply.item)
+				GUI.PushParent(GUI.Flow("labels", GUI.VERTICAL))
+					GUI.Label("item", game.get_localised_item_name(supply.item))
+					local satString = string.format(">%d%% satisfaction", supply.satisfaction_range.min * 100)
+					GUI.Label("satifaction_threshold", satString)
+				GUI.PopParent()
+			GUI.PopParent()
 		GUI.PopParent()
 	end
 end

@@ -92,6 +92,10 @@ needs_prototype =
 			{
 				{item = "productivity-module", amount = 3}
 			},
+		},
+		supplies = {
+			{item = "science-pack-1", amount_per_min = {min = 1, max = 10}, satisfaction_range = {min = 0.5, max = 1}},
+			{item = "science-pack-2", amount_per_min = {min = 1, max = 10}, satisfaction_range = {min = 0.5, max = 1}},
 		}
 	},
 

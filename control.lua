@@ -52,6 +52,10 @@ local function AfterGameLoad()
 		end
 		homeworld = AddActor( Homeworld.CreateActor() )
 	end
+
+	if main_portal then
+		main_portal.homeworld = homeworld
+	end
 end
 
 local function OnGameLoad()
@@ -68,6 +72,7 @@ local function OnGameLoad()
 						homeworld = actor
 					elseif glob_actor.className == "Portal" and not main_portal then
 						main_portal = actor
+						actor.is_main_portal = true
 					end
 				end
 			end
@@ -104,9 +109,9 @@ local function SpawnHomeworldPortal( player )
 	local surface = player.surface
 	local portalSpawnPos = surface.find_non_colliding_position("homeworld_portal", player.position, 30, 1)
 	local portalEntity = surface.create_entity({name = "homeworld_portal", position = portalSpawnPos, force = player.force})
-	local portal = Portal.CreateActor{entity = portalEntity, homeworld = homeworld}
+	local portal = Portal.CreateActor{entity = portalEntity, homeworld = homeworld, is_main_portal = true}
 	AddActor(portal)
-	portal:RegisterForRewards()
+	portal:RegisterEvents()
 end
 
 local intro_delegate = {}

@@ -14,22 +14,26 @@ function Portal:Init()
 		self:OnHomeworldOnline()
 	end)
 
-	if self.homeworld and self.homeworld.connected_by_radar then
-		self.homeworld_is_online = true
+	if self.homeworld then
+		if self.homeworld.connected_by_radar then
+			self.homeworld_is_online = true
+		end
 	end
 end
 
 function Portal:OnLoad()
 	self.enabled = true
+
 	game.on_event(HOMEWORLD_EVENTS.HOMEWORLD_ONLINE, function()
 		self:OnHomeworldOnline()
 	end)
+
 	if self.can_receive_rewards then
-		self:RegisterForRewards()
+		self:RegisterEvents()
 	end
 end
 
-function Portal:RegisterForRewards()
+function Portal:RegisterEvents()
 	game.on_event(HOMEWORLD_EVENTS.ON_REWARD, function(reward)
 		self:InsertReward(reward)
 	end)
@@ -85,8 +89,25 @@ function Portal:OnTick()
 		end
 	end
 
+	-- get supplies
+	if self.is_main_portal then
+		local supplies = self.homeworld:GetSupplies()
+		if supplies then
+			for i, item_stack in ipairs(supplies) do
+				self:InsertItem(item_stack)
+			end
+		end
+	end
+
 	-- Create portal FX.
 	self.entity.surface.create_entity({name = "portal-sound", position = self.entity.position, force = self.entity.force, target = self.entity})
+end
+
+function Portal:InsertItem( item_stack )
+	local inventory = self.entity.get_inventory(1)
+	if inventory.can_insert(item_stack) then
+		inventory.insert(item_stack)
+	end
 end
 
 function Portal:InsertReward( reward )
