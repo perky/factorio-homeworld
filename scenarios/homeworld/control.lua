@@ -22,6 +22,8 @@ needs = The list of needs that need to be met for this tier (see below for more 
 rewards = The list of rewards placed in the portal when this tier upgrades. This requires a list of tables, each table containing a list of items.
           One set of items are chosen randomly and placed in the portal.
 
+supplies = The list of items that will be supplied to the player every minute, so long as all the needs are above a certain threshold.
+
 ------------------------------------
 
 The needs table contains a list of tables, each indicating the item needed and how fast it is consumed:
@@ -44,6 +46,15 @@ The rewards table takes a list of tables that contain a list of items. One of th
 
 item = The item name.
 amount = The amount of that item rewarded.
+
+------------------------------------
+
+The supplies tables takes a list of tables that contain three keys:
+
+item = The name of the item supplied.
+amount_per_min = A table with two keys; min and max. This is how much the player receives per minute, depening on the satisfaction of needs.
+satisfaction_range = A table with two keys; min and max. The min indication the minumum threshold satisfaction needs to be at to receive this supply,
+                     the max indication at what value of satisfaction the player receives the maximum amount of the item.
 
 ]]
 
