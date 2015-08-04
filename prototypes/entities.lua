@@ -408,6 +408,6 @@ local fast_inserter = data.raw["inserter"]["fast-inserter"]
 local modifier = 2
 fast_inserter.extension_speed = fast_inserter.extension_speed * modifier
 fast_inserter.rotation_speed = fast_inserter.rotation_speed * modifier
-fast_inserter.energy_source.drain = fast_inserter.energy_source.drain * modifier
+fast_inserter.energy_source.drain = "0.8kW"
 fast_inserter.energy_per_movement = fast_inserter.energy_per_movement * modifier
 fast_inserter.energy_per_rotation = fast_inserter.energy_per_rotation * modifier
