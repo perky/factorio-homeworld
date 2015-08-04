@@ -38,7 +38,7 @@ data:extend({
             scale = 0.8,
             shift = {0, -0.8}
         },
-        inventory_size = 1,
+        inventory_size = 3,
         open_sound = { filename = "__base__/sound/metallic-chest-open.ogg", volume=0.65 },
         close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 }
     },
@@ -402,3 +402,12 @@ Farm("farm_01", "farm_01.png")
 Farm("farm_02", "farm_02.png")
 Farm("farm_03", "farm_03.png")
 Farm("farm_full", "farm_full.png")
+
+-- Double fast inserter speed.
+local fast_inserter = data.raw["inserter"]["fast-inserter"]
+local modifier = 2
+fast_inserter.extension_speed = fast_inserter.extension_speed * modifier
+fast_inserter.rotation_speed = fast_inserter.rotation_speed * modifier
+fast_inserter.energy_source.drain = fast_inserter.energy_source.drain * modifier
+fast_inserter.energy_per_movement = fast_inserter.energy_per_movement * modifier
+fast_inserter.energy_per_rotation = fast_inserter.energy_per_rotation * modifier
