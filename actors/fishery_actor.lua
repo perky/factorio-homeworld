@@ -1,6 +1,6 @@
 ActorClass("Fishery", {
 	open_gui_on_selected = true,
-	max_yield_per_minute = 360,
+	max_yield_per_minute = 500,
 	max_pollution = 4000,
 	max_fish = 13,
 	max_fish_reproduction = 3,
@@ -32,13 +32,15 @@ end
 
 function Fishery:StartRoutines()
 	StartCoroutine(self.FisheryRoutine, {delegate = self, validater = self.ValidateRoutine})
-	StartCoroutine(self.ReproductionRoutine, {delegate = self, validater = self.ValidateRoutine})
+	--StartCoroutine(self.ReproductionRoutine, {delegate = self, validater = self.ValidateRoutine})
 end
 
 function Fishery:ValidateRoutine()
 	return self.enabled and self.entity and self.entity.valid
 end
 
+-- Disabled due to desync issues (v0.5.1)
+--[[
 function Fishery:ReproductionRoutine()
 	local surface = self.entity.surface
 	local pos = self.entity.position
@@ -87,6 +89,7 @@ function Fishery:ReproductionRoutine()
 		end
 	end
 end
+]]--
 
 function Fishery:FisheryRoutine()
 	local surface = self.entity.surface
@@ -97,16 +100,28 @@ function Fishery:FisheryRoutine()
 		local pollution = math.min(surface.get_pollution(self.entity.position), max_pollution)
 		self.water_purity = RemapNumber(pollution, 0, max_pollution, 1, 0)
 
+		-- Count nearby fish
 		local pos = self.entity.position
 		local nearbyFish = surface.find_entities_filtered{
 			area = {{pos.x - self.fishing_radius, pos.y - self.fishing_radius},
 					{pos.x + self.fishing_radius, pos.y + self.fishing_radius}},
 			name = "fish"
 		}
-
 		local fishCount = math.min(#nearbyFish, self.max_fish)
 		self.fish_population = RemapNumber(fishCount, 0, self.max_fish, 0, 1)
-		self.yield = self.fish_population * self.water_purity
+
+		-- Count nearby fisheries
+		local r = self.fishing_radius * 2
+		local fisheryCount = surface.count_entities_filtered{
+			area = {{pos.x - r, pos.y - r},
+					{pos.x + r, pos.y + r}},
+			name = "fishery"
+		}
+		if fisheryCount <= 0 then
+			fisheryCount = 1 -- prevent divide by zero or negative.
+		end
+
+		self.yield = (self.fish_population * self.water_purity) / fisheryCount
 		self:UpdateGUIForAllPlayers()
 
 		-- Wait to harvest
@@ -120,12 +135,6 @@ function Fishery:FisheryRoutine()
 			local stack = {name = "raw-fish", count = count}
 			if inventory.can_insert(stack) then
 				inventory.insert(stack)
-			end
-
-			for i = 0, fishCount do
-				if nearbyFish[i] and nearbyFish[i].valid then
-					nearbyFish[i].damage(1, game.forces.player)
-				end
 			end
 		end
 	end
@@ -157,12 +166,13 @@ function Fishery:UpdateGUI( playerIndex )
 	if not self.gui[playerIndex] or not self.yield then return end
 
 	-- calculate rolling average of fish_population
+	local avg_window_size = 4
 	if not self.fish_roll_avg then
 		self.fish_roll_avg = {}
 	end
 	local fishPop = math.floor(self.fish_population * 100)
 	table.insert(self.fish_roll_avg, fishPop)
-	if #self.fish_roll_avg > 10 then
+	if #self.fish_roll_avg > avg_window_size then
 		table.remove(self.fish_roll_avg, 1)
 	end
 	local fishPopSum = 0
