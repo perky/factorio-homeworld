@@ -2,7 +2,8 @@ ActorClass("Portal", {
 	open_gui_on_selected = true,
 	homeworld = nil,
 	transfer_interval = 1 * MINUTES,
-	countdown_tick = 0
+	countdown_tick = 0,
+	stat_window_size = 5
 })
 
 function Portal:Init()
@@ -81,12 +82,12 @@ function Portal:OnTick()
 		local stat = self.stats[need.item]
 		if not stat then
 			stat = {}
-			self.stats[need.item] = stat
 		end
 		table.insert(stat, count)
-		if #stat > 60 then
+		if #stat > self.stat_window_size then
 			table.remove(stat, 1)
 		end
+		self.stats[need.item] = stat
 	end
 
 	-- get supplies
@@ -172,6 +173,8 @@ function Portal:UpdateGUI( playerIndex )
 end
 
 function Portal:GetStatAvg( item )
+	local avg_window_size = 5
+
 	if self.stats and self.stats[item] then
 		local sum = 0
 		for _, count in ipairs(self.stats[item]) do
