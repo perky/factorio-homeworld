@@ -1,5 +1,6 @@
 require("prototypes.items")
 require("prototypes.entities")
+require("prototypes.terraforming")
 require("prototypes.fluids")
 require("prototypes.recipes")
 require("prototypes.resources")

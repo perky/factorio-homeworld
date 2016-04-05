@@ -1,25 +1,4 @@
 data:extend({
-	{
-		type = "container",
-		name = "arcology",
-		icon = "__base__/graphics/icons/lab.png",
-    	flags = {"placeable-player", "player-creation"},
-    	max_health = 150,
-    	corpse = "big-remnants",
-    	dying_explosion = "medium-explosion",
-    	collision_box = {{-1.2, -1.2}, {1.2, 1.2}},
-    	selection_box = {{-1.5, -1.5}, {1.5, 1.5}},
-    	picture = {
-    		filename = "__base__/graphics/entity/lab/lab.png",
-    		width = 113,
-      		height = 91,
-      		shift = {0.2, 0.15}
-    	},
-    	inventory_size = 56,
-    	open_sound = { filename = "__base__/sound/metallic-chest-open.ogg", volume=0.65 },
-    	close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 }
-	},
-
     {
         type = "container",
         name = "fishery",
@@ -63,7 +42,7 @@ data:extend({
             shift = {0.40625, -0.71875},
             animation_speed = 4
         },
-        
+
         crafting_categories = {"sawmill"},
         crafting_speed = 0.1,
         energy_usage = "15kW",
@@ -81,29 +60,7 @@ data:extend({
         close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 }
     },
 
-    {
-        type = "container",
-        name = "farm",
-        icon = "__base__/graphics/icons/fish.png",
-        flags = {"player-creation", "placeable-player"},
-        minable = {mining_time = 0.3, result = "farm"},
-        max_health = 50,
-        corpse = "big-remnants",
-        collision_box = {{-4.5, -4.5}, {4.5, 4.5}},
-        selection_box = {{-4, -4}, {4, 4}},
-        picture = {
-            filename = "__homeworld__/graphics/entity/farm.png",
-            priority = "low",
-            width = 450,
-            height = 450,
-            shift = {0, 0}
-        },
-        inventory_size = 30,
-        open_sound = { filename = "__base__/sound/metallic-chest-open.ogg", volume=0.65 },
-        close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 }
-    },
-
-    {
+	 {
         type = "smart-container",
         name = "homeworld_portal",
         icon = "__homeworld__/graphics/icons/portal.png",
@@ -134,12 +91,12 @@ data:extend({
             green = {0.3, -0.8}
           }
         },
-        inventory_size = 32,
+        inventory_size = 36,
         open_sound = { filename = "__base__/sound/metallic-chest-open.ogg", volume=0.65 },
-        close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 },    
+        close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 },
     },
-    
-    {
+
+	 {
         type = "explosion",
         name = "portal-sound",
         flags = {"not-on-map"},
@@ -175,7 +132,7 @@ data:extend({
         }
     },
 
-    {
+	 {
         type = "explosion",
         name = "portal-fx",
         flags = {"not-on-map"},

@@ -5,16 +5,6 @@ data.raw.item["concrete"].stack_size = 1024
 data:extend({
 	{
 		type = "item",
-		name = "arcology",
-		icon = "__base__/graphics/icons/lab.png",
-		flags = { "goes-to-quickbar" },
-		subgroup = "storage",
-		place_result = "arcology",
-		stack_size = 1
-	},
-
-	{
-		type = "item",
 		name = "homeworld_portal",
 		icon = "__homeworld__/graphics/icons/portal.png",
 		flags = { "goes-to-quickbar" },

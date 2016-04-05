@@ -1,8 +1,8 @@
 -- Overwrite vanilla recipes
 data.raw.recipe["empty-barrel"].results[1].amount = 10
 data.raw.recipe["concrete"].ingredients = {
-  {"stone-brick", 2},
-  {"sand", 10},
+  {"stone-brick", 5},
+  {"sand", 5},
   {"iron-ore", 1},
   {type="fluid", name="water", amount=10}
 }
@@ -32,8 +32,9 @@ data:extend({
 		name = "homeworld-portal",
 		enabled = "false",
 		ingredients = {
-			{"alien-artifact", 30},
-			{"smart-chest", 5}
+			{"alien-artifact", 50},
+         {"stone-brick", 200},
+			{"smart-chest", 1}
 		},
 		result = "homeworld_portal"
 	},
