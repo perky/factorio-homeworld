@@ -47,26 +47,6 @@ end
 function on_player_created( event )
     local player = game.get_player(event.player_index)
     player.insert{
-        name = "sawmill",
-        count = 10
-    }
-    player.insert{
-        name = "farm",
-        count = 30
-    }
-    player.insert{
-        name = "fishery",
-        count = 30
-    }
-    player.insert{
-        name = "raw-fish",
-        count = 1000
-    }
-    player.insert{
-        name = "raw-wood",
-        count = 1000
-    }
-    player.insert{
         name = "homeworld_portal",
         count = 1
    }

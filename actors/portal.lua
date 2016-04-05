@@ -2,7 +2,7 @@ Portal = Actor{name = "portal", use_proximity_gui = true, gui_proximity_radius =
 
 local config = {
    update_interval = 60 * SECONDS,
-   test_mode = true
+   test_mode = false
 }
 
 function Portal:tick( tick )
