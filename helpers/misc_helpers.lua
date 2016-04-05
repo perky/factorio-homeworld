@@ -147,6 +147,23 @@ function table.where( tbl, predicate )
     return result
 end
 
+function table.except(source, exception)
+    local result = {}
+    for key, value in ipairs(source) do
+        local exception_exists = false
+        for key2, value2 in ipairs(exception) do
+            if value2 == value then
+                exception_exists = true
+                break
+            end
+        end
+        if not exception_exists then
+            table.insert(result, value)
+        end
+    end
+    return result
+end
+
 function DistanceSqr( p1, p2 )
 	local dx = p2.x - p1.x
 	local dy = p2.y - p1.y
@@ -160,13 +177,29 @@ function GetNearest( objects, point )
 
 	local maxDist = math.huge
 	local nearest = objects[1]
-	for _, tile in ipairs(objects) do
-		local dist = DistanceSqr(point, tile.position)
+	for _, obj in ipairs(objects) do
+		local dist = DistanceSqr(point, obj.position)
 		if dist < maxDist then
 			maxDist = dist
-			nearest = tile
+			nearest = obj
 		end
 	end
 
 	return nearest
+end
+
+function nearest_players( params )
+    local origin = params.origin
+    local max_distance = params.max_distance or 2
+    local list = {}
+
+    for playerIndex = 1, #game.players do
+        local player = game.players[playerIndex]
+        local distance = util.distance(player.position, origin)
+        if distance <= max_distance then
+            table.insert(list, player)
+        end
+    end
+
+    return list
 end

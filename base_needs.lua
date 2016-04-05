@@ -5,7 +5,7 @@
 	The higher the duration the more items needed per capita.
 	For example:
 		if in tier 1 the max_per_min for fish is 1000 and the consumption duration is 10 minutes.
-		The total amount per capita would be `(max_per_min * (consumption_duration / MINUTES)) / upgrade_population`.
+		The total count per capita would be `(max_per_min * (consumption_duration / MINUTES)) / upgrade_population`.
 		In this case 0.8 per capita.
 ]]
 
@@ -20,7 +20,7 @@ needs_prototype =
 		needs = {
 			{
 				item = "raw-fish",
-				max_per_day = 600
+				max_per_day = 2000
 			},
 			{
 				item = "raw-wood",
@@ -29,90 +29,98 @@ needs_prototype =
 		},
 		rewards = {
 			{
-				{item = "basic-bullet-magazine", amount = 300},
-				{item = "basic-armor", amount = 3}
+				{name = "basic-bullet-magazine", count = 300},
+				{name = "basic-armor", count = 3}
 			},
 			{
-				{item = "heavy-armor", amount = 4},
-				{item = "basic-grenade", amount = 16}
+				{name = "heavy-armor", count = 4},
+				{name = "basic-grenade", count = 16}
 			},
 			{
-				{item = "poison-capsule", amount = 2},
-				{item = "piercing-bullet-magazine", amount = 200}
+				{name = "poison-capsule", count = 2},
+				{name = "piercing-bullet-magazine", count = 200}
 			},
 			{
-				{item = "shotgun-shell", amount = 600}
+				{name = "shotgun-shell", count = 600}
 			},
 			{
-				{item = "speed-module", amount = 3}
+				{name = "speed-module", count = 3}
 			},
 			{
-				{item = "effectivity-module", amount = 3}
+				{name = "effectivity-module", count = 3}
 			},
 			{
-				{item = "productivity-module", amount = 3}
+				{name = "productivity-module", count = 3}
 			},
 		}
 	},
 
 	{
 		name = "Tier 2",
-		upgrade_population = 10000,
+		upgrade_population = 12000,
 		downgrade_population = 3000,
 		max_growth_rate = 15,
-		max_decline_rate = -17,
+		max_decline_rate = -27,
 		needs = {
 			{
 				item = "raw-fish",
 				max_per_day = 7000
 			},
 			{
-				item = "bread",
-				max_per_day = 9000
+				item = "raw-wood",
+				max_per_day = 300
 			},
 			{
 				item = "furniture",
 				max_per_day = 1000
+			},
+			{
+				item = "bread",
+				max_per_day = 9000
 			}
 		},
 		rewards = {
 			{
-				{item = "flame-thrower-ammo", amount = 500},
-				{item = "heavy-armor", amount = 10}
+				{name = "flame-thrower-ammo", count = 500},
+				{name = "heavy-armor", count = 10}
 			},
 			{
-				{item = "rocket", amount = 10},
-				{item = "basic-grenade", amount = 80}
+				{name = "rocket", count = 10},
+				{name = "basic-grenade", count = 80}
 			},
 			{
-				{item = "piercing-shotgun-shell", amount = 200},
-				{item = "piercing-bullet-magazine", amount = 400}
+				{name = "piercing-shotgun-shell", count = 200},
+				{name = "piercing-bullet-magazine", count = 400}
 			},
 			{
-				{item = "speed-module-2", amount = 5},
-				{item = "effectivity-module", amount = 10},
+				{name = "speed-module-2", count = 5},
+				{name = "effectivity-module", count = 10},
 			},
 			{
-				{item = "effectivity-module-2", amount = 5},
-				{item = "productivity-module", amount = 10},
+				{name = "effectivity-module-2", count = 5},
+				{name = "productivity-module", count = 10},
 			},
 			{
-				{item = "productivity-module-2", amount = 5},
-				{item = "speed-module", amount = 10},
+				{name = "productivity-module-2", count = 5},
+				{name = "speed-module", count = 10},
 			},
 		}
 	},
 
 	{
 		name = "Tier 3",
-		upgrade_population = 25000,
+		upgrade_population = 27000,
 		downgrade_population = 8000,
-		max_growth_rate = 19,
-		max_decline_rate = -20,
+		max_growth_rate = 22,
+		max_decline_rate = -30,
 		needs = {
 			{
 				item = "raw-fish",
 				max_per_day = 13000
+			},
+			{
+				item = "furniture",
+				max_per_day = 2000
 			},
 			{
 				item = "bread",
@@ -125,35 +133,31 @@ needs_prototype =
 			{
 				item = "beer",
 				max_per_day = 1500
-			},
-			{
-				item = "furniture",
-				max_per_day = 3000
 			}
 		},
 		rewards = {
 			{
-				{item = "laser-turret", amount = 100}
+				{name = "laser-turret", count = 100}
 			},
 			{
-				{item = "express-transport-belt", amount = 500},
-				{item = "basic-grenade", amount = 50}
+				{name = "express-transport-belt", count = 500},
+				{name = "basic-grenade", count = 50}
 			},
 			{
-				{item = "piercing-shotgun-shell", amount = 800},
-				{item = "solar-panel", amount = 200}
+				{name = "piercing-shotgun-shell", count = 800},
+				{name = "solar-panel", count = 200}
 			},
 			{
-				{item = "speed-module-3", amount = 10},
-				{item = "effectivity-module-2", amount = 20},
+				{name = "speed-module-3", count = 10},
+				{name = "effectivity-module-2", count = 20},
 			},
 			{
-				{item = "effectivity-module-3", amount = 10},
-				{item = "productivity-module-2", amount = 20},
+				{name = "effectivity-module-3", count = 10},
+				{name = "productivity-module-2", count = 20},
 			},
 			{
-				{item = "productivity-module-3", amount = 10},
-				{item = "speed-module-2", amount = 20},
+				{name = "productivity-module-3", count = 10},
+				{name = "speed-module-2", count = 20},
 			},
 		}
 	},
@@ -163,11 +167,23 @@ needs_prototype =
 		upgrade_population = 50000,
 		downgrade_population = 18000,
 		max_growth_rate = 35,
-		max_decline_rate = -40,
+		max_decline_rate = -45,
 		needs = {
+			{
+				item = "raw-fish",
+				max_per_day = 5000
+			},
 			{
 				item = "luxury-meal",
 				max_per_day = 7000
+			},
+			{
+				item = "furniture",
+				max_per_day = 3000
+			},
+			{
+				item = "bread",
+				max_per_day = 18000
 			},
 			{
 				item = "water-barrel",
@@ -188,19 +204,19 @@ needs_prototype =
 		},
 		rewards = {
 			{
-				{item = "straight-rail", amount = 500},
-				{item = "curved-rail", amount = 250},
-				{item = "speed-module-3", amount = 1},
+				{name = "straight-rail", count = 500},
+				{name = "curved-rail", count = 250},
+				{name = "speed-module-3", count = 1},
 			},
 			{
-				{item = "express-transport-belt", amount = 500},
-				{item = "tank", amount = 1},
-				{item = "speed-module-3", amount = 3},
+				{name = "express-transport-belt", count = 500},
+				{name = "tank", count = 1},
+				{name = "speed-module-3", count = 3},
 			},
 			{
-				{item = "alien-science-pack", amount = 100},
-				{item = "logistic-robot", amount = 300},
-				{item = "construction-robot", amount = 300},
+				{name = "alien-science-pack", count = 100},
+				{name = "logistic-robot", count = 300},
+				{name = "construction-robot", count = 300},
 			}
 		}
 	},
@@ -210,7 +226,7 @@ needs_prototype =
 		upgrade_population = 100000,
 		downgrade_population = 40000,
 		max_growth_rate = 75,
-		max_decline_rate = -85,
+		max_decline_rate = -105,
 		needs = {
 			{
 				item = "luxury-meal",
@@ -246,18 +262,18 @@ needs_prototype =
 		},
 		rewards = {
 			{
-				{item = "straight-rail", amount = 250},
+				{name = "straight-rail", count = 250},
 			},
 			{
-				{item = "tank", amount = 2},
-				{item = "logistic-robot", amount = 500},
-				{item = "construction-robot", amount = 500},
+				{name = "tank", count = 2},
+				{name = "logistic-robot", count = 500},
+				{name = "construction-robot", count = 500},
 			},
 			{
-				{item = "alien-science-pack", amount = 200},
-				{item = "science-pack-3", amount = 500},
-				{item = "science-pack-2", amount = 400},
-				{item = "science-pack-1", amount = 300},
+				{name = "alien-science-pack", count = 200},
+				{name = "science-pack-3", count = 500},
+				{name = "science-pack-2", count = 400},
+				{name = "science-pack-1", count = 300},
 			}
 		}
 	},
@@ -265,10 +281,14 @@ needs_prototype =
 	{
 		name = "Tier 6",
 		upgrade_population = 9900000,
-		downgrade_population = 80000,
-		max_growth_rate = 75,
-		max_decline_rate = -85,
+		downgrade_population = 60000,
+		max_growth_rate = 85,
+		max_decline_rate = -125,
 		needs = {
+			{
+				item = "portable-electronics",
+				max_per_day = 300
+			},
 			{
 				item = "terraformer",
 				consume_once = true,
@@ -302,7 +322,8 @@ needs_prototype =
 		},
 		rewards = {
 			{
-				{item = "straight-rail", amount = 250},
+				{name = "straight-rail", count = 3000},
+				{name = "curved-rail", count = 1500},
 			},
 		}
 	},

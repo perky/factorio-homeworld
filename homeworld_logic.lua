@@ -1,20 +1,21 @@
 Homeworld = {}
 
 local config = {
-   starting_population = 100,
+   starting_population = 1000,
    min_population = 10,
-   max_population = 10000,
    max_growth_rate = 35,
    max_decline_rate = 15,
-   update_interval = 1 * SECONDS,
+   update_interval = 1 * SECONDS
 }
 
 function Homeworld:init()
    self.state = {
       tier = 1,
       population = config.starting_population,
+      population_delta = 0,
       inventory = {},
       average_satisfaction = {},
+      average_satisfaction_window = 120,
       gui = {}
    }
    self:increment_update_timer()
@@ -92,19 +93,50 @@ function Homeworld:get_satisfaction_for_need( need )
    return satisfaction
 end
 
+function Homeworld:get_average_satisfaction_for_need( need )
+   if need.consume_once then
+      return self:get_satisfaction_for_need(need)
+   else
+      local average = self.state.average_satisfaction
+      if average[need.item] then
+         return average[need.item].satisfaction
+      else
+         return 0
+      end
+   end
+end
+
 function Homeworld:get_total_satisfaction()
    local total_satisfaction = 0
    local current_needs = self:get_needs()
    for _, need in ipairs(current_needs) do
-      total_satisfaction = total_satisfaction + self:get_satisfaction_for_need(need)
+      total_satisfaction = total_satisfaction + self:get_average_satisfaction_for_need(need)
    end
-   local result = total_satisfaction / #current_needs
-   return result
+   return total_satisfaction / #current_needs
 end
 
 function Homeworld:change_tier_by( amount )
    local new_tier = self.state.tier + amount
    if needs_prototype[new_tier] then
+      -- If upgrading...
+      if amount > 0 then
+         -- Spawn rewards.
+         self:spawn_reward(self:get_tier())
+         -- Consume 'consume_once' needs.
+         for index, need in ipairs(self:get_needs()) do
+            if need.consume_once then
+               self:remove_item{name = need.item, count = need.count}
+            end
+         end
+         PrintToAllPlayers("Homeworld population upgraded to ".. needs_prototype[new_tier].name ..".")
+      end
+
+      -- If downgrading..
+      if amount < 0 then
+         PrintToAllPlayers("Homeworld population downgraded to ".. needs_prototype[new_tier].name .."!")
+      end
+
+      -- Update tier.
       self.state.tier = new_tier
       for player_index, frame in pairs(self.state.gui) do
          self:show_needs_gui(player_index)
@@ -113,7 +145,58 @@ function Homeworld:change_tier_by( amount )
    end
 end
 
+function Homeworld:update_satisfaction()
+   local window = self.state.average_satisfaction_window
+   local average_satisfaction = self.state.average_satisfaction
+   for index, need in ipairs(self:get_needs()) do
+      local avg = average_satisfaction[need.item]
+      if not avg then
+         avg = {
+            next = 1,
+            satisfaction = 0
+         }
+         for k = 1, window do
+            avg[k] = 0
+         end
+      end
+      avg[avg.next] = self:get_satisfaction_for_need(need)
+      avg.next = avg.next + 1
+      if avg.next > window then
+         avg.next = 1
+      end
+      local total = 0
+      for k = 1, window do
+         total = total + avg[k]
+      end
+      avg.satisfaction = total / window
+      average_satisfaction[need.item] = avg
+   end
+end
+
+function Homeworld:are_consume_once_needs_satisfied()
+   for index, need in ipairs(self:get_needs()) do
+      if need.consume_once then
+         if self:count_item(need.item) < need.count then
+            return false
+         end
+      end
+   end
+   return true
+end
+
+function Homeworld:can_upgrade_tier()
+   local current_tier = self:get_tier()
+   if self.state.population >= current_tier.upgrade_population then
+      -- All 'consume_once' needs must be met before we can upgrade tier.
+      return self:are_consume_once_needs_satisfied()
+   end
+   return false
+end
+
 function Homeworld:update_population()
+   local state = self.state
+
+   -- Calculate population change.
    local total_satisfaction = self:get_total_satisfaction()
    local current_tier = self:get_tier()
    local pop_change = RemapNumber(
@@ -123,14 +206,34 @@ function Homeworld:update_population()
       current_tier.max_decline_rate,
       current_tier.max_growth_rate
    )
-   self.state.population = self.state.population + pop_change
-   if self.state.population < config.min_population then
-      self.state.population = config.min_population
+   if pop_change > 0 and state.population >= current_tier.upgrade_population and not self:are_consume_once_needs_satisfied() then
+      pop_change = 0
    end
+
+   -- Change population.
+   local last_pop = state.population
+   state.population = state.population + pop_change
+   if state.population < config.min_population then
+      state.population = config.min_population
+   end
+
+   local last_pop_delta = state.population_delta
+   state.population_delta = state.population - last_pop
+
+   if state.population_delta > 0 then
+      state.is_population_increasing = true
+   elseif state.population_delta < 0 then
+      if state.is_population_increasing then
+         PrintToAllPlayers("Homeworld population is declining!")
+      end
+      state.is_population_increasing = false
+   end
+
+   -- Upgrade or downgrade tier.
    local next_tier = self:get_next_tier()
-   if next_tier and self.state.population >= current_tier.upgrade_population then
+   if next_tier and self:can_upgrade_tier() then
       self:change_tier_by(1)
-   elseif self.state.population < current_tier.downgrade_population then
+   elseif state.population < current_tier.downgrade_population then
       self:change_tier_by(-1)
    end
 end
@@ -138,14 +241,7 @@ end
 function Homeworld:update_consumption()
    local needs = self:get_needs()
    for index, need in ipairs(needs) do
-      if need.consume_once then
-         if self:count_item(need.item) >= need.count then
-            self:remove_item{
-               name = need.item,
-               count = need.count
-            }
-         end
-      else
+      if not need.consume_once then
          local needed = self:get_need_item_count(need, config.update_interval)
          self:remove_item{
             name = need.item,
@@ -155,9 +251,44 @@ function Homeworld:update_consumption()
    end
 end
 
+function Homeworld:spawn_reward( tier )
+   -- Select random portal.
+   local portal = table.random_value(Portal._instances)
+   if portal then
+      local portal_entity = portal.state.entity
+      local chest_name = "iron-chest"
+      local spawn_pos = portal_entity.surface.find_non_colliding_position(chest_name, portal_entity.position, 30, 1.0)
+      if spawn_pos then
+         -- Spawn chest.
+         local chest = portal_entity.surface.create_entity{
+            name = chest_name,
+            force = portal_entity.force,
+            position = spawn_pos
+         }
+         -- Insert reward items.
+         local chest_inventory = chest.get_inventory(1)
+         local reward = table.random_value(tier.rewards)
+         for index, item_stack in ipairs(reward) do
+            chest_inventory.insert(item_stack)
+         end
+         -- Show arrow to closest player.
+         local nearest_player = GetNearest(game.players, portal_entity.position)
+         if nearest_player then
+            nearest_player.set_gui_arrow{
+               type = "entity",
+               entity = chest
+            }
+         end
+      else
+         PrintToAllPlayers("Could not find suitable location to drop reward chest.")
+      end
+   end
+end
+
 function Homeworld:tick( tick )
    if self:can_update() then
       self:increment_update_timer()
+      self:update_satisfaction()
       self:update_population()
       self:update_consumption()
       for player_index, frame in pairs(self.state.gui) do
@@ -174,7 +305,7 @@ function Homeworld:show_gui( player_index )
    GUI.push_left_section(player_index)
    self.state.gui[player_index] = GUI.push_parent(GUI.frame("homeworld", "Homeworld", GUI.VERTICAL))
    GUI.label_data("tier", "Tier:", "1 / 6")
-   GUI.label_data("population", {"population"}, "0 / 0")
+   GUI.label_data("population", {"population"}, "0 / 0 [0]")
    GUI.progress_bar("population_bar", 0)
    self:show_needs_gui(player_index)
    GUI.pop_all()
@@ -195,7 +326,7 @@ function Homeworld:show_needs_gui( player_index )
             GUI.push_parent(GUI.flow("labels", GUI.VERTICAL))
 					GUI.label_data("item", game.item_prototypes[need.item].localised_name, "[0]")
                if need.consume_once then
-                  GUI.label("consumption", "Consume once: "..PrettyNumber(need.count))
+                  GUI.label("consumption", "Target: "..PrettyNumber(need.count))
                else
                   local per_day = self:get_need_item_count(need, GAME_DAY)
                   GUI.label("consumption", "Consumption per day: "..PrettyNumber(per_day))
@@ -217,32 +348,39 @@ function Homeworld:update_gui( player_index )
    local my_gui = self.state.gui[player_index]
    local state = self.state
    local pop = state.population
+   local pop_delta = state.population_delta
    local upgrade_pop = self:get_tier().upgrade_population
    local downgrade_pop = self:get_tier().downgrade_population
    local pop_bar_value = (pop - downgrade_pop) / (upgrade_pop - downgrade_pop)
+   if math.floor(pop_delta) > 0 then
+      pop_delta = string.format("+%i", math.floor(pop_delta))
+   else
+      pop_delta = string.format("%i", math.floor(pop_delta))
+   end
    my_gui.tier.data.caption = string.format("%i / %i", self.state.tier, #needs_prototype)
-   my_gui.population.data.caption = string.format("%s / %s", PrettyNumber(pop), PrettyNumber(upgrade_pop))
+   my_gui.population.data.caption = string.format("%s / %s [%s]", PrettyNumber(pop), PrettyNumber(upgrade_pop), pop_delta)
    my_gui.population_bar.value = pop_bar_value
    local needs_gui = my_gui.needs
    for index, need in ipairs(self:get_needs()) do
       local need_gui = needs_gui["need_"..index]
-      local labels = need_gui.label_icon.labels
-      if not need.consume_once then
-         local per_day = self:get_need_item_count(need, GAME_DAY)
-         labels.consumption.caption = string.format("Consumption per day: %s", PrettyNumber(per_day))
+      if need_gui then
+         local labels = need_gui.label_icon.labels
+         if not need.consume_once then
+            local per_day = self:get_need_item_count(need, GAME_DAY)
+            labels.consumption.caption = string.format("Consumption per day: %s", PrettyNumber(per_day))
+         end
+         local in_stock = self:count_item(need.item)
+         labels.item.label.caption = game.item_prototypes[need.item].localised_name
+         labels.item.data.caption = string.format("[%s]", PrettyNumber(in_stock))
+         need_gui.satisfaction.value = self:get_average_satisfaction_for_need(need)
       end
-      local in_stock = self:count_item(need.item)
-      labels.item.label.caption = game.item_prototypes[need.item].localised_name
-      labels.item.data.caption = string.format("[%s]", PrettyNumber(in_stock))
-      need_gui.satisfaction.value = self:get_satisfaction_for_need(need)
    end
 end
 
 function Homeworld:hide_gui( player_index )
-   if not self.state.gui[player_index] then
+   if self.state.gui[player_index] == nil then
       return
    end
-
    self.state.gui[player_index].destroy()
    self.state.gui[player_index] = nil
 end

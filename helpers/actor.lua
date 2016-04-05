@@ -8,7 +8,7 @@ function Actor( params )
     local classname = params.name
     local use_entity_gui = params.use_entity_gui or false
     local use_proximity_gui = params.use_proximity_gui or false
-    
+
     -- store the class name.
     o._classname = classname
     o._instances = {}
@@ -64,8 +64,11 @@ function Actor( params )
         end
     elseif use_proximity_gui then
         o._tick_gui = function(self)
-            if ModuloTimer(2 * SECONDS) then
-                local near_players = nearest_players{origin = self.state.entity.position, max_distance = 2}
+            if ModuloTimer(30) then
+                local near_players = nearest_players{
+                   origin = self.state.entity.position,
+                   max_distance = params.gui_proximity_radius or 2
+                }
                 for index, player in ipairs(near_players) do
                     self:show_gui(index)
                 end
@@ -79,7 +82,7 @@ function Actor( params )
         o._tick_gui = function(self) end
     end
     -- store the actor class by name so that we can easily instantiate
-    -- if we only have it's name and state. 
+    -- if we only have it's name and state.
     _actor_classes[o._classname] = o
     return o
 end

@@ -32,8 +32,9 @@ data:extend({
 		name = "homeworld-portal",
 		enabled = "false",
 		ingredients = {
-			{"alien-artifact", 30},
-			{"smart-chest", 5}
+			{"alien-artifact", 50},
+         {"stone-brick", 200},
+			{"smart-chest", 1}
 		},
 		result = "homeworld_portal"
 	},
