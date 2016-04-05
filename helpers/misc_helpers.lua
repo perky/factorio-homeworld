@@ -1,13 +1,5 @@
-function ActorClass( name, class )
-	_ENV[name] = class
-	class.className = name
-	class.CreateActor = function (existing) 
-		local actor = existing or {}
-		actor.className = name
-		setmetatable(actor, {__index = class})
-		return actor
-	end
-	return class
+function ModuloTimer( ticks )
+	return (game.tick % ticks) == 0
 end
 
 function PrintToAllPlayers( text )
@@ -93,7 +85,11 @@ function iarea( area )
 	local bb = area[2]
 	local _x = aa.x
 	local _y = aa.y
+    local reached_end = false
 	return function()
+        if reached_end then
+            return nil
+        end
 		local x = _x
 		local y = _y
 		_x = _x + 1
@@ -101,7 +97,7 @@ function iarea( area )
 			_x = aa.x
 			_y = _y + 1
 			if _y > bb.y then
-				return nil
+				reached_end = true
 			end
 		end
 		return x, y
@@ -115,11 +111,23 @@ function SquareArea( origin, radius )
 	}
 end
 
+function VectorArea( origin, radius )
+	return {
+		{x=origin.x - radius, y=origin.y - radius},
+		{x=origin.x + radius, y=origin.y + radius}
+	}
+end
+
 function RemapNumber(number, from1, to1, from2, to2)
 	return (number - from1) / (to1 - from1) * (to2 - from2) + from2
 end
 
-function ShuffleTable( tbl )
+function table.random_value( tbl )
+	local index = math.random(1, #tbl)
+	return tbl[index]
+end
+
+function table.shuffle( tbl )
 	local rand = math.random
 	local count = #tbl
 	local dieRoll
@@ -127,6 +135,16 @@ function ShuffleTable( tbl )
 		dieRoll = rand(i)
 		tbl[i], tbl[dieRoll] = tbl[dieRoll], tbl[i]
 	end
+end
+
+function table.where( tbl, predicate )
+    local result = {}
+    for index, value in ipairs(tbl) do
+        if predicate(value) then
+            table.insert(result, value)
+        end
+    end
+    return result
 end
 
 function DistanceSqr( p1, p2 )

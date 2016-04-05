@@ -1,8 +1,8 @@
 -- Overwrite vanilla recipes
 data.raw.recipe["empty-barrel"].results[1].amount = 10
 data.raw.recipe["concrete"].ingredients = {
-  {"stone-brick", 2},
-  {"sand", 10},
+  {"stone-brick", 5},
+  {"sand", 5},
   {"iron-ore", 1},
   {type="fluid", name="water", amount=10}
 }
@@ -95,6 +95,31 @@ data:extend({
       {"electronic-circuit", 2}
     },
     result = "sand-collector"
+  },
+
+  {
+    type = "recipe",
+    name = "seeder",
+    enabled = "false",
+    ingredients = {
+      {"raw-wood", 100},
+      {"iron-plate", 20},
+      {"battery", 30},
+      {"advanced-circuit", 20}
+    },
+    result = "seeder"
+  },
+
+  {
+    type = "recipe",
+    name = "terraformer",
+    enabled = "false",
+    ingredients = {
+      {"iron-plate", 50},
+      {"battery", 40},
+      {"processing-unit", 20}
+    },
+    result = "terraformer"
   },
 
   -- SMELTING RECIPES

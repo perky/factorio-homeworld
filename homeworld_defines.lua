@@ -1,9 +1,3 @@
-HOMEWORLD_EVENTS = {}
-HOMEWORLD_EVENTS.HOMEWORLD_ONLINE = game.generate_event_name()
-HOMEWORLD_EVENTS.ON_REWARD = game.generate_event_name()
-
 SECONDS = 60
 MINUTES = 3600
 GAME_DAY = 25000
-
-HOMEWORLD_PORTAL_EID = "homeworld_portal_smart"

@@ -1,27 +1,6 @@
 local styles = data.raw["gui-style"].default
 
-local function CreateIconStyle( itemType, itemName )
-	local item = data.raw[itemType][itemName]
-	local style = {
-		type = "checkbox_style",
-		parent = "frame_style",
-		default_background =
-	  	{
-	    	filename = item.icon,
-	    	width = 32,
-	   		height = 32
-	  	},
-	  	hovered_background =
-	  	{
-	    	filename = item.icon,
-	    	width = 32,
-	    	height = 32
-	  	}
-	}
-	styles["arcology-icon-"..itemName] = style
-end
-
-styles["arcology-icon-base"] = {
+styles["item-icon-base"] = {
   type = "checkbox_style",
   parent = "checkbox_style",
   width = 35,
@@ -52,9 +31,6 @@ styles["arcology-icon-base"] = {
   }
 }
 
---CreateIconStyle("recipes", "wood")
---CreateIconStyle("capsule", "raw-fish")
-
 for typename, sometype in pairs(data.raw) do
   local _, object = next(sometype)
   if object.stack_size then
@@ -63,7 +39,7 @@ for typename, sometype in pairs(data.raw) do
         local style =
         {
           type = "checkbox_style",
-          parent = "arcology-icon-base",
+          parent = "item-icon-base",
           default_background =
           {
             filename = item.icon,
@@ -77,7 +53,7 @@ for typename, sometype in pairs(data.raw) do
             height = 32
           }
         }
-        data.raw["gui-style"].default["arcology-icon-"..name] = style
+        data.raw["gui-style"].default["item-icon-"..name] = style
       end
     end
   end

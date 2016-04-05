@@ -1,25 +1,4 @@
 data:extend({
-	{
-		type = "container",
-		name = "arcology",
-		icon = "__base__/graphics/icons/lab.png",
-    	flags = {"placeable-player", "player-creation"},
-    	max_health = 150,
-    	corpse = "big-remnants",
-    	dying_explosion = "medium-explosion",
-    	collision_box = {{-1.2, -1.2}, {1.2, 1.2}},
-    	selection_box = {{-1.5, -1.5}, {1.5, 1.5}},
-    	picture = {
-    		filename = "__base__/graphics/entity/lab/lab.png",
-    		width = 113,
-      		height = 91,
-      		shift = {0.2, 0.15}
-    	},
-    	inventory_size = 56,
-    	open_sound = { filename = "__base__/sound/metallic-chest-open.ogg", volume=0.65 },
-    	close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 }
-	},
-
     {
         type = "container",
         name = "fishery",
@@ -38,7 +17,7 @@ data:extend({
             scale = 0.8,
             shift = {0, -0.8}
         },
-        inventory_size = 1,
+        inventory_size = 3,
         open_sound = { filename = "__base__/sound/metallic-chest-open.ogg", volume=0.65 },
         close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 }
     },
@@ -63,7 +42,7 @@ data:extend({
             shift = {0.40625, -0.71875},
             animation_speed = 4
         },
-        
+
         crafting_categories = {"sawmill"},
         crafting_speed = 0.1,
         energy_usage = "15kW",
@@ -81,46 +60,23 @@ data:extend({
         close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 }
     },
 
-    {
-        type = "container",
-        name = "farm",
-        icon = "__base__/graphics/icons/fish.png",
-        flags = {"player-creation", "placeable-player"},
-        minable = {mining_time = 0.3, result = "farm"},
-        max_health = 50,
-        corpse = "big-remnants",
-        collision_box = {{-4.5, -4.5}, {4.5, 4.5}},
-        selection_box = {{-4, -4}, {4, 4}},
-        picture = {
-            filename = "__homeworld__/graphics/entity/farm.png",
-            priority = "low",
-            width = 450,
-            height = 450,
-            shift = {0, 0}
-        },
-        inventory_size = 30,
-        open_sound = { filename = "__base__/sound/metallic-chest-open.ogg", volume=0.65 },
-        close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 }
-    },
-
-    {
+	 {
         type = "smart-container",
         name = "homeworld_portal",
-        icon = "__base__/graphics/icons/lab.png",
+        icon = "__homeworld__/graphics/icons/portal.png",
         flags = {"player-creation", "placeable-player"},
         render_layer = "floor",
         max_health = 150,
         corpse = "big-remnants",
         dying_explosion = "medium-explosion",
-        collision_box = {{-3.2, -3.2}, {3.2, 3.2}},
-        selection_box = {{-3.5, -3.5}, {3.5, 3.5}},
+        collision_box = {{-2.2, -1.2}, {2.2, 2.2}},
+        selection_box = {{-2.5, -1.5}, {2.5, 2.5}},
         picture = {
-            filename = "__homeworld__/graphics/entity/homeworld-portal.png",
+            filename = "__homeworld__/graphics/entity/portal/portal.png",
             priority = "low",
-            width = 358,
-            height = 312,
-            shift = {0, 0},
-            scale = 0.625
+            width = 226,
+            height = 163,
+            shift = {0.9375, 0.0625}
         },
         connection_point =
         {
@@ -135,12 +91,12 @@ data:extend({
             green = {0.3, -0.8}
           }
         },
-        inventory_size = 32,
+        inventory_size = 36,
         open_sound = { filename = "__base__/sound/metallic-chest-open.ogg", volume=0.65 },
-        close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 },    
+        close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 },
     },
 
-    {
+	 {
         type = "explosion",
         name = "portal-sound",
         flags = {"not-on-map"},
@@ -176,29 +132,22 @@ data:extend({
         }
     },
 
-    {
-        type = "smoke",
+	 {
+        type = "explosion",
         name = "portal-fx",
         flags = {"not-on-map"},
-        animation =
-        {
-            filename = "__homeworld__/graphics/entity/homeworld-portal-on.png",
+        animations =
+        {{
+            filename = "__homeworld__/graphics/entity/portal/portal-animation.png",
             priority = "high",
-            width = 358,
-            height = 312,
-            frame_count = 4,
-            animation_speed = 1,
-            scale = 0.625,
-            shift = {-0.52, 0.45},
+            width = 95,
+            height = 215,
+            frame_count = 50,
+            line_length = 10,
+            animation_speed = 0.2,
+            shift = {-0.5, -1.95},
             tint = {r = 1, g = 1, b = 1, a = 1}
-        },
-        render_layer = "smoke",
-        cyclic = true,
-        affected_by_wind = false,
-        duration = 60 * 6,
-        movement_slow_down_factor = 0,
-        fade_away_duration = 60,
-        show_when_smoke_off = true
+        }},
     },
 
     {
@@ -410,3 +359,12 @@ Farm("farm_01", "farm_01.png")
 Farm("farm_02", "farm_02.png")
 Farm("farm_03", "farm_03.png")
 Farm("farm_full", "farm_full.png")
+
+-- Double fast inserter speed.
+local fast_inserter = data.raw["inserter"]["fast-inserter"]
+local modifier = 2
+fast_inserter.extension_speed = fast_inserter.extension_speed * modifier
+fast_inserter.rotation_speed = fast_inserter.rotation_speed * modifier
+fast_inserter.energy_source.drain = "0.8kW"
+fast_inserter.energy_per_movement = fast_inserter.energy_per_movement * modifier
+fast_inserter.energy_per_rotation = fast_inserter.energy_per_rotation * modifier

@@ -1,63 +1,66 @@
 GUI = {
-	parentStack = {},
-	buttonCallbacks = {}
+	parentStack = {}
 }
 GUI.VERTICAL = "vertical"
 GUI.HORIZONTAL = "horizontal"
 
-function GUI.PushLeftSection( playerIndex )
-	return GUI.PushParent(game.players[playerIndex].gui.left)
+function GUI.init()
+    global.gui_button_callbacks = {}
 end
 
-function GUI.PushParent( parent )
+function GUI.push_left_section( playerIndex )
+	return GUI.push_parent(game.get_player(playerIndex).gui.left)
+end
+
+function GUI.push_parent( parent )
 	table.insert(GUI.parentStack, parent)
 	return parent
 end
 
-function GUI.PopParent()
+function GUI.pop_parent()
 	table.remove(GUI.parentStack, #GUI.parentStack)
 end
 
-function GUI.PopAll()
+function GUI.pop_all()
 	GUI.parentStack = {}
 end
 
-function GUI.Parent()
+function GUI.parent()
 	return GUI.parentStack[#GUI.parentStack]
 end
 
-function GUI.Frame(name, caption, direction)
+function GUI.frame(name, caption, direction)
 	if direction == nil then
 		direction = GUI.VERTICAL
 	end
-	local parent = GUI.Parent()
+	local parent = GUI.parent()
 	if not parent[name] then
-		return GUI.Parent().add{type = "frame", name=name, caption=caption, direction=direction}
+		return GUI.parent().add{type = "frame", name=name, caption=caption, direction=direction}
 	else
 		return parent[name]
 	end
 end
 
-function GUI.Label(name, caption, style)
-	return GUI.Parent().add{type = "label", name = name, caption = caption, style = style}
+function GUI.label(name, caption, style)
+	return GUI.parent().add{type = "label", name = name, caption = caption, style = style}
 end
 
-function GUI.SetLabelCaptionLocalised( label, ... )
+function GUI.set_label_caption_localized( label, ... )
 	local texts = {...}
 	table.insert(texts, 1, "")
 	label.caption = texts
 end
 
-function GUI.LabelData(name, caption, initialValue)
-	local flow = GUI.PushParent(GUI.Flow(name, GUI.HORIZONTAL))
-	GUI.Label("label", caption, "caption_label_style")
-	GUI.Label("data", initialValue, "description_title_label_style")
-	GUI.PopParent()
+function GUI.label_data(name, caption, initialValue)
+	local flow = GUI.push_parent(GUI.flow(name, GUI.HORIZONTAL))
+	GUI.label("label", caption, "caption_label_style")
+	GUI.label("data", initialValue, "description_title_label_style")
+	GUI.pop_parent()
 	return flow
 end
 
-function GUI.ProgressBar(name, size, initialValue, style)
-	return GUI.Parent().add{
+function GUI.progress_bar(name, size, initialValue, style)
+	return GUI.parent().add{
 		type = "progressbar",
 		name = name,
 		size = size,
@@ -66,43 +69,56 @@ function GUI.ProgressBar(name, size, initialValue, style)
 	}
 end
 
-function GUI.Flow(name, direction)
-	return GUI.Parent().add{type = "flow", name = name, direction = direction}
+function GUI.flow(name, direction)
+	return GUI.parent().add{type = "flow", name = name, direction = direction}
 end
 
-function GUI.Icon(name, iconName)
-	return GUI.Parent().add{type = "checkbox", style = "arcology-icon-"..iconName, state = false, name = name}
+function GUI.icon(name, iconName)
+	return GUI.parent().add{type = "checkbox", style = "item-icon-"..iconName, state = false, name = name}
 end
 
-function GUI.TextField(name, defaultText)
+function GUI.text_field(name, defaultText)
 	if defaultText == nil then
 		defaultText = ""
 	end
-	return GUI.Parent().add{type = "textfield", name = name, text = defaultText}
+	return GUI.parent().add{type = "textfield", name = name, text = defaultText}
 end
 
-function GUI.Button(name, caption, methodName, delegate, args)
-	local parent = GUI.Parent()
+function GUI.button(name, caption, methodName, delegate, args)
+	local parent = GUI.parent()
 	local button = parent.add{type = "button", name = name, caption = caption, style = style}
-	GUI.buttonCallbacks[name] = {onclick = methodName, delegate = delegate, args = args}
+	local identifier = GUI.get_button_identifier(parent.gui.player, button)
+	global.gui_button_callbacks[identifier] = {onclick = methodName, delegate = delegate, args = args}
 	return button
 end
 
-function GUI.DestroyButton( button )
-	GUI.buttonCallbacks[button.name] = nil
+function GUI.checkbox( name, caption, state, methodName, delegate, args )
+	local parent = GUI.parent()
+	local checkbox = parent.add{type = "checkbox", caption = caption, state = state}
+	local identifier = GUI.get_button_identifier(parent.gui.player, checkbox)
+	global.gui_button_callbacks[identifier] = {onclick = methodName, delegate = delegate, args = args}
+end
+
+function GUI.destroy_button( button )
+	global.gui_button_callbacks[button.name] = nil
 	button.destroy()
 end
 
-function GUI.OnClick( event )
+function GUI.get_button_identifier( player, button )
+	return string.format("p_%s_%s", player.name, button.name)
+end
+
+function GUI.on_click( event )
 	local playerIndex = event.player_index
 	local button = event.element
-	local callback = GUI.buttonCallbacks[button.name]
+	local identifier = GUI.get_button_identifier(game.players[playerIndex], button)
+	local callback = global.gui_button_callbacks[identifier]
 
 	if callback then
 		local func = callback.delegate[callback.onclick]
 		if func then
-			func(callback.delegate, playerIndex, callback.args)
+			func(callback.delegate, event, callback.args)
 		end
 	end
 end
-game.on_event(defines.events.on_gui_click, GUI.OnClick)
+script.on_event(defines.events.on_gui_click, GUI.on_click)

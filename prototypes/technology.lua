@@ -66,5 +66,44 @@ data:extend({
 			{type = "unlock-recipe", recipe = "furniture"}
 		}
 	},
-})
 
+	{
+		type = "technology",
+		name = "terraforming-1",
+		icon = "__homeworld__/graphics/icons/seeder.png",
+		prerequisites = {"battery"},
+		unit = {
+			count = 75,
+			ingredients = {{"science-pack-1", 1}, {"science-pack-2", 1}, {"science-pack-3", 1}},
+			time = 25
+		},
+		effects = {
+			{type = "unlock-recipe", recipe = "seeder"},
+			{type = "unlock-recipe", recipe = "craft-seeder-module-01"},
+			{type = "unlock-recipe", recipe = "craft-seeder-module-02"},
+			{type = "unlock-recipe", recipe = "craft-seeder-module-03"},
+			{type = "unlock-recipe", recipe = "craft-seeder-module-04"},
+			{type = "unlock-recipe", recipe = "craft-seeder-module-05"},
+		}
+	},
+
+	{
+		type = "technology",
+		name = "terraforming-2",
+		icon = "__homeworld__/graphics/icons/terraformer.png",
+		prerequisites = {"terraforming-1", "alien-technology"},
+		unit = {
+			count = 125,
+			ingredients = {{"science-pack-1", 1}, {"science-pack-2", 1}, {"science-pack-3", 1}, {"alien-science-pack", 1}},
+			time = 40
+		},
+		effects = {
+			{type = "unlock-recipe", recipe = "terraformer"},
+			{type = "unlock-recipe", recipe = "craft-terraform-module-sand"},
+			{type = "unlock-recipe", recipe = "craft-terraform-module-grass"},
+			{type = "unlock-recipe", recipe = "craft-terraform-module-dirt"},
+			{type = "unlock-recipe", recipe = "craft-terraform-module-stone"},
+			{type = "unlock-recipe", recipe = "craft-terraform-module-concrete"},
+		}
+	},
+})
