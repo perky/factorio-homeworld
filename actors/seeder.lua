@@ -1,16 +1,6 @@
 Seeder = Actor{name = "seeder"}
-local config = {
-   tree_types = {
-   	["seeder-module-01"] = "tree-01",
-   	["seeder-module-02"] = "tree-02",
-   	["seeder-module-03"] = "tree-03",
-   	["seeder-module-04"] = "tree-04",
-   	["seeder-module-05"] = "tree-05",
-   },
-   plant_tree_interval = {min = 5 * SECONDS, max = 1 * MINUTES},
-   plant_radius = 16,
-   plant_precision = 4.0
-}
+local config = homeworld_config.seeder
+
 function Seeder:init()
    self:increment_timer()
 end

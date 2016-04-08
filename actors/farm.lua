@@ -2,32 +2,7 @@ Farm = Actor{name = "farm", use_entity_gui = true}
 
 local STATE_GROWING = 1
 local STATE_RESETTING = 2
-local config = {
-   max_wheat_yield_per_min = 20,
-   max_veg_yield_per_min = 10,
-   max_hops_yield_per_min = 10,
-   max_grapes_yield_per_min = 5,
-   production_interval = 5 * GAME_DAY,
-   production_interval_deviation = 1 * GAME_DAY,
-   reset_interval = 1 * GAME_DAY,
-   max_pollution = 1500,
-   pollution_multiplier = 1,
-   radius = 12,
-   soil_richness = {
-      ["water"]       = 5.00,
-      ["deepwater"]   = 5.00,
-   	["grass"]       = 0.80,
-   	["grass-medium"]= 0.70,
-   	["grass-dry"]   = 0.60,
-   	["dirt"]        = 0.50,
-   	["dirt-dark"]   = 0.40,
-   	["sand"]        = -1.00,
-   	["sand-dark"]   = -1.00
-   },
-   farm_stages = {
-      "farm", "farm_01", "farm_02", "farm_03", "farm_full"
-   }
-}
+local config = homeworld_config.farm;
 
 function Farm:init()
     local state = self.state
@@ -98,12 +73,12 @@ function Farm:get_yield( air_purity )
 end
 
 function Farm:set_entity_stage( stage )
-    if self.state.stage == stage then
+    local entity = self.state.entity
+    if self.state.stage == stage or not entity.valid then
         return
     end
     self.state.stage = stage
     -- create new farm entity
-    local entity = self.state.entity
     local surface = entity.surface
     local new_farm = surface.create_entity{
         name = config.farm_stages[stage],
@@ -132,10 +107,10 @@ function Farm:tick()
          local veg_yield = math.floor(config.max_veg_yield_per_min * interval * yield)
          local grapes_yield = math.floor(config.max_grapes_yield_per_min * interval * yield)
          local inventory = state.entity.get_inventory(1)
-         inventory.insert{name = "wheat", count = wheat_yield}
-         inventory.insert{name = "hops", count = hops_yield}
-         inventory.insert{name = "vegetables", count = veg_yield}
-         inventory.insert{name = "grapes", count = grapes_yield}
+         inventory.insert{name = "wheat", count = math.max(wheat_yield,1)}
+         inventory.insert{name = "hops", count = math.max(hops_yield, 1)}
+         inventory.insert{name = "vegetables", count = math.max(veg_yield, 1)}
+         inventory.insert{name = "grapes", count = math.max(grapes_yield, 1)}
          self:increment_reset_timer()
       end
    elseif state.current_state == STATE_RESETTING then

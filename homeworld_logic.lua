@@ -1,21 +1,16 @@
 Homeworld = {}
 
-local config = {
-   starting_population = 1000,
-   min_population = 10,
-   max_growth_rate = 35,
-   max_decline_rate = 15,
-   update_interval = 1 * SECONDS
-}
+local config = homeworld_config.homeworld
 
 function Homeworld:init()
    self.state = {
-      tier = 1,
+      tier = config.starting_tier,
       population = config.starting_population,
       population_delta = 0,
       inventory = {},
       average_satisfaction = {},
       average_satisfaction_window = 120,
+      claimed_rewards = {},
       gui = {}
    }
    self:increment_update_timer()
@@ -24,6 +19,9 @@ end
 
 function Homeworld:load()
    self.state = global.homeworld_state
+   if self.state.claimed_rewards == nil then
+    self.state.claimed_rewards = {}
+   end
 end
 
 function Homeworld:insert_item( item_stack )
@@ -64,11 +62,11 @@ function Homeworld:increment_update_timer()
 end
 
 function Homeworld:get_tier()
-   return needs_prototype[self.state.tier]
+   return config.tiers[self.state.tier]
 end
 
 function Homeworld:get_next_tier()
-   return needs_prototype[self.state.tier + 1]
+   return config.tiers[self.state.tier + 1]
 end
 
 function Homeworld:get_needs()
@@ -117,23 +115,31 @@ end
 
 function Homeworld:change_tier_by( amount )
    local new_tier = self.state.tier + amount
-   if needs_prototype[new_tier] then
+   
+   if new_tier == 7 then
+    game.set_game_state{game_finished = true, player_won = true, next_level = false, can_continue = true}
+   end
+   
+   if config.tiers[new_tier] then
       -- If upgrading...
       if amount > 0 then
          -- Spawn rewards.
-         self:spawn_reward(self:get_tier())
+         if not self.state.claimed_rewards[self.state.tier] then
+            self:spawn_reward(self:get_tier())
+            self.state.claimed_rewards[self.state.tier] = true
+         end
          -- Consume 'consume_once' needs.
          for index, need in ipairs(self:get_needs()) do
             if need.consume_once then
                self:remove_item{name = need.item, count = need.count}
             end
          end
-         PrintToAllPlayers("Homeworld population upgraded to ".. needs_prototype[new_tier].name ..".")
+         PrintToAllPlayers("Homeworld population upgraded to ".. config.tiers[new_tier].name ..".")
       end
 
       -- If downgrading..
       if amount < 0 then
-         PrintToAllPlayers("Homeworld population downgraded to ".. needs_prototype[new_tier].name .."!")
+         PrintToAllPlayers("Homeworld population downgraded to ".. config.tiers[new_tier].name .."!")
       end
 
       -- Update tier.
@@ -357,7 +363,7 @@ function Homeworld:update_gui( player_index )
    else
       pop_delta = string.format("%i", math.floor(pop_delta))
    end
-   my_gui.tier.data.caption = string.format("%i / %i", self.state.tier, #needs_prototype)
+   my_gui.tier.data.caption = string.format("%i / %i", self.state.tier, #config.tiers)
    my_gui.population.data.caption = string.format("%s / %s [%s]", PrettyNumber(pop), PrettyNumber(upgrade_pop), pop_delta)
    my_gui.population_bar.value = pop_bar_value
    local needs_gui = my_gui.needs

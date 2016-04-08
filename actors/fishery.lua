@@ -1,17 +1,6 @@
 Fishery = Actor{name = "fishery", use_entity_gui = true}
 
-local config = {
-   max_pollution = 4000,
-   max_fish_yield_per_min = 500,
-   yield_reduce_per_nearby_fishery = 0.2,
-   max_fish = 10,
-   fish_reproduction_chance = 0.06,
-   fish_die_chance = 0.07,
-   fish_die_chance_increase_per_fishery = 0.06,
-   reproduction_interval = 40 * SECONDS,
-   harvest_interval = 20 * SECONDS,
-   radius = 12
-}
+local config = homeworld_config.fishery;
 
 function Fishery:init()
    self:increment_harvest_timer()
@@ -86,7 +75,7 @@ function Fishery:tick( tick )
          local inventory = entity.get_inventory(1)
          local interval = config.harvest_interval * (1/MINUTES)
          local yield = self:get_yield()
-         local item_count = math.max(config.max_fish_yield_per_min * interval * yield, 0)
+         local item_count = math.max(config.max_fish_yield_per_min * interval * yield, 1)
          local fish_stack = {
             name = "raw-fish",
             count = item_count

@@ -1,13 +1,13 @@
 Portal = Actor{name = "portal", use_proximity_gui = true, gui_proximity_radius = 6}
 
-local config = {
-   update_interval = 60 * SECONDS,
-   test_mode = false
-}
+local config = homeworld_config.portal
 
 function Portal:tick( tick )
    if ModuloTimer(config.update_interval) then
       local inventory = self.state.entity.get_inventory(1)
+      if inventory.is_empty() then
+        return
+      end
       for index = 1, #inventory do
          if inventory[index] and inventory[index].valid_for_read then
             Homeworld:insert_item(inventory[index])

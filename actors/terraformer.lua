@@ -7,19 +7,7 @@ local CURSOR_OFFSET = {
    [LEFT] = {x = -1, y = 0},
    [UP] = {x = 0, y = -1}
 }
-local config = {
-   radius = 50,
-   min_step_interval = 10, -- Ticks.
-   max_step_interval = 1 * MINUTES,
-   max_energy = 35555,
-   tile_types = {
-   	["terraform-module-sand"] = "sand",
-   	["terraform-module-grass"] = "grass",
-   	["terraform-module-dirt"] = "dirt",
-   	["terraform-module-stone"] = "stone-path",
-   	["terraform-module-concrete"] = "concrete",
-   }
-}
+local config = homeworld_config.terraformer
 
 function Terraformer:init()
    self.last_step_tick = game.tick
