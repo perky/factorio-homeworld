@@ -8,16 +8,18 @@ return {
     },
     
     farm = {
-        max_wheat_yield_per_min = 30,
-        max_veg_yield_per_min = 10,
-        max_hops_yield_per_min = 10,
-        max_grapes_yield_per_min = 5,
         production_interval = 5 * GAME_DAY,
         production_interval_deviation = 1 * GAME_DAY,
         reset_interval = 1 * GAME_DAY,
         max_pollution = 1750,
         pollution_multiplier = 1,
         radius = 12,
+        produce = {
+            {item_name = "wheat", yield_per_min = 30},
+            {item_name = "vegetables", yield_per_min = 10},
+            {item_name = "hops", yield_per_min = 10},
+            {item_name = "grapes", yield_per_min = 5},
+        },
         soil_richness = {
             ["water"]       = 5.00,
             ["deepwater"]   = 5.00,
