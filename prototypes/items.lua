@@ -72,6 +72,26 @@ data:extend({
 		place_result = "sand-collector",
 		stack_size = 50
 	},
+    
+    {
+		type = "item",
+		name = "belt_gate",
+		icon = "__homeworld__/graphics/icons/belt_gate.png",
+		flags = { "goes-to-quickbar" },
+		subgroup = "belt",
+		place_result = "belt_gate",
+		stack_size = 50
+	},
+    
+    {
+		type = "item",
+		name = "belt_throughput_reader",
+		icon = "__homeworld__/graphics/icons/belt_throughput_reader.png",
+		flags = { "goes-to-quickbar" },
+		subgroup = "belt",
+		place_result = "belt_throughput_reader",
+		stack_size = 50
+	},
 
 	{
 	    type = "item",

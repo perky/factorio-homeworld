@@ -41,7 +41,7 @@ end
 function Fishery:count_nearby_fisheries()
    local entity = self.state.entity
    local nearby_fisheries = entity.surface.find_entities_filtered{
-      area = VectorArea(entity.position, config.radius),
+      area = SquareArea(entity.position, config.radius),
       name = "fishery"
    }
    return #nearby_fisheries - 1
@@ -51,7 +51,7 @@ function Fishery:get_nearby_fish()
    local entity = self.state.entity
    if not entity.valid then return {} end
    local nearby_fish = entity.surface.find_entities_filtered{
-      area = VectorArea(entity.position, config.radius),
+      area = SquareArea(entity.position, config.radius),
       name = "fish"
    }
    return nearby_fish

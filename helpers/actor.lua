@@ -12,13 +12,18 @@ function Actor( params )
     -- store the class name.
     o._classname = classname
     o._instances = {}
+    local class_mt = {__index = o}
+    -- Superclass
+    if params.superclass then
+        setmetatable(o, {__index = params.superclass})
+    end
     -- the new method used to instantiate an actor.
     o.new = function(self, entity, state)
         local actor = {}
         table.insert(o._instances, actor)
         -- set the metatable to allow OOP behaviour.
-        setmetatable(actor, self)
-        self.__index = self
+        setmetatable(actor, class_mt)
+        --self.__index = self
         -- create a new state table or use the one provided.
         if state then
             actor.state = state

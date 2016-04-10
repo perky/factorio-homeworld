@@ -3,11 +3,14 @@ local alienTech = data.raw.technology["alien-technology"]
 local battery = data.raw.technology["battery"]
 local plastics = data.raw.technology["plastics"]
 local concreteTech = data.raw.technology["concrete"]
+local circuitNetwork = data.raw.technology["circuit-network"]
 table.insert(fluidTech.effects, {type = "unlock-recipe", recipe = "fill-water-barrel"})
 table.insert(alienTech.effects, {type = "unlock-recipe", recipe = "homeworld-portal"})
 table.insert(battery.effects, {type = "unlock-recipe", recipe = "portable-electronics"})
 table.insert(plastics.effects, {type = "unlock-recipe", recipe = "synthetic-wood"})
 table.insert(concreteTech.effects, {type = "unlock-recipe", recipe = "building-materials"})
+table.insert(circuitNetwork.effects, {type = "unlock-recipe", recipe = "belt_gate"})
+table.insert(circuitNetwork.effects, {type = "unlock-recipe", recipe = "belt_throughput_reader"})
 
 concreteTech.prerequisites = {"advanced-material-processing-2", "carpentry"}
 
@@ -84,6 +87,12 @@ data:extend({
 			{type = "unlock-recipe", recipe = "craft-seeder-module-03"},
 			{type = "unlock-recipe", recipe = "craft-seeder-module-04"},
 			{type = "unlock-recipe", recipe = "craft-seeder-module-05"},
+            
+            {type = "unlock-recipe", recipe = "seeder-module-01"},
+			{type = "unlock-recipe", recipe = "seeder-module-02"},
+			{type = "unlock-recipe", recipe = "seeder-module-03"},
+			{type = "unlock-recipe", recipe = "seeder-module-04"},
+			{type = "unlock-recipe", recipe = "seeder-module-05"},
 		}
 	},
 
@@ -104,6 +113,12 @@ data:extend({
 			{type = "unlock-recipe", recipe = "craft-terraform-module-dirt"},
 			{type = "unlock-recipe", recipe = "craft-terraform-module-stone"},
 			{type = "unlock-recipe", recipe = "craft-terraform-module-concrete"},
+            
+            {type = "unlock-recipe", recipe = "terraform-module-sand"},
+			{type = "unlock-recipe", recipe = "terraform-module-grass"},
+			{type = "unlock-recipe", recipe = "terraform-module-dirt"},
+			{type = "unlock-recipe", recipe = "terraform-module-stone"},
+			{type = "unlock-recipe", recipe = "terraform-module-concrete"},
 		}
 	},
 })

@@ -2,10 +2,6 @@ function ModuloTimer( ticks )
 	return (game.tick % ticks) == 0
 end
 
-function ModuloTimer( ticks )
-	return (game.tick % ticks) == 0
-end
-
 function PrintToAllPlayers( text )
 	for playerIndex = 1, #game.players do
 		if game.players[playerIndex] ~= nil then
@@ -20,6 +16,18 @@ function SetGoalForAllPlayers( goalText )
 			game.players[playerIndex].set_goal_description(goalText)
 		end
 	end
+end
+
+function transport_lines( belt )
+    local lane_index = 0
+    return function()
+        lane_index = lane_index + 1
+        if lane_index > 2 then
+            return nil
+        end
+        local transport_line = belt.get_transport_line(lane_index)
+        return lane_index, transport_line
+    end
 end
 
 function FindTilesInArea( surface, area, tileNameFilter )
@@ -108,13 +116,6 @@ function iarea( area )
 end
 
 function SquareArea( origin, radius )
-	return {
-		{x=origin.x - radius, y=origin.y - radius},
-		{x=origin.x + radius, y=origin.y + radius}
-	}
-end
-
-function VectorArea( origin, radius )
 	return {
 		{x=origin.x - radius, y=origin.y - radius},
 		{x=origin.x + radius, y=origin.y + radius}

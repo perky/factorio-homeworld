@@ -85,5 +85,10 @@ return {
             ["terraform-module-stone"] = "stone-path",
             ["terraform-module-concrete"] = "concrete",
         }
+    },
+    
+    belt_throughput_reader = {
+        max_snapshots = 1 * MINUTES,
+        calculate_throughput_interval = 5 * SECONDS
     }
 }
