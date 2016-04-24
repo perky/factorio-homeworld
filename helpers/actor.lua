@@ -57,30 +57,36 @@ function Actor( params )
     o.tick = function(self) end
     if use_entity_gui then
         o._tick_gui = function(self)
-            for player_index = 1, #game.players do
-                if game.get_player(player_index).opened == self.state.entity then
-                    if self.state.gui[player_index] == nil then
-                        self:show_gui(player_index, self.state.gui)
+            local ent = self.state.entity
+            local gui = self.state.gui
+            fun
+                .filter(game.players, function(p, index)
+                    return p.opened == ent
+                end)
+                :for_each(function(p, index)
+                    if gui[index] == nil then
+                        self:show_gui(index, gui)
                     end
-                elseif self.state.gui[player_index] then
-                    self:hide_gui(player_index, self.state.gui)
-                end
-            end
+                end)
+            fun
+                .filter(game.players, function(p, index)
+                    return p.opened ~= ent
+                end)
+                :for_each(function(p, index)
+                    if gui[index] then
+                        self:hide_gui(index, gui)
+                    end
+                end)
         end
     elseif use_proximity_gui then
         o._tick_gui = function(self)
-            if ModuloTimer(30) then
-                local near_players = nearest_players{
-                   origin = self.state.entity.position,
-                   max_distance = params.gui_proximity_radius or 2
-                }
-                for index, player in ipairs(near_players) do
-                    self:show_gui(index)
-                end
-                local far_players = table.except(game.players, near_players)
-                for index, player in ipairs(far_players) do
-                    self:hide_gui(index)
-                end
+            if util.modulo_timer(30) then
+                local point = self.state.entity.position
+                local radius = params.gui_proximity_radius or 2
+                fun(util.nearest_players(point, radius))
+                   :for_each(function(p,i) self:show_gui(i) end)
+                   :difference(game.players)
+                   :for_each(function(p, i) self:hide_gui(i) end)
             end
         end
     else

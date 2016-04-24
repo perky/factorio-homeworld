@@ -29,7 +29,7 @@ function Sawmill:tick( tick )
         if input_inventory.can_insert(item) then
             local entity = self.state.entity
             local nearby_trees = entity.surface.find_entities_filtered{
-                area = SquareArea(entity.position, config.work_radius),
+                area = util.square_area(entity.position, config.work_radius),
                 type = "tree"
             }
             if #nearby_trees > 0 then

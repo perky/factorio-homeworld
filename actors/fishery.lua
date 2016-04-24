@@ -27,7 +27,7 @@ function Fishery:get_water_purity()
    local entity = self.state.entity
    local pollution = entity.surface.get_pollution(entity.position)
    pollution = math.min(pollution, config.max_pollution)
-   local water_purity = RemapNumber(pollution, 0, config.max_pollution, 1, 0)
+   local water_purity = util.inverse_lerp(pollution, 0, config.max_pollution, 1, 0)
    return water_purity
 end
 
@@ -41,7 +41,7 @@ end
 function Fishery:count_nearby_fisheries()
    local entity = self.state.entity
    local nearby_fisheries = entity.surface.find_entities_filtered{
-      area = SquareArea(entity.position, config.radius),
+      area = util.square_area(entity.position, config.radius),
       name = "fishery"
    }
    return #nearby_fisheries - 1
@@ -51,7 +51,7 @@ function Fishery:get_nearby_fish()
    local entity = self.state.entity
    if not entity.valid then return {} end
    local nearby_fish = entity.surface.find_entities_filtered{
-      area = SquareArea(entity.position, config.radius),
+      area = util.square_area(entity.position, config.radius),
       name = "fish"
    }
    return nearby_fish
@@ -109,7 +109,7 @@ function Fishery:tick( tick )
       self:increment_reproduce_timer()
    end
    -- Update GUI.
-   if ModuloTimer(1 * SECONDS) then
+   if util.modulo_timer(1 * SECONDS) then
       for player_index, frame in pairs(self.state.gui) do
          self:update_gui(player_index, self.state.gui)
       end

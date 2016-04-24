@@ -3,7 +3,7 @@ Portal = Actor{name = "portal", use_proximity_gui = true, gui_proximity_radius =
 local config = homeworld_config.portal
 
 function Portal:tick( tick )
-   if ModuloTimer(config.update_interval) then
+   if util.modulo_timer(config.update_interval) then
       local inventory = self.state.entity.get_inventory(1)
       if inventory.is_empty() then
         return

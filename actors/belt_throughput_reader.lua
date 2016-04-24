@@ -21,7 +21,7 @@ function BeltThroughputReader:tick( dt )
     end
     
     -- Average the transferred items and output it as a signal.
-    if ModuloTimer(config.calculate_throughput_interval) then
+    if util.modulo_timer(config.calculate_throughput_interval) then
         local throughput = self:calculate_throughput()
         self:set_circuit_output(throughput)
         --PrintToAllPlayers(serpent.block(self.state.inventory))
@@ -39,7 +39,7 @@ function BeltThroughputReader:add_to_snapshots( items )
 end
 
 function BeltThroughputReader:find_belt_entity( origin, direction )
-    local area = SquareArea(origin, 0.5)
+    local area = util.square_area(origin, 0.5)
     local offset = DIRECTION_OFFSET[direction]
     for i = 1, 2 do
         area[i].x = area[i].x + offset.x
@@ -71,6 +71,7 @@ function BeltThroughputReader:calculate_throughput()
             end
         end
     end
+    
     --[[
     for item, count in pairs(throughput) do
         local per = count / config.max_snapshots

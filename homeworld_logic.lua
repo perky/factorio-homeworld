@@ -134,12 +134,12 @@ function Homeworld:change_tier_by( amount )
                self:remove_item{name = need.item, count = need.count}
             end
          end
-         PrintToAllPlayers("Homeworld population upgraded to ".. config.tiers[new_tier].name ..".")
+         util.print_to_all_players("Homeworld population upgraded to ".. config.tiers[new_tier].name ..".")
       end
 
       -- If downgrading..
       if amount < 0 then
-         PrintToAllPlayers("Homeworld population downgraded to ".. config.tiers[new_tier].name .."!")
+         util.print_to_all_players("Homeworld population downgraded to ".. config.tiers[new_tier].name .."!")
       end
 
       -- Update tier.
@@ -205,7 +205,7 @@ function Homeworld:update_population()
    -- Calculate population change.
    local total_satisfaction = self:get_total_satisfaction()
    local current_tier = self:get_tier()
-   local pop_change = RemapNumber(
+   local pop_change = util.inverse_lerp(
       total_satisfaction,
       0,
       1,
@@ -230,7 +230,7 @@ function Homeworld:update_population()
       state.is_population_increasing = true
    elseif state.population_delta < 0 then
       if state.is_population_increasing then
-         PrintToAllPlayers("Homeworld population is declining!")
+         util.print_to_all_players("Homeworld population is declining!")
       end
       state.is_population_increasing = false
    end
@@ -278,7 +278,7 @@ function Homeworld:spawn_reward( tier )
             chest_inventory.insert(item_stack)
          end
          -- Show arrow to closest player.
-         local nearest_player = GetNearest(game.players, portal_entity.position)
+         local nearest_player = util.get_nearest(game.players, portal_entity.position)
          if nearest_player then
             nearest_player.set_gui_arrow{
                type = "entity",
@@ -286,7 +286,7 @@ function Homeworld:spawn_reward( tier )
             }
          end
       else
-         PrintToAllPlayers("Could not find suitable location to drop reward chest.")
+         util.print_to_all_players("Could not find suitable location to drop reward chest.")
       end
    end
 end
@@ -332,10 +332,10 @@ function Homeworld:show_needs_gui( player_index )
             GUI.push_parent(GUI.flow("labels", GUI.VERTICAL))
 					GUI.label_data("item", game.item_prototypes[need.item].localised_name, "[0]")
                if need.consume_once then
-                  GUI.label("consumption", "Target: "..PrettyNumber(need.count))
+                  GUI.label("consumption", "Target: "..util.pretty_number(need.count))
                else
                   local per_day = self:get_need_item_count(need, GAME_DAY)
-                  GUI.label("consumption", "Consumption per day: "..PrettyNumber(per_day))
+                  GUI.label("consumption", "Consumption per day: "..util.pretty_number(per_day))
                end
             GUI.pop_parent()
          GUI.pop_parent()
@@ -364,7 +364,7 @@ function Homeworld:update_gui( player_index )
       pop_delta = string.format("%i", math.floor(pop_delta))
    end
    my_gui.tier.data.caption = string.format("%i / %i", self.state.tier, #config.tiers)
-   my_gui.population.data.caption = string.format("%s / %s [%s]", PrettyNumber(pop), PrettyNumber(upgrade_pop), pop_delta)
+   my_gui.population.data.caption = string.format("%s / %s [%s]", util.pretty_number(pop), util.pretty_number(upgrade_pop), pop_delta)
    my_gui.population_bar.value = pop_bar_value
    local needs_gui = my_gui.needs
    for index, need in ipairs(self:get_needs()) do
@@ -373,11 +373,11 @@ function Homeworld:update_gui( player_index )
          local labels = need_gui.label_icon.labels
          if not need.consume_once then
             local per_day = self:get_need_item_count(need, GAME_DAY)
-            labels.consumption.caption = string.format("Consumption per day: %s", PrettyNumber(per_day))
+            labels.consumption.caption = string.format("Consumption per day: %s", util.pretty_number(per_day))
          end
          local in_stock = self:count_item(need.item)
          labels.item.label.caption = game.item_prototypes[need.item].localised_name
-         labels.item.data.caption = string.format("[%s]", PrettyNumber(in_stock))
+         labels.item.data.caption = string.format("[%s]", util.pretty_number(in_stock))
          need_gui.satisfaction.value = self:get_average_satisfaction_for_need(need)
       end
    end

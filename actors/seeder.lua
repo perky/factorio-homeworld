@@ -1,6 +1,9 @@
 Seeder = Actor{name = "seeder"}
 local config = homeworld_config.seeder
 
+-- TODO: use module invetory to store seeder programs and have 'seeds' item that gets
+-- 'smelted'.
+
 function Seeder:init()
    self:increment_timer()
 end

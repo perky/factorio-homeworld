@@ -12,10 +12,10 @@ function Farm:init()
 
 	-- Calculate soil richness.
 	local surface = state.entity.surface
-	local area = SquareArea(state.entity.position, config.radius)
+	local area = util.square_area(state.entity.position, config.radius)
 	local total_area = 0
 	local total_richness = 0
-	for x, y in iarea(area) do
+	for x, y in util.iarea(area) do
 		local tile = surface.get_tile(x, y)
 		local richness = 0
 		if config.soil_richness[tile.name] then
@@ -61,7 +61,7 @@ function Farm:get_air_purity()
 	local state = self.state
 	local surface = state.entity.surface
 	local pollution = surface.get_pollution(state.entity.position) * config.pollution_multiplier
-	local air_purity = RemapNumber(pollution, 0, config.max_pollution, 1, 0)
+	local air_purity = util.inverse_lerp(pollution, 0, config.max_pollution, 1, 0)
 	air_purity = math.max(air_purity, 0)
 	return air_purity
 end
@@ -115,7 +115,7 @@ function Farm:tick()
 		end
    end
 
-   if ModuloTimer(5 * SECONDS) then
+   if util.modulo_timer(5 * SECONDS) then
 	  local production_tick = state.current_production_interval - (state.next_yield_tick - game.tick)
 	  local increment = state.current_production_interval / #config.farm_stages
 	  for i = #config.farm_stages, 1, -1 do
@@ -126,7 +126,7 @@ function Farm:tick()
 	  end
    end
 
-   if ModuloTimer(1 * SECONDS) then
+   if util.modulo_timer(1 * SECONDS) then
 	  for player_index, frame in pairs(state.gui) do
 		 self:update_gui(player_index, state.gui)
 	  end

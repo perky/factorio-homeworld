@@ -1,5 +1,8 @@
 Terraformer = Actor{name = "terraformer"}
 
+-- TODO: use module invetory to store terraformer program and have 'matter' item that gets
+-- 'smelted'.
+
 local RIGHT, DOWN, LEFT, UP = 1, 2, 3, 4
 local CURSOR_OFFSET = {
    [RIGHT] = {x = 1, y = 0},
@@ -10,12 +13,12 @@ local CURSOR_OFFSET = {
 local config = homeworld_config.terraformer
 
 function Terraformer:init()
-   self.last_step_tick = game.tick
+   self.state.last_step_tick = game.tick
    self:reset_cursor()
 end
 
 function Terraformer:load()
-   self.last_step_tick = 0
+   self.state.last_step_tick = 0
 end
 
 function Terraformer:can_do_step()
@@ -24,7 +27,7 @@ function Terraformer:can_do_step()
    if energy == 0 then
       return false
    else
-      local step_interval = RemapNumber(energy, 0, config.max_energy, config.max_step_interval, config.min_step_interval)
+      local step_interval = util.inverse_lerp(energy, 0, config.max_energy, config.max_step_interval, config.min_step_interval)
       local wait_time = game.tick - self.state.last_step_tick
       return wait_time >= step_interval and entity.is_crafting()
    end

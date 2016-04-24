@@ -48,7 +48,7 @@ function BeltActor:find_input_orthogonal_output_belt()
 end
 
 function BeltActor:find_belt_entity( origin, direction )
-    local area = SquareArea(origin, 0.5)
+    local area = util.square_area(origin, 0.5)
     local offset = DIRECTION_OFFSET[direction]
     for i = 1, 2 do
         area[i].x = area[i].x + offset.x
@@ -69,7 +69,7 @@ function BeltActor:transfer_belt_to_belt( belt_in, belt_out )
     assertion.not_nil(belt_in)
     assertion.not_nil(belt_out)
     local transferred = {}
-    for index, line in transport_lines(belt_in) do
+    for index, line in util.itransport_lines(belt_in) do
         local contents = line.get_contents()
         for name, count in pairs(contents) do
             local item_stack = {name = name, count = 1}

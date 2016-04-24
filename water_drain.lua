@@ -68,7 +68,7 @@ function WaterDrain.OnTick()
 	end
 
 	-- Clean up the pumps array.
-	if ModuloTimer(1*MINUTES) then
+	if util.modulo_timer(1*MINUTES) then
 		for i = #pumps, 1, -1 do
 			local pump = pumps[i]
 			if not pump.routine then
@@ -100,7 +100,7 @@ _tileAtPosIsWater = function( surface, pos )
 end
 
 _waterNearPos = function( surface, pos )
-	local area = SquareArea(pos, 2)
+	local area = util.square_area(pos, 2)
 	local nearbyWater = FindTilesInArea(surface, area, "water")
 	if #nearbyWater > 0 then
 		return true
@@ -110,10 +110,10 @@ _waterNearPos = function( surface, pos )
 end
 
 _nearestWaterTile = function(surface, pos)
-	local area = SquareArea(pos, 2)
+	local area = util.square_area(pos, 2)
 	local nearbyWater = FindTilePropertiesInArea(surface, area, "water")
 	if #nearbyWater > 0 then
-		return GetNearest(nearbyWater, pos)
+		return util.get_nearest(nearbyWater, pos)
 	else
 		return nil
 	end
@@ -121,7 +121,7 @@ end
 
 _drainTilesInArea = function( surface, area )
 	local newTiles = {}
-	for x, y in iarea(area) do
+	for x, y in util.iarea(area) do
 		table.insert(newTiles, {name = DRAINED_TILE, position = {x, y}})
 	end
 	surface.set_tiles(newTiles)
@@ -198,7 +198,7 @@ _pumpWater = function( pump )
 			if tilePos then
 				local tile = surface.get_tile(tilePos.x, tilePos.y)
 				if tile and tile.valid and (tile.name == "deepwater" or tile.name == "water") then
-					local area = SquareArea(tilePos, SEARCH_OFFSET-1)
+					local area = util.square_area(tilePos, SEARCH_OFFSET-1)
 					_drainTilesInArea(surface, area)
 					-- create and destroy any entity to update the map (stole this idea from landfill :D)
 					local sediment = SEDIMENT[math.random(1, #SEDIMENT)]
@@ -216,7 +216,7 @@ _pumpWater = function( pump )
 	if pump.entity.valid then
 		pump.entity.active = false
 		-- clear all remaining water tiles in area.
-		_drainTilesInArea(surface, SquareArea(origin, 3))
+		_drainTilesInArea(surface, util.square_area(origin, 3))
 	end
 	pump.fully_drained = true
 end
