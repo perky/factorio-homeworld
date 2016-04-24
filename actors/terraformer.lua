@@ -10,12 +10,14 @@ local CURSOR_OFFSET = {
 local config = homeworld_config.terraformer
 
 function Terraformer:init()
-   self.last_step_tick = game.tick
+   self.state.last_step_tick = game.tick
    self:reset_cursor()
 end
 
 function Terraformer:load()
-   self.last_step_tick = 0
+   if not self.state.last_step_tick then
+      self.state.last_step_tick = 0
+   end
 end
 
 function Terraformer:can_do_step()
