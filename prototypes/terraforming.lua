@@ -25,7 +25,7 @@ data:extend({
     },
     allowed_effects = {"consumption", "speed", "productivity", "pollution"},
     crafting_categories = {"seeder"},
-	result_inventory_size = 1,
+	result_inventory_size = 0,
     crafting_speed = 1,
     energy_usage = "500kW",
 	source_inventory_size = 1,
@@ -55,6 +55,19 @@ data:extend({
       line_length = 5,
       scale = 1
     },
+	on_animation = {
+		{
+			animation ={
+				filename = "__homeworld__/graphics/entity/seeder/seeder_spray_animation.png",
+				priority = "high",
+				width = 300,
+			    height = 300,
+			    frame_count = 25,
+			    line_length = 5,
+			    scale = 1
+			}
+		}
+	},
     fast_replaceable_group = "furnace"
   },
 
@@ -84,7 +97,7 @@ data:extend({
     },
     allowed_effects = {"consumption", "speed", "productivity", "pollution"},
     crafting_categories = {"terraformer"},
-    result_inventory_size = 1,
+    result_inventory_size = 0,
     crafting_speed = 6,
     energy_usage = "2MW",
     source_inventory_size = 1,
