@@ -445,6 +445,7 @@ function Farm(name, image)
       flags = { "goes-to-quickbar" },
       subgroup = "extraction-machine",
       place_result = name,
+	  order = "c[gatherers]-b[farm]",
       stack_size = 16
     },
   });

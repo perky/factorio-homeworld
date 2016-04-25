@@ -10,7 +10,8 @@ data:extend({
 		flags = { "goes-to-quickbar" },
 		subgroup = "storage",
 		place_result = "homeworld_portal",
-		stack_size = 1
+		stack_size = 1,
+		order = "d[items]-c[steel-chest]"
 	},
 
 	{
@@ -20,6 +21,7 @@ data:extend({
 		flags = { "goes-to-quickbar" },
 		subgroup = "extraction-machine",
 		place_result = "fishery",
+		order = "c[gatherers]-a[fishery]",
 		stack_size = 16
 	},
 
@@ -30,6 +32,7 @@ data:extend({
 		flags = { "goes-to-quickbar" },
 		subgroup = "extraction-machine",
 		place_result = "sawmill",
+		order = "a[items]-a[burner-mining-drill]",
 		stack_size = 16
 	},
 
@@ -40,6 +43,7 @@ data:extend({
 		flags = { "goes-to-quickbar" },
 		subgroup = "extraction-machine",
 		place_result = "terraformer",
+		order = "d[terraformers]-b[terraformer]",
 		stack_size = 16
 	},
 
@@ -50,6 +54,7 @@ data:extend({
 		flags = { "goes-to-quickbar" },
 		subgroup = "extraction-machine",
 		place_result = "seeder",
+		order = "d[terraformers]-a[seeder]",
 		stack_size = 16
 	},
 
@@ -60,6 +65,7 @@ data:extend({
 		flags = { "goes-to-quickbar" },
 		subgroup = "production-machine",
 		place_result = "distillery",
+		order = "e[distillery]",
 		stack_size = 10
 	},
 
@@ -70,6 +76,7 @@ data:extend({
 		flags = { "goes-to-quickbar" },
 		subgroup = "extraction-machine",
 		place_result = "sand-collector",
+		order = "a[items]-b[basic-mining-drill]",
 		stack_size = 50
 	},
     
@@ -80,6 +87,7 @@ data:extend({
 		flags = { "goes-to-quickbar" },
 		subgroup = "belt",
 		place_result = "belt_gate",
+		order = "d[smart-belt]-a[gate]",
 		stack_size = 50
 	},
     
@@ -90,6 +98,7 @@ data:extend({
 		flags = { "goes-to-quickbar" },
 		subgroup = "belt",
 		place_result = "belt_throughput_reader",
+		order = "d[smart-belt]-b[throughput-monitor]",
 		stack_size = 50
 	},
 
@@ -109,7 +118,8 @@ data:extend({
 	    icon = "__homeworld__/graphics/icons/glass.png",
 	    flags = {"goes-to-main-inventory"},
 	    subgroup = "intermediate-product",
-	    stack_size = 1024
+	    order = "k[homeworld]-f[glass]",
+		stack_size = 1024
   	},
 
   	{
@@ -118,7 +128,7 @@ data:extend({
 	    icon = "__homeworld__/graphics/icons/building-materials.png",
 	    flags = {"goes-to-main-inventory"},
 	    subgroup = "intermediate-product",
-	    order = "s",
+	    order = "k[homeworld]-b[building-materials]",
 	    stack_size = 512
   	},
 
@@ -128,7 +138,6 @@ data:extend({
 	    icon = "__homeworld__/graphics/icons/fluid/water-barrel.png",
 	    flags = {"goes-to-main-inventory"},
 	    subgroup = "barrel",
-	    order = "b[water-barrel]",
 	    stack_size = 256
   	},
 
@@ -138,7 +147,6 @@ data:extend({
 	    icon = "__homeworld__/graphics/icons/fluid/water-barrel.png",
 	    flags = {"goes-to-main-inventory"},
 	    subgroup = "barrel",
-	    order = "b[water-barrel]",
 	    stack_size = 256
   	},
 
@@ -148,7 +156,7 @@ data:extend({
 	    icon = "__homeworld__/graphics/icons/furniture.png",
 	    flags = {"goes-to-main-inventory"},
 	    subgroup = "intermediate-product",
-	    order = "b[water-barrel]",
+	    order = "k[homeworld]-a[furniture]",
 	    stack_size = 256
   	},
 
@@ -157,8 +165,8 @@ data:extend({
 	    name = "portable-electronics",
 	    icon = "__homeworld__/graphics/icons/electronics.png",
 	    flags = {"goes-to-main-inventory"},
-	    subgroup = "tool",
-	    order = "b[water-barrel]",
+	    subgroup = "intermediate-product",
+	    order = "k[homeworld]-d[electronics]",
 	    stack_size = 512
   	},
 
@@ -177,6 +185,7 @@ data:extend({
 	    icon = "__homeworld__/graphics/icons/bread.png",
 	    flags = {"goes-to-main-inventory"},
 	    subgroup = "intermediate-product",
+		order = "k[homeworld]-e[bread]",
 	    stack_size = 512
   	},
 
@@ -249,6 +258,7 @@ data:extend({
 	    icon = "__homeworld__/graphics/icons/luxury-meal.png",
 	    flags = {"goes-to-main-inventory"},
 	    subgroup = "intermediate-product",
+		order = "k[homeworld]-c[luxury-meal]",
 	    stack_size = 256
   	},
 })

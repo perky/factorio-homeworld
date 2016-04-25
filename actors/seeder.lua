@@ -1,8 +1,10 @@
 Seeder = Actor{name = "seeder"}
 local config = homeworld_config.seeder
+local tree_name = nil
 
 function Seeder:init()
    self:increment_timer()
+   
 end
 
 function Seeder:increment_timer()
@@ -11,20 +13,30 @@ function Seeder:increment_timer()
 end
 
 function Seeder:get_tree_type()
-   if self.state.entity.is_crafting() then
-      local inventory = self.state.entity.get_inventory(2)
-      if inventory[1] then
-         local tree_module = inventory[1].name
-         return config.tree_types[tree_module]
-      end
+   local entity = self.state.entity
+   if not entity or not entity.valid then return end
+   local state = self.state
+
+   -- Get module type.
+   local inventory = entity.get_inventory(2)
+   if not inventory.is_empty() then
+      local module = inventory[1]
+      if config.tree_types[module.name] then
+		 return config.tree_types[module.name]
+	  end
    end
    return nil
 end
 
+-- seeder-module-01
+-- seeder-module-02
+-- seeder-module-03
+-- seeder-module-04
+-- seeder-module-05
+
 function Seeder:can_plant()
    local entity = self.state.entity
    return game.tick >= self.state.next_plant_tick
-      and entity.valid
       and entity.is_crafting()
       and entity.energy > 0
 end
@@ -33,10 +45,11 @@ function Seeder:tick( tick )
    local state = self.state
    local entity = self.state.entity
    if not entity.valid then return end
-
+   if entity.energy > 0 and self:get_tree_type() ~= nil then
+	tree_name = self:get_tree_type()
+   end
    if self:can_plant() then
       self:increment_timer()
-      local tree_name = self:get_tree_type()
       if tree_name then
          local plant_pos = entity.surface.find_non_colliding_position(
             tree_name, entity.position, config.plant_radius, config.plant_precision)
@@ -47,6 +60,6 @@ function Seeder:tick( tick )
                force = game.forces.neutral
             }
          end
-      end
+	  end
    end
 end
