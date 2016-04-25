@@ -68,7 +68,8 @@ return {
             ["seeder-module-04"] = "tree-04",
             ["seeder-module-05"] = "tree-05",
         },
-        plant_tree_interval = {min = 5 * SECONDS, max = 1 * MINUTES},
+        --NOTE: Tree programs last for 250 seconds
+		plant_tree_interval = {min = 10 * SECONDS, max = 25 * SECONDS},
         plant_radius = 16,
         plant_precision = 4.0
     },

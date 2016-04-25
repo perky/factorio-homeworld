@@ -25,10 +25,10 @@ data:extend({
     },
     allowed_effects = {"consumption", "speed", "productivity", "pollution"},
     crafting_categories = {"seeder"},
-    result_inventory_size = 1,
+	result_inventory_size = 1,
     crafting_speed = 1,
     energy_usage = "500kW",
-    source_inventory_size = 1,
+	source_inventory_size = 1,
     energy_source =
     {
       type = "electric",
@@ -126,7 +126,7 @@ data:extend({
   {
     type = "recipe-category",
     name = "terraformer"
-  },
+  }
 })
 
 function SeederModule( itemName )
@@ -144,10 +144,11 @@ function SeederModule( itemName )
       category = "seeder",
       name = itemName,
       enabled = "false",
+	  hidden = "true",
       energy_required = 250,
       ingredients = {{itemName, 1}},
       result = "raw-wood",
-      result_count = 1
+      result_count = 0
     },
     {
       type = "recipe",
@@ -178,10 +179,11 @@ function TerraformerModule( itemName )
       category = "terraformer",
       name = "terraform-module-"..itemName,
       enabled = "false",
+	  hidden = true,
       energy_required = 500,
       ingredients = {{"terraform-module-"..itemName, 1}},
       result = "plastic-bar",
-      result_count = 1
+      result_count = 0
     },
     {
       type = "recipe",
@@ -207,3 +209,4 @@ TerraformerModule("grass")
 TerraformerModule("dirt")
 TerraformerModule("stone")
 TerraformerModule("concrete")
+

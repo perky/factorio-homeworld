@@ -81,6 +81,7 @@ end
 script.on_init(on_mod_init)
 script.on_load(on_mod_load)
 script.on_event(defines.events.on_built_entity, on_built_entity)
+script.on_event(defines.events.on_robot_built_entity, on_built_entity)
 script.on_event(defines.events.on_entity_died, on_entity_died)
 script.on_event(defines.events.on_player_created, on_player_created)
 script.on_event(defines.events.on_preplayer_mined_item, before_player_mined_item)

@@ -9,7 +9,7 @@ function Farm:init()
 	state.current_production_interval = config.production_interval
 	state.current_state = STATE_GROWING
 	state.stage = 1
-
+	
 	-- Calculate soil richness.
 	local surface = state.entity.surface
 	local area = SquareArea(state.entity.position, config.radius)
@@ -26,6 +26,7 @@ function Farm:init()
 	end
 	self.state.soil_richness = math.max(total_richness / total_area, 0)
 
+	self:set_entity_stage(1)
 	self:increment_production_timer()
 end
 
@@ -34,6 +35,7 @@ function Farm:increment_production_timer()
 	state.current_state = STATE_GROWING
 	local deviation = math.random(-config.production_interval_deviation, config.production_interval_deviation)
 	state.current_production_interval = config.production_interval + deviation
+	state.previous_yield_tick = state.next_yield_tick or game.tick
 	state.next_yield_tick = game.tick + config.production_interval + deviation
 end
 
@@ -43,6 +45,7 @@ function Farm:increment_reset_timer()
 	state.next_reset_tick = game.tick + config.reset_interval
 end
 
+--check if farm should spawn food
 function Farm:can_operate()
 	local state = self.state
 	return state.next_yield_tick
@@ -52,9 +55,9 @@ end
 
 function Farm:can_reset()
 	local state = self.state
-	return state.next_reset_tick
-		and game.tick >= state.next_reset_tick
-		and state.entity.valid
+	return state.entity.valid 
+		and ((state.next_reset_tick and game.tick >= state.next_reset_tick) 
+		or (state.entity.name == 'farm_full'  and self:inventory_empty()))
 end
 
 function Farm:get_air_purity()
@@ -70,6 +73,28 @@ function Farm:get_yield( air_purity )
 	local air_purity = air_purity or self:get_air_purity()
 	local yield = math.max(self.state.soil_richness * air_purity, 0)
 	return yield
+end
+
+function Farm:get_growth()
+	local format = "%i%%"
+	local state = self.state
+	
+	
+	if state.current_state == STATE_GROWING then
+		local previous_yield_tick = state.previous_yield_tick --nil
+		local next_yield_tick = state.next_yield_tick --good
+		local current_tick = game.tick --good
+				
+		if previous_yield_tick and next_yield_tick and current_tick then
+			local growth_decimal = 1 - (next_yield_tick - current_tick) / (next_yield_tick - previous_yield_tick)
+		return string.format(format, math.floor(growth_decimal * 100))
+		end
+		
+		return 'error-in-cal'
+	elseif state.current_state == STATE_RESETTING then
+		return 'Mature'
+	end
+	return 'error-no-state'
 end
 
 function Farm:set_entity_stage( stage )
@@ -98,6 +123,8 @@ end
 
 function Farm:tick()
    local state = self.state
+   
+   --Increment production timer or spawn produce
    if state.current_state == STATE_GROWING then
 	  if self:can_operate() then
 		local yield_multiplier = self:get_yield() * state.current_production_interval * (1/MINUTES)
@@ -114,7 +141,8 @@ function Farm:tick()
 			self:increment_production_timer()
 		end
    end
-
+   
+   --Updates farm entity (visual)
    if ModuloTimer(5 * SECONDS) then
 	  local production_tick = state.current_production_interval - (state.next_yield_tick - game.tick)
 	  local increment = state.current_production_interval / #config.farm_stages
@@ -125,13 +153,25 @@ function Farm:tick()
 		 end
 	  end
    end
-
+   
+   --Updates farm gui every second
    if ModuloTimer(1 * SECONDS) then
 	  for player_index, frame in pairs(state.gui) do
 		 self:update_gui(player_index, state.gui)
 	  end
    end
+
 end
+
+function Farm:inventory_empty()
+	local entity = self.state.entity
+	local contents = entity.get_item_count()
+	if contents == 0 then
+		return true
+	end
+	return false
+end
+-- GUI
 
 function Farm:show_gui( player_index, gui )
 	GUI.push_left_section(player_index)
@@ -139,6 +179,7 @@ function Farm:show_gui( player_index, gui )
 	GUI.label_data("richness", "Soil Richness:", "0%")
 	GUI.label_data("purity", "Air Purity:", "0%")
 	GUI.label_data("yield", "Yield:", "0%")
+	GUI.label_data("growth", "Growth:", "0%")
 	GUI.pop_all()
 	self:update_gui(player_index, gui)
 end
@@ -152,7 +193,9 @@ function Farm:update_gui( player_index, gui )
 	local format = "%i%%"
 	local air_purity = self:get_air_purity()
 	local yield = self:get_yield(air_purity)
+	local growth = self:get_growth()
 	gui[player_index].richness.data.caption = string.format(format, math.floor(self.state.soil_richness * 100))
 	gui[player_index].purity.data.caption = string.format(format, math.floor(air_purity * 100))
 	gui[player_index].yield.data.caption = string.format(format, math.floor(yield * 100))
+	gui[player_index].growth.data.caption = growth
 end
