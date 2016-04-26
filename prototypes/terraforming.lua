@@ -55,19 +55,6 @@ data:extend({
       line_length = 5,
       scale = 1
     },
-	on_animation = {
-		{
-			animation ={
-				filename = "__homeworld__/graphics/entity/seeder/seeder_spray_animation.png",
-				priority = "high",
-				width = 300,
-			    height = 300,
-			    frame_count = 25,
-			    line_length = 5,
-			    scale = 1
-			}
-		}
-	},
     fast_replaceable_group = "furnace"
   },
 
