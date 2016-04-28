@@ -71,7 +71,31 @@ function before_robot_mined( event )
 end
 
 function event_create_entity( entity )
-    create_entity_actor(entity)
+	if entity.name == 'entity-ghost' and entity.ghost_prototype and entity.ghost_prototype.name then
+		local ghost_name = entity.ghost_prototype.name
+		
+		if ghost_name == "farm_01" or ghost_name == "farm_02" or ghost_name == "farm_03" or ghost_name == "farm_full" then
+			--Get position of entity
+			local position = entity.position
+			local surface_name = entity.surface.name
+			local name = entity.name
+			
+			--Destroy old farm
+			entity.destroy()
+			
+			--Create proper entity
+			local new_farm = game.surfaces['nauvis'].create_entity{
+               name = "entity-ghost",
+               position = position,
+               force = game.forces.player,
+			   inner_name = "stone-furnace"
+            }
+			
+			create_entity_actor(new_farm)
+			return
+		end
+	end
+	create_entity_actor(entity)
 end
 
 function event_destroy_entity( entity )
