@@ -12,7 +12,7 @@ function Homeworld:init()
       average_satisfaction_window = 120,
       claimed_rewards = {},
       gui = {},
-      holding_pda = {}
+      using_pda = {}
    }
    self:increment_update_timer()
    global.homeworld_state = self.state
