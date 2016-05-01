@@ -11,7 +11,8 @@ function Homeworld:init()
       average_satisfaction = {},
       average_satisfaction_window = 120,
       claimed_rewards = {},
-      gui = {}
+      gui = {},
+      holding_pda = {}
    }
    self:increment_update_timer()
    global.homeworld_state = self.state
@@ -20,7 +21,10 @@ end
 function Homeworld:load()
    self.state = global.homeworld_state
    if self.state.claimed_rewards == nil then
-    self.state.claimed_rewards = {}
+      self.state.claimed_rewards = {}
+   end
+   if self.state.using_pda == nil then
+      self.state.using_pda = {}
    end
 end
 
@@ -299,6 +303,21 @@ function Homeworld:tick( tick )
       self:update_consumption()
       for player_index, frame in pairs(self.state.gui) do
          self:update_gui(player_index)
+      end
+   end
+   
+   -- NOTE(luke): Show homeworld gui if they are holding 'portable electronics'.
+   local pda_name = "portable-electronics"
+   for player_index = 1, #game.players do
+      local player = game.get_player(player_index)
+      local held_item = player.cursor_stack
+      local holding_pda = (held_item.valid_for_read and held_item.name == pda_name)
+      if self.state.using_pda[player_index] and not holding_pda then
+         self.state.using_pda[player_index] = nil
+         self:hide_gui(player_index)
+      elseif not self.state.using_pda[player_index] and holding_pda then
+         self:show_gui(player_index)
+         self.state.using_pda[player_index] = true
       end
    end
 end

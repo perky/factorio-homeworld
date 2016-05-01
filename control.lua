@@ -71,6 +71,8 @@ function before_robot_mined( event )
 end
 
 function event_create_entity( entity )
+    -- TODO(luke): move this out of control.lua, obviously the best place for this would be in farm.lua
+    -- and that will require some changes to the actor system.
 	if entity.name == 'entity-ghost' and entity.ghost_prototype and entity.ghost_prototype.name then
 		local ghost_name = entity.ghost_prototype.name
 		

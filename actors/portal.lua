@@ -1,4 +1,4 @@
-Portal = Actor{name = "portal", use_proximity_gui = true, gui_proximity_radius = 6}
+Portal = Actor{name = "portal", use_entity_gui = true}
 
 local config = homeworld_config.portal
 
@@ -32,8 +32,10 @@ end
 
 function Portal:show_gui( player_index, gui )
    Homeworld:show_gui(player_index)
+   gui[player_index] = true;
 end
 
 function Portal:hide_gui( player_index, gui )
    Homeworld:hide_gui(player_index)
+   gui[player_index] = nil;
 end
