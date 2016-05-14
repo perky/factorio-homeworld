@@ -9,7 +9,7 @@ function BeltThroughputReader:init()
     state.snapshot_index = 1
 end
 
-function BeltThroughputReader:tick( dt )
+function BeltThroughputReader:tick( dt ) 
     -- Find adjacent belts.
     local input_belt, output_belt = self:find_input_output_belt()
     if input_belt and output_belt then
