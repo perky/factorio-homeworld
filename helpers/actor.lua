@@ -58,7 +58,7 @@ function Actor( params )
     if use_entity_gui then
         o._tick_gui = function(self)
             for player_index = 1, #game.players do
-                if game.get_player(player_index).opened == self.state.entity then
+                if game.players[player_index].opened == self.state.entity then
                     if self.state.gui[player_index] == nil then
                         self:show_gui(player_index, self.state.gui)
                     end

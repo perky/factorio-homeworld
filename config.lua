@@ -19,7 +19,7 @@ return {
             {item_name = "vegetables", yield_per_min = 10},
             {item_name = "hops", yield_per_min = 10},
             {item_name = "grapes", yield_per_min = 5},
-        },
+        }, 
         soil_richness = {
             ["water"]       = 5.00,
             ["deepwater"]   = 5.00,
@@ -38,13 +38,14 @@ return {
     
     fishery = {
         max_pollution = 4000,
-        max_fish_yield_per_min = 200,
+        max_fish_yield_per_min = 400,
         yield_reduce_per_nearby_fishery = 0.2,
-        max_fish = 10,
-        fish_reproduction_chance = 0.06,
-        fish_die_chance = 0.07,
-        fish_die_chance_increase_per_fishery = 0.06,
-        reproduction_interval = 40 * SECONDS,
+        fish_per_chunk = 100000,
+        --max_fish = 10,
+        --fish_reproduction_chance = 0.06,
+        --fish_die_chance = 0.07,
+        --fish_die_chance_increase_per_fishery = 0.06,
+        --reproduction_interval = 40 * SECONDS,
         harvest_interval = 20 * SECONDS,
         radius = 12
     },

@@ -1,6 +1,5 @@
 Seeder = Actor{name = "seeder"}
 local config = homeworld_config.seeder
-local tree_name = nil
 
 function Seeder:init()
    self:increment_timer()
@@ -46,16 +45,16 @@ function Seeder:tick( tick )
    local entity = self.state.entity
    if not entity.valid then return end
    if entity.energy > 0 and self:get_tree_type() ~= nil then
-	tree_name = self:get_tree_type()
+	state.tree_name = self:get_tree_type()
    end
    if self:can_plant() then
       self:increment_timer()
-      if tree_name then
+      if state.tree_name then
          local plant_pos = entity.surface.find_non_colliding_position(
-            tree_name, entity.position, config.plant_radius, config.plant_precision)
+            state.tree_name, entity.position, config.plant_radius, config.plant_precision)
          if plant_pos then
             entity.surface.create_entity{
-               name = tree_name,
+               name = state.tree_name,
                position = plant_pos,
                force = game.forces.neutral
             }

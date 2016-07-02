@@ -1,4 +1,3 @@
-require("defines")
 require("util")
 require("homeworld_defines")
 homeworld_config = require('config')
@@ -49,10 +48,14 @@ function on_tick( event )
 end
 
 function on_player_created( event )
-    local player = game.get_player(event.player_index)
+    local player = game.players[event.player_index]
     player.insert{
         name = "homeworld_portal",
         count = 1
+   }
+   player.insert{
+       name = "portable-electronics",
+       count = 1
    }
 end
 

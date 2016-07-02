@@ -371,25 +371,148 @@ data:extend({
 
     item_slot_count = 15,
 
-    sprite =
+    sprites =
     {
-      filename = "__base__/graphics/entity/combinator/constanter.png",
-      x = 61,
-      width = 61,
-      height = 50,
-      shift = {0.078125, 0.15625},
-    },
-    circuit_wire_connection_point =
-    {
-      shadow =
+      north =
       {
-        red = {0.828125, 0.328125},
-        green = {0.828125, -0.078125},
+        filename = "__base__/graphics/entity/combinator/combinator-entities.png",
+        x = 158,
+        y = 126,
+        width = 79,
+        height = 63,
+        frame_count = 1,
+        shift = {0.140625, 0.140625},
       },
-      wire =
+      east =
       {
-        red = {0.515625, -0.078125},
-        green = {0.515625, -0.484375},
+        filename = "__base__/graphics/entity/combinator/combinator-entities.png",
+        y = 126,
+        width = 79,
+        height = 63,
+        frame_count = 1,
+        shift = {0.140625, 0.140625},
+      },
+      south =
+      {
+        filename = "__base__/graphics/entity/combinator/combinator-entities.png",
+        x = 237,
+        y = 126,
+        width = 79,
+        height = 63,
+        frame_count = 1,
+        shift = {0.140625, 0.140625},
+      },
+      west =
+      {
+        filename = "__base__/graphics/entity/combinator/combinator-entities.png",
+        x = 79,
+        y = 126,
+        width = 79,
+        height = 63,
+        frame_count = 1,
+        shift = {0.140625, 0.140625},
+      }
+    },
+    
+    activity_led_sprites =
+    {
+      north =
+      {
+        filename = "__base__/graphics/entity/combinator/activity-leds/combinator-led-constant-north.png",
+        width = 11,
+        height = 10,
+        frame_count = 1,
+        shift = {0.296875, -0.40625},
+      },
+      east =
+      {
+        filename = "__base__/graphics/entity/combinator/activity-leds/combinator-led-constant-east.png",
+        width = 14,
+        height = 12,
+        frame_count = 1,
+        shift = {0.25, -0.03125},
+      },
+      south =
+      {
+        filename = "__base__/graphics/entity/combinator/activity-leds/combinator-led-constant-south.png",
+        width = 11,
+        height = 11,
+        frame_count = 1,
+        shift = {-0.296875, -0.078125},
+      },
+      west =
+      {
+        filename = "__base__/graphics/entity/combinator/activity-leds/combinator-led-constant-west.png",
+        width = 12,
+        height = 12,
+        frame_count = 1,
+        shift = {-0.21875, -0.46875},
+      }
+    },
+
+    activity_led_light =
+    {
+      intensity = 0.8,
+      size = 1,
+    },
+    
+    activity_led_light_offsets =
+    {
+      {0.296875, -0.40625},
+      {0.25, -0.03125},
+      {-0.296875, -0.078125},
+      {-0.21875, -0.46875}
+    },
+    
+    circuit_wire_connection_points =
+    {
+      {
+        shadow =
+        {
+          red = {0.15625, -0.28125},
+          green = {0.65625, -0.25}
+        },
+        wire =
+        {
+          red = {-0.28125, -0.5625},
+          green = {0.21875, -0.5625},
+        }
+      },
+      {
+        shadow =
+        {
+          red = {0.75, -0.15625},
+          green = {0.75, 0.25},
+        },
+        wire =
+        {
+          red = {0.46875, -0.5},
+          green = {0.46875, -0.09375},
+        }
+      },
+      {
+        shadow =
+        {
+          red = {0.75, 0.5625},
+          green = {0.21875, 0.5625}
+        },
+        wire =
+        {
+          red = {0.28125, 0.15625},
+          green = {-0.21875, 0.15625}
+        }
+      },
+      {
+        shadow =
+        {
+          red = {-0.03125, 0.28125},
+          green = {-0.03125, -0.125},
+        },
+        wire =
+        {
+          red = {-0.46875, 0},
+          green = {-0.46875, -0.40625},
+        }
       }
     },
     circuit_wire_max_distance = 7.5
@@ -397,7 +520,7 @@ data:extend({
 })
 
 -- Copy basic mining drill for the sand collector.
-local miningDrill = data.raw["mining-drill"]["basic-mining-drill"]
+local miningDrill = data.raw["mining-drill"]["electric-mining-drill"]
 local sandCollector = {
     name = "sand-collector",
     icon = "__homeworld__/graphics/icons/sand-collector.png",

@@ -9,7 +9,7 @@ function GUI.init()
 end
 
 function GUI.push_left_section( playerIndex )
-	return GUI.push_parent(game.get_player(playerIndex).gui.left)
+	return GUI.push_parent(game.players[playerIndex].gui.left)
 end
 
 function GUI.push_parent( parent )

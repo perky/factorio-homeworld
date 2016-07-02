@@ -35,7 +35,7 @@ data:extend({
 		ingredients = {
 			{"alien-artifact", 50},
          {"stone-brick", 200},
-			{"smart-chest", 1}
+			{"iron-chest", 5}
 		},
 		result = "homeworld_portal"
 	},

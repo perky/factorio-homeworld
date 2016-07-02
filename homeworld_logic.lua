@@ -309,7 +309,7 @@ function Homeworld:tick( tick )
    -- NOTE(luke): Show homeworld gui if they are holding 'portable electronics'.
    local pda_name = "portable-electronics"
    for player_index = 1, #game.players do
-      local player = game.get_player(player_index)
+      local player = game.players[player_index]
       local held_item = player.cursor_stack
       local holding_pda = (held_item.valid_for_read and held_item.name == pda_name)
       if self.state.using_pda[player_index] and not holding_pda then
