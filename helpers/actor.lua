@@ -107,8 +107,10 @@ end
 function tick_all_actors( tick )
     for classname, class in pairs(_actor_classes) do
         for _, actor in ipairs(class._instances) do
-            actor:_tick_gui()
-            actor:tick( tick )
+            if actor.state.entity and actor.state.entity.valid then
+                actor:_tick_gui()
+                actor:tick( tick )
+            end
         end
     end
 end
