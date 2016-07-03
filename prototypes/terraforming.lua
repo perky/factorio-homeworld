@@ -144,7 +144,7 @@ function SeederModule( itemName )
       category = "seeder",
       name = itemName,
       enabled = "false",
-	  hidden = "true",
+	    hidden = "true",
       energy_required = 250,
       ingredients = {{itemName, 1}},
       result = "raw-wood",
@@ -155,11 +155,12 @@ function SeederModule( itemName )
       name = "craft-"..itemName,
       enabled = "false",
       ingredients = {
-        {"raw-wood", 50},
+        {"raw-wood", 5},
         {"alien-artifact", 1},
-        {"plastic-bar", 5}
+        {"plastic-bar", 3}
       },
-      result = itemName
+      result = itemName,
+      result_count = 2
     }
   })
 end
@@ -179,7 +180,7 @@ function TerraformerModule( itemName )
       category = "terraformer",
       name = "terraform-module-"..itemName,
       enabled = "false",
-	  hidden = true,
+	    hidden = true,
       energy_required = 500,
       ingredients = {{"terraform-module-"..itemName, 1}},
       result = "plastic-bar",
