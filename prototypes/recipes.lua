@@ -1,11 +1,6 @@
 -- Overwrite vanilla recipes
-data.raw.recipe["empty-barrel"].results[1].amount = 10
-data.raw.recipe["concrete"].ingredients = {
-  {"stone-brick", 5},
-  {"sand", 5},
-  {"iron-ore", 1},
-  {type="fluid", name="water", amount=10}
-}
+-- data.raw.recipe["empty-barrel"].results[1].amount = 10
+table.insert(data.raw.recipe["concrete"].ingredients, {"sand", 5})
 
 data:extend({
 
@@ -302,7 +297,7 @@ data:extend({
     },
 
   -- BARREL RECIPES
-    {
+    --[[{
         type = "recipe",
         name = "fill-water-barrel",
         category = "crafting-with-fluid",
@@ -320,7 +315,7 @@ data:extend({
         {
             {type="item", name="water-barrel", amount=1}
         }
-    },
+    },]]--
 
     {
         type = "recipe",
