@@ -87,7 +87,7 @@ end
 function Fishery:tick( tick )
    local entity = self.state.entity
    if self:can_harvest() then
-      local yield = self:get_yield()
+      local yield = math.floor(self:get_yield())
       local fish_stack = {
          name = "raw-fish",
          count = yield
