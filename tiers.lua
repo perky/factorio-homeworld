@@ -23,16 +23,16 @@ return {
         },
         rewards = {
             {
-                {name = "basic-bullet-magazine", count = 300},
-                {name = "basic-armor", count = 3}
+                {name = "firearm-bullet-magazine", count = 300},
+                {name = "light-armor", count = 3}
             },
             {
                 {name = "heavy-armor", count = 4},
-                {name = "basic-grenade", count = 16}
+                {name = "grenade", count = 16}
             },
             {
                 {name = "poison-capsule", count = 2},
-                {name = "piercing-bullet-magazine", count = 200}
+                {name = "piercing-rounds-magazine", count = 200}
             },
             {
                 {name = "shotgun-shell", count = 600}
@@ -80,11 +80,11 @@ return {
             },
             {
                 {name = "rocket", count = 10},
-                {name = "basic-grenade", count = 80}
+                {name = "grenade", count = 80}
             },
             {
                 {name = "piercing-shotgun-shell", count = 200},
-                {name = "piercing-bullet-magazine", count = 400}
+                {name = "piercing-rounds-magazine", count = 400}
             },
             {
                 {name = "speed-module-2", count = 5},
@@ -135,7 +135,7 @@ return {
             },
             {
                 {name = "express-transport-belt", count = 500},
-                {name = "basic-grenade", count = 50}
+                {name = "grenade", count = 50}
             },
             {
                 {name = "piercing-shotgun-shell", count = 800},
@@ -199,7 +199,6 @@ return {
         rewards = {
             {
                 {name = "straight-rail", count = 500},
-                {name = "curved-rail", count = 250},
                 {name = "speed-module-3", count = 1},
             },
             {
@@ -255,7 +254,7 @@ return {
         },
         rewards = {
             {
-                {name = "straight-rail", count = 250},
+                {name = "straight-rail", count = 500},
             },
             {
                 {name = "tank", count = 2},
@@ -315,9 +314,19 @@ return {
         },
         rewards = {
             {
-                {name = "straight-rail", count = 3000},
-                {name = "curved-rail", count = 1500},
+                {name = "straight-rail", count = 1000},
             },
+            {
+                {name = "tank", count = 20},
+                {name = "logistic-robot", count = 5000},
+                {name = "construction-robot", count = 5000},
+            },
+            {
+                {name = "alien-science-pack", count = 2000},
+                {name = "science-pack-3", count = 5000},
+                {name = "science-pack-2", count = 4000},
+                {name = "science-pack-1", count = 3000},
+            }
         }
     },
 }
