@@ -4,7 +4,6 @@ local battery = data.raw.technology["battery"]
 local plastics = data.raw.technology["plastics"]
 local concreteTech = data.raw.technology["concrete"]
 local circuitNetwork = data.raw.technology["circuit-network"]
-table.insert(fluidTech.effects, {type = "unlock-recipe", recipe = "fill-water-barrel"})
 table.insert(alienTech.effects, {type = "unlock-recipe", recipe = "homeworld-portal"})
 table.insert(battery.effects, {type = "unlock-recipe", recipe = "portable-electronics"})
 table.insert(plastics.effects, {type = "unlock-recipe", recipe = "synthetic-wood"})
