@@ -59,6 +59,13 @@ function GUI.label_data(name, caption, initialValue)
 	return flow
 end
 
+function GUI.scroll_pane( name, scrollVert, scrollHort )
+	local pane = GUI.parent().add{type = "scroll-pane", name = name}
+	pane.vertical_scroll_policy = scrollVert or "never"
+	pane.horizontal_scroll_policy = scrollHort or "never"
+	return pane
+end
+
 function GUI.table( name, colspan )
 	return GUI.parent().add{type = "table", name = name, colspan = colspan}
 end
