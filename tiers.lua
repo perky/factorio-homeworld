@@ -198,7 +198,7 @@ return {
         },
         rewards = {
             {
-                {name = "straight-rail", count = 500},
+                {name = "rail", count = 500},
                 {name = "speed-module-3", count = 1},
             },
             {
@@ -254,7 +254,7 @@ return {
         },
         rewards = {
             {
-                {name = "straight-rail", count = 500},
+                {name = "rail", count = 500},
             },
             {
                 {name = "tank", count = 2},
@@ -314,7 +314,7 @@ return {
         },
         rewards = {
             {
-                {name = "straight-rail", count = 1000},
+                {name = "rail", count = 1000},
             },
             {
                 {name = "tank", count = 20},
