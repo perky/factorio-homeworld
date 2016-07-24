@@ -45,6 +45,9 @@ end
 function on_tick( event )
     tick_all_actors(event.tick)
     Homeworld:tick(event.tick)
+    if ModuloTimer(20) then
+    	Fishery.update_fish_chunks()
+    end
 end
 
 function on_player_created( event )
