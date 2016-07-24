@@ -5,6 +5,7 @@ local config = homeworld_config.fishery;
 local fish_chunks = {}
 local fish_chunk_index = 1
 function Fishery.update_fish_chunks()
+   if global.fish_in_chunk == nil then return end
    if #fish_chunks == 0 then
       for chunk_name, num_fish in pairs(global.fish_in_chunk) do
          table.insert(fish_chunks, chunk_name)
