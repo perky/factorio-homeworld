@@ -61,7 +61,7 @@ data:extend({
     },
 
 	 {
-        type = "smart-container",
+        type = "container",
         name = "homeworld_portal",
         icon = "__homeworld__/graphics/icons/portal.png",
         flags = {"player-creation", "placeable-player"},
