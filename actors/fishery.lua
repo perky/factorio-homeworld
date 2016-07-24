@@ -2,6 +2,25 @@ Fishery = Actor{name = "fishery", use_entity_gui = true}
 
 local config = homeworld_config.fishery;
 
+local fish_chunks = {}
+local fish_chunk_index = 1
+function Fishery.update_fish_chunks()
+   if #fish_chunks == 0 then
+      for chunk_name, num_fish in pairs(global.fish_in_chunk) do
+         table.insert(fish_chunks, chunk_name)
+      end
+      fish_chunk_index = 1
+   else
+      if fish_chunk_index <= #fish_chunks then
+         local chunk_name = fish_chunks[fish_chunk_index]
+         global.fish_in_chunk[chunk_name] = global.fish_in_chunk[chunk_name] + math.random(0,10)
+         fish_chunk_index = fish_chunk_index + 1  
+      else
+         fish_chunks = {}
+      end
+   end
+end
+
 function Fishery:init()
    local chunk_size = 100
    self.state.chunk_x = math.floor(self.state.entity.position.x / chunk_size)
@@ -106,77 +125,6 @@ function Fishery:tick( tick )
       end
    end
 end
-
---[[
-function Fishery:get_nearby_fish()
-   local entity = self.state.entity
-   if not entity.valid then return {} end
-   local nearby_fish = entity.surface.find_entities_filtered{
-      area = SquareArea(entity.position, config.radius),
-      name = "fish"
-   }
-   return nearby_fish
-end
-
-function Fishery:get_random_nearby_fish()
-   local nearby_fish = self:get_nearby_fish()
-   if #nearby_fish > 0 then
-      return table.random_value(nearby_fish)
-   else
-      return nil
-   end
-end
-
-function Fishery:tick( tick )
-   local entity = self.state.entity
-   -- Harvest.
-   if self:can_harvest() then
-      local fish = self:get_random_nearby_fish()
-      if fish then
-         local inventory = entity.get_inventory(1)
-         local interval = config.harvest_interval * (1/MINUTES)
-         local yield = self:get_yield()
-         local item_count = math.max(config.max_fish_yield_per_min * interval * yield, 1)
-         local fish_stack = {
-            name = "raw-fish",
-            count = item_count
-         }
-         if item_count > 0 and inventory.can_insert(fish_stack) then
-            inventory.insert(fish_stack)
-            local die_chance = config.fish_die_chance
-            local nearby_fisheries = self:count_nearby_fisheries()
-            die_chance = die_chance + (nearby_fisheries * config.fish_die_chance_increase_per_fishery)
-            if math.random() <= die_chance then
-               fish.destroy()
-            end
-         end
-      end
-      self:increment_harvest_timer()
-   end
-   -- Reproduce.
-   if self:can_reproduce() then
-      if math.random() <= config.fish_reproduction_chance then
-         local nearby_fish = self:get_nearby_fish()
-         if #nearby_fish > 0 and #nearby_fish < config.max_fish then
-            local fish = table.random_value(nearby_fish)
-            local entity = self.state.entity
-            entity.surface.create_entity{
-               name = "fish",
-               force = game.forces.neutral,
-               position = fish.position
-            }
-         end
-      end
-      self:increment_reproduce_timer()
-   end
-   -- Update GUI.
-   if ModuloTimer(1 * SECONDS) then
-      for player_index, frame in pairs(self.state.gui) do
-         self:update_gui(player_index, self.state.gui)
-      end
-   end
-end
-]]
 
 function Fishery:show_gui( player_index, gui )
    GUI.push_left_section(player_index)
