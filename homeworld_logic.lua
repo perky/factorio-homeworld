@@ -262,9 +262,16 @@ function Homeworld:update_consumption()
 end
 
 function Homeworld:spawn_reward( tier )
+   if #Portal._instances == 0 then
+      PrintToAllPlayers("No portal exists to receive reward chest.")
+      return
+   end
    -- Select random portal.
-   local portal = table.random_value(Portal._instances)
-   if portal then
+   local portal = nil
+   while portal == nil or portal.state.entity == nil or not portal.state.entity.valid do
+   	portal = table.random_value(Portal._instances)
+   end
+   if portal and portal.state.entity.valid then
       local portal_entity = portal.state.entity
       local chest_name = "iron-chest"
       local spawn_pos = portal_entity.surface.find_non_colliding_position(chest_name, portal_entity.position, 30, 1.0)
