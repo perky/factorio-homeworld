@@ -65,6 +65,7 @@ data:extend({
         name = "homeworld_portal",
         icon = "__homeworld__/graphics/icons/portal.png",
         flags = {"player-creation", "placeable-player"},
+        minable = {mining_time = 0.3, result = "homeworld_portal"},
         render_layer = "floor",
         max_health = 150,
         corpse = "big-remnants",

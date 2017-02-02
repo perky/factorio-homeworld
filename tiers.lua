@@ -6,7 +6,7 @@
 
 local rewards01 = {
     {
-        {name = "firearm-bullet-magazine", count = 300},
+        {name = "firearm-magazine", count = 300},
         {name = "light-armor", count = 3}
     },
     {
