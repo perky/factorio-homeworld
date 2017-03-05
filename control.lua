@@ -24,24 +24,27 @@ register_entity_actor(Portal, "homeworld_portal")
 register_entity_actor(BeltThroughputReader, "belt_throughput_reader")
 register_entity_actor(BeltGate, "belt_gate")
 
-function insert_starting_items()
-  for player_index = 1, #game.players do
-    local player = game.players[player_index]
-    player.insert{
-      name = "homeworld_portal",
-      count = 1
-    }
-    player.insert{
-      name = "portable-electronics",
-      count = 1
-    }
-  end
+function insert_starting_items(player)
+  player.insert{
+    name = "homeworld_portal",
+    count = 1
+  }
+  player.insert{
+    name = "portable-electronics",
+    count = 1
+  }
 end
 
 function on_mod_init( event )
     GUI.init()
     Homeworld:init()
-    insert_starting_items()
+    -- Mod is added to:
+    -- 1. an existing game: give out items right now.
+    -- 2. a new game: there are no players at the moment: items will be given out
+    -- by on_player_created() handler.
+    for _, player in pairs(game.players) do
+      insert_starting_items(player)
+    end
 end
 
 function on_mod_load( event )
@@ -63,6 +66,10 @@ function on_tick( event )
     if ModuloTimer(20) then
     	Fishery.update_fish_chunks()
     end
+end
+
+function on_player_created( event )
+  insert_starting_items(game.players[event.player_index])
 end
 
 function on_resource_depleted( event )
@@ -118,6 +125,7 @@ script.on_load(on_mod_load)
 script.on_event(defines.events.on_built_entity, on_built_entity)
 script.on_event(defines.events.on_robot_built_entity, on_built_entity)
 script.on_event(defines.events.on_entity_died, on_entity_died)
+script.on_event(defines.events.on_player_created, on_player_created)
 script.on_event(defines.events.on_preplayer_mined_item, before_player_mined_item)
 script.on_event(defines.events.on_robot_pre_mined, before_robot_mined)
 script.on_event(defines.events.on_resource_depleted, on_resource_depleted)
