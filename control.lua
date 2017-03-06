@@ -24,9 +24,27 @@ register_entity_actor(Portal, "homeworld_portal")
 register_entity_actor(BeltThroughputReader, "belt_throughput_reader")
 register_entity_actor(BeltGate, "belt_gate")
 
+function insert_starting_items(player)
+  player.insert{
+    name = "homeworld_portal",
+    count = 1
+  }
+  player.insert{
+    name = "portable-electronics",
+    count = 1
+  }
+end
+
 function on_mod_init( event )
     GUI.init()
     Homeworld:init()
+    -- Mod is added to:
+    -- 1. an existing game: give out items right now.
+    -- 2. a new game: there are no players at the moment: items will be given out
+    -- by on_player_created() handler.
+    for _, player in pairs(game.players) do
+      insert_starting_items(player)
+    end
 end
 
 function on_mod_load( event )
@@ -51,15 +69,7 @@ function on_tick( event )
 end
 
 function on_player_created( event )
-    local player = game.players[event.player_index]
-    player.insert{
-        name = "homeworld_portal",
-        count = 1
-   }
-   player.insert{
-       name = "portable-electronics",
-       count = 1
-   }
+  insert_starting_items(game.players[event.player_index])
 end
 
 function on_resource_depleted( event )

@@ -73,6 +73,7 @@ data:extend({
 		type = "technology",
 		name = "terraforming-1",
 		icon = "__homeworld__/graphics/icons/seeder.png",
+        localised_description = {"technology-description.terraforming-1"},
 		prerequisites = {"battery"},
 		unit = {
 			count = 75,
@@ -99,6 +100,7 @@ data:extend({
 		type = "technology",
 		name = "terraforming-2",
 		icon = "__homeworld__/graphics/icons/terraformer.png",
+        localised_description = {"technology-description.terraforming-2"},
 		prerequisites = {"terraforming-1", "alien-technology"},
 		unit = {
 			count = 125,
